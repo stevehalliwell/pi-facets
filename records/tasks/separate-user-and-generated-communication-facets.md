@@ -50,6 +50,7 @@ Define whether pi-facets should distinguish communication addressed to the user 
 
 - Capture as future work; keep `status: todo` and `scope: draft` until refined.
 - Treat independent control as a possibility to evaluate, not an implementation commitment.
+- Defer target-specific facets until concrete communication-target pain or artifact-style conflict appears; see `records/decisions/defer-communication-target-facets.md`.
 
 ## Plan
 
@@ -67,8 +68,8 @@ Define whether pi-facets should distinguish communication addressed to the user 
 
 ## Review / next slice
 
-- Ready for review: no; task requires scoping.
-- Likely next slice/task: refine communication targets and independent facet behavior.
+- Ready for review: no; task is intentionally deferred.
+- Revisit when `communication-target-pain` or `artifact-style-conflict` occurs.
 
 ## Notes
 

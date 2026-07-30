@@ -4,8 +4,8 @@ name: document-pi-facets
 created_at: 2026-07-30T01:26:16.328Z
 desc: ""
 tags: []
-status: todo
-scope: draft
+status: done
+scope: agreed
 depends_on:
   - tasks/implement-mode-extension
   - tasks/create-mode-components
@@ -41,38 +41,52 @@ Document first-milestone usage and extension points so a new role or skill can b
 
 ### Acceptance
 
-- README documents setup, usage, layout, and current status.
-- New role and skill instructions are clear and do not require extension-code edits.
-- Documentation matches implemented commands and first-milestone boundaries.
+- README documents current status, setup, checks, tests, repository layout, and implemented boundaries.
+- README documents all implemented `/mode` commands, state restoration, missing-reference behavior, component format, discovery sources, precedence, trust gating, and named presets.
+- README documents skill layout, required frontmatter, automatic discovery, explicit `/skill:name` invocation, and workflow boundaries.
+- README distinguishes modes, skills, project context, references, and unrestricted tool calling.
+- README records deferred work accurately: automatic mismatch detection/inference, model switching, communication-target facets, and tool restrictions.
+- New role and skill components remain addable without extension-code edits.
+- `AGENTS.md` remains short and has no contradiction with README; edit only if needed.
+- Examples match implementation and `npm test` / `npm run check` pass.
 
 ## Open questions
 
-- Final install/test commands are TBD until package/toolchain setup.
-- Documentation location for Pi-specific extension API details is TBD.
+- None for this documentation slice.
 
 ## Decisions
 
-- Keep implementation brief as design context.
-- Skip handoff until real implementation status exists.
+- README is primary human-facing and contributor documentation.
+- Keep `AGENTS.md` limited to stable working rules; perform consistency audit and make only minimal corrective edits.
+- Document current named presets and trusted project-local modes; do not describe implemented behavior as deferred.
+- Do not duplicate Pi internal extension API details; link or point to Pi documentation when useful.
+- Keep handoff/status notes out of README.
 
 ## Plan
 
-- Review and update `README.md` and `AGENTS.md` after package setup works.
-- Add concise contributor guidance for modes and skills.
-- Verify examples against tests.
+- Rewrite stale README status and boundaries against current implementation.
+- Add concise mode, preset, skill, project-local, and contributor-format sections.
+- Audit `AGENTS.md` for contradictions; edit only if required.
+- Verify command examples and run documentation-adjacent tests/checks.
 
 ## Implemented so far
 
 - Task captured from implementation brief.
+- Refinement agreed: README-primary boundary, current implementation coverage, deferred work, and validation checks.
+- Rewrote README status, setup, commands, mode components, discovery, presets, skills, project context, references, tool policy, and deferred work.
+- Audited AGENTS.md; no corrective edit required.
 
 ## Checks
 
-- Not started.
+- README implementation paths verified.
+- `git diff --check` — passed.
+- `npm test` — 12 tests passed.
+- `npm run check` — passed.
 
 ## Review / next slice
 
-- Ready for review: no; scope remains draft.
-- Likely next slice/task: document exact runtime setup after implementation begins.
+- Approved and complete.
+- Next: refine next actionable task when needed.
 
 ## Notes
 
