@@ -4,8 +4,8 @@ name: create-initial-skills
 created_at: 2026-07-30T01:25:06.597Z
 desc: ""
 tags: []
-status: todo
-scope: draft
+status: done
+scope: agreed
 depends_on: []
 ---
 
@@ -38,39 +38,52 @@ Add four independently invokable stub skills covering the initial workflow categ
 
 ### Acceptance
 
-- Four valid independently invokable skill files exist.
+- Four valid independently invokable skill files exist at the declared paths.
+- Each skill uses valid Pi frontmatter with quoted, trigger-rich `description` and lowercase hyphenated `name`.
+- Automatic discovery and explicit `/skill:name` invocation remain available.
+- Each skill has ordered workflow steps with observable completion criteria, concise output shape, and clear positive boundaries.
 - Descriptions distinguish workflows with minimal overlap.
-- Each skill states what it does not cover where confusion is likely.
-- No skill duplicates mode content or project context.
+- No skill duplicates mode content, project facts, tool policy, or Attendant lifecycle.
+- Framework-specific references remain deferred.
+- Skill-craft frontmatter/word-count checks, `npm test`, and `npm run check` pass.
 
 ## Open questions
 
-- Exact Pi skill metadata and invocation conventions require confirmation from runtime docs.
-- Whether website-messaging references belong in first implementation slice.
+- None for this implementation slice.
 
 ## Decisions
 
-- Start with stubs; add detailed references only when workflow use proves need.
+- Implement four self-contained workflows; target under 1,000 words per `SKILL.md`.
+- Split into additional files only when branch-specific workflow or reference content earns separate loading; no split is planned initially.
+- Keep skills model-invokable and command-invokable; do not set `disable-model-invocation`.
+- Use skill-craft guidance for rich trigger descriptions, completion criteria, information hierarchy, pruning, and validation.
+- Defer StoryBrand, positioning, and other framework references.
 
 ## Plan
 
-- Review Pi skill documentation and examples.
-- Confirm Pi skill format.
-- Write four minimal SKILL.md files.
-- Check automatic/manual invocation behavior.
+- Create `backlog-refinement`, `competitor-analysis`, `website-messaging`, and `technical-review` skill files.
+- Define each workflow's trigger, boundaries, ordered procedure, completion checks, and output contract.
+- Validate frontmatter, word counts, relative links, package discovery, and project tests.
 
 ## Implemented so far
 
 - Task captured from implementation brief.
+- Refinement agreed: workflow depth, invocation, split policy, boundaries, references, and acceptance checks.
+- Added four self-contained, model-invokable and command-invokable skills.
+- Added trigger-rich descriptions, ordered workflows, completion criteria, output shapes, and scope boundaries.
+- Deferred framework references; no extra files needed.
 
 ## Checks
 
-- Not started.
+- Skill-craft frontmatter validation passed for all four skills.
+- Skill-craft word counts: backlog 320, competitor 285, messaging 301, technical 313.
+- `npm test` — 12 tests passed.
+- `npm run check` — passed.
 
 ## Review / next slice
 
-- Ready for review: no; scope remains draft.
-- Likely next slice/task: agree skill metadata and stub depth.
+- Approved and complete.
+- Next: refine next pivotal draft task.
 
 ## Notes
 
