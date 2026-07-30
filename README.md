@@ -81,5 +81,8 @@ npm test -- test/package.test.ts
 - `modes/authority/` — decision authority defaults.
 - `modes/style/` — conversation style definitions.
 - `skills/` — independently invokable workflows.
+- `<project>/.pi/modes/{roles,authority,style}/` — trusted project-local components.
 - `records/tasks/` — Attendant-backed task records.
 - `records/decisions/` — Attendant-backed durable decisions.
+
+Project-local components are read from current project `.pi/modes/` only when project is trusted. Resolution precedence is project, then package, then global; same-named files are not merged. Untrusted projects retain package/global modes without loading local mode Markdown.

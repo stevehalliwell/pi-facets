@@ -138,6 +138,35 @@ describe("mode discovery", () => {
 		expect(result.diagnostics.some((diagnostic) => diagnostic.path.endsWith("broken.md"))).toBe(true);
 	});
 
+	it("discovers trusted project components with project/package/global precedence", async () => {
+		const packageRoot = await createRoot();
+		const globalRoot = await createRoot();
+		const projectModesRoot = join(await createRoot(), ".pi", "modes");
+		await writeMode(packageRoot, "roles", "shared", "Package body");
+		await writeMode(packageRoot, "roles", "package-only", "Package-only body");
+		await writeMode(globalRoot, "roles", "shared", "Global body");
+		await writeMode(globalRoot, "roles", "global-only", "Global-only body");
+		await writeMode(projectModesRoot, "roles", "shared", "Project body");
+		await writeMode(projectModesRoot, "roles", "project-only", "Project-only body");
+		await mkdir(join(projectModesRoot, "style"), { recursive: true });
+		await writeFile(
+			join(projectModesRoot, "style", "broken.md"),
+			"---\nname: broken\naxis: role\ndescription: Broken mode\n---\n\nBody\n",
+		);
+
+		const trusted = discoverModes(packageRoot, globalRoot, projectModesRoot, true);
+		expect(trusted.components.get("role:shared")?.source).toBe("project");
+		expect(trusted.components.get("role:package-only")?.source).toBe("package");
+		expect(trusted.components.get("role:global-only")?.source).toBe("global");
+		expect(trusted.components.get("role:project-only")?.source).toBe("project");
+		expect(trusted.diagnostics.some((diagnostic) => diagnostic.path.endsWith("broken.md"))).toBe(true);
+
+		const untrusted = discoverModes(packageRoot, globalRoot, projectModesRoot, false);
+		expect(untrusted.components.get("role:shared")?.source).toBe("package");
+		expect(untrusted.components.has("role:project-only")).toBe(false);
+		expect(untrusted.diagnostics.some((diagnostic) => diagnostic.path.endsWith("broken.md"))).toBe(false);
+	});
+
 	it("composes active component bodies without changing an empty prompt", async () => {
 		const packageRoot = await createRoot();
 		const globalRoot = await createRoot();
@@ -287,6 +316,28 @@ describe("mode extension", () => {
 		expect(
 			harness.notifications.some((message) => message.includes("/mode selector requires interactive TUI")),
 		).toBe(true);
+	});
+
+	it("loads project components and reports project source", async () => {
+		const packageRoot = await createRoot();
+		const globalRoot = await createRoot();
+		const projectRoot = await createRoot();
+		const projectModesRoot = join(projectRoot, ".pi", "modes");
+		await writeMode(projectModesRoot, "roles", "local-role", "Project-local body.");
+		const harness = createHarness(packageRoot, globalRoot, [], { cwd: projectRoot });
+
+		await handlersFor(harness.handlers, "session_start")({}, harness.context);
+		await harness.commands.get("mode")!.handler("role local-role", harness.context);
+		await harness.commands.get("mode")!.handler("show", harness.context);
+
+		const shown = harness.notifications.find((message) => message.startsWith("Active mode:"));
+		expect(shown).toContain("role: local-role [project]");
+		expect(shown).toContain(join(projectModesRoot, "roles", "local-role.md"));
+		const result = (await handlersFor(harness.handlers, "before_agent_start")(
+			{ systemPrompt: "Base prompt" },
+			harness.context,
+		)) as { systemPrompt?: string } | undefined;
+		expect(result?.systemPrompt).toContain("Project-local body.");
 	});
 
 	it("applies, inspects, lists, selects, and materializes presets", async () => {

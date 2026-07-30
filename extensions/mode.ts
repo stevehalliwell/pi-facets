@@ -11,7 +11,7 @@ import {
 import { Box, Text } from "@earendil-works/pi-tui";
 
 export type Axis = "role" | "authority" | "style";
-export type ModeSource = "package" | "global";
+export type ModeSource = "project" | "package" | "global";
 
 export interface ModeComponent {
 	name: string;
@@ -147,18 +147,28 @@ function readSource(root: string, source: ModeSource): { components: Map<string,
 	return { components, diagnostics };
 }
 
-export function discoverModes(packageRoot: string, globalRoot: string): ModeDiscovery {
-	const packageResult = readSource(packageRoot, "package");
-	const globalResult = readSource(globalRoot, "global");
-	const components = new Map(packageResult.components);
+export function discoverModes(
+	packageRoot: string,
+	globalRoot: string,
+	projectRoot?: string,
+	projectTrusted = true,
+): ModeDiscovery {
+	const results = [
+		...(projectRoot && projectTrusted ? [readSource(projectRoot, "project")] : []),
+		readSource(packageRoot, "package"),
+		readSource(globalRoot, "global"),
+	];
+	const components = new Map<string, ModeComponent>();
 
-	for (const [key, component] of globalResult.components) {
-		if (!components.has(key)) components.set(key, component);
+	for (const result of results) {
+		for (const [key, component] of result.components) {
+			if (!components.has(key)) components.set(key, component);
+		}
 	}
 
 	return {
 		components,
-		diagnostics: [...packageResult.diagnostics, ...globalResult.diagnostics],
+		diagnostics: results.flatMap((result) => result.diagnostics),
 	};
 }
 
@@ -347,7 +357,7 @@ function isModeRef(value: unknown): value is ModeRef {
 	const ref = value as { name?: unknown; source?: unknown };
 	return (
 		typeof ref.name === "string" &&
-		(ref.source === "package" || ref.source === "global" || ref.source === "missing")
+		(ref.source === "project" || ref.source === "package" || ref.source === "global" || ref.source === "missing")
 	);
 }
 
@@ -457,9 +467,11 @@ export function registerModeExtension(
 	let state: ModeState = {};
 
 	function refresh(ctx: ExtensionContext): void {
-		discovery = discoverModes(packageRoot, globalRoot);
-		const projectRoot = join(ctx.cwd, CONFIG_DIR_NAME, "modes", "presets");
-		const result = discoverPresets(join(globalRoot, "presets"), projectRoot, discovery.components, ctx.isProjectTrusted());
+		const projectModesRoot = join(ctx.cwd, CONFIG_DIR_NAME, "modes");
+		const projectTrusted = ctx.isProjectTrusted();
+		discovery = discoverModes(packageRoot, globalRoot, projectModesRoot, projectTrusted);
+		const projectPresetRoot = join(projectModesRoot, "presets");
+		const result = discoverPresets(join(globalRoot, "presets"), projectPresetRoot, discovery.components, projectTrusted);
 		presets = result.presets;
 		const diagnostics = [...discovery.diagnostics, ...result.diagnostics];
 		if (diagnostics.length) {

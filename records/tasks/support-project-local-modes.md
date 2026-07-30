@@ -4,8 +4,8 @@ name: support-project-local-modes
 created_at: 2026-07-30T01:43:30.461Z
 desc: ""
 tags: []
-status: todo
-scope: draft
+status: done
+scope: agreed
 depends_on:
   - tasks/implement-mode-extension
 ---
@@ -40,40 +40,51 @@ Allow projects to define mode components local to their repository while retaini
 
 ### Acceptance
 
-- Project-local components are discovered without extension-code changes.
-- Resolution behavior is documented and tested for global-only, project-only, and collision cases.
-- Invalid local components produce actionable errors.
+- Trusted project components are discovered from `<cwd>/.pi/modes/{roles,authority,style}/*.md`.
+- Resolution is deterministic: project > package > global; files are never merged.
+- Project-only, fallback, same-name collision, malformed local file, and untrusted-project cases are covered by tests.
+- Invalid trusted local components produce actionable diagnostics.
+- `/mode show` reports `project` source and path for active local components.
+- README documents local layout, precedence, and trust behavior.
 
 ## Open questions
 
-- Exact project directory and supported search boundaries.
-- Exact search boundaries and behavior when project root cannot be identified.
-- Trust/security behavior for repository-provided Markdown.
+- None for this implementation slice.
 
 ## Decisions
 
 - Project-local modes are required direction.
-- Project-local components shadow same-named global components with global fallback.
+- Project components shadow same-named package and global components; unmatched names fall back package, then global.
+- Project root is current `ctx.cwd`; do not search parent directories.
+- Untrusted projects skip local component discovery without loading local Markdown; package/global modes remain available.
+- Extend component source metadata to `project | package | global`; preserve names-only persisted state and report missing references when resolution changes.
 
 ## Plan
 
-- Review Pi project instruction/config discovery conventions.
-- Propose local layout and precedence.
-- Implement discovery and validation after agreement.
-- Add focused resolution tests.
+- Extend `discoverModes` and refresh flow to accept trusted project component root.
+- Reuse existing Markdown parser and single-axis validation.
+- Extend source/ref validation and `/mode show` output for `project`.
+- Add focused discovery, trust, diagnostics, and source-display tests.
+- Update README after implementation and checks pass.
 
 ## Implemented so far
 
 - Task captured from deferred-question review.
+- Refinement agreed: path, precedence, trust gating, discovery boundary, and acceptance checks.
+- Added trusted current-cwd project component discovery.
+- Added project > package > global resolution precedence.
+- Added project source reporting, trust gating, diagnostics, and fallback tests.
+- Documented project-local mode layout and resolution behavior in `README.md`.
 
 ## Checks
 
-- Not started.
+- `npm test` — 12 tests passed.
+- `npm run check` — passed.
 
 ## Review / next slice
 
-- Ready for review: no; scope remains draft.
-- Likely next slice/task: agree project-local layout and precedence.
+- Approved and complete.
+- Next: refine next pivotal draft task.
 
 ## Notes
 
