@@ -8,6 +8,7 @@ import {
 	type ExtensionAPI,
 	type ExtensionContext,
 } from "@earendil-works/pi-coding-agent";
+import { Box, Text } from "@earendil-works/pi-tui";
 
 export type Axis = "role" | "authority" | "style";
 export type ModeSource = "package" | "global";
@@ -45,6 +46,18 @@ export interface ModeDiscovery {
 }
 
 export type ModeState = Partial<Record<Axis, string>>;
+export type ModeAction = "set-axis" | "apply-preset" | "clear";
+export type ModeRef = { name: string; source: ModeSource | "missing" };
+export type ModeSnapshot = Record<Axis, ModeRef | null>;
+
+export interface ModeChangeEvent {
+	version: 1;
+	action: ModeAction;
+	before: ModeSnapshot;
+	after: ModeSnapshot;
+	axis?: Axis;
+	preset?: { name: string; source: PresetSource };
+}
 
 const AXES: readonly Axis[] = ["role", "authority", "style"];
 const AXIS_DIRECTORIES: Record<Axis, string> = {
@@ -53,6 +66,7 @@ const AXIS_DIRECTORIES: Record<Axis, string> = {
 	style: "style",
 };
 const MODE_STATE_ENTRY = "pi-facets.mode-state";
+const MODE_CHANGE_ENTRY = "pi-facets.mode-change";
 const PACKAGE_MODES_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "modes");
 
 function componentKey(axis: Axis, name: string): string {
@@ -305,6 +319,60 @@ function errorMessage(error: unknown): string {
 	return error instanceof Error ? error.message : String(error);
 }
 
+function snapshotState(state: ModeState, discovery: ModeDiscovery): ModeSnapshot {
+	const snapshot = {} as ModeSnapshot;
+	for (const axis of AXES) {
+		const name = state[axis];
+		if (!name) {
+			snapshot[axis] = null;
+			continue;
+		}
+		const component = discovery.components.get(componentKey(axis, name));
+		snapshot[axis] = { name, source: component?.source ?? "missing" };
+	}
+	return snapshot;
+}
+
+function stateFromSnapshot(snapshot: ModeSnapshot): ModeState {
+	const state: ModeState = {};
+	for (const axis of AXES) {
+		const ref = snapshot[axis];
+		if (ref) state[axis] = ref.name;
+	}
+	return state;
+}
+
+function isModeRef(value: unknown): value is ModeRef {
+	if (!value || typeof value !== "object") return false;
+	const ref = value as { name?: unknown; source?: unknown };
+	return (
+		typeof ref.name === "string" &&
+		(ref.source === "package" || ref.source === "global" || ref.source === "missing")
+	);
+}
+
+function isModeSnapshot(value: unknown): value is ModeSnapshot {
+	if (!value || typeof value !== "object") return false;
+	const snapshot = value as Record<string, unknown>;
+	return AXES.every((axis) => snapshot[axis] === null || isModeRef(snapshot[axis]));
+}
+
+function isModeChangeEvent(value: unknown): value is ModeChangeEvent {
+	if (!value || typeof value !== "object") return false;
+	const event = value as Record<string, unknown>;
+	if (event.version !== 1 || !["set-axis", "apply-preset", "clear"].includes(String(event.action))) return false;
+	if (!isModeSnapshot(event.before) || !isModeSnapshot(event.after)) return false;
+	if (event.action === "set-axis" ? !isAxis(event.axis) : event.axis !== undefined) return false;
+	if (event.action === "apply-preset") {
+		if (!event.preset || typeof event.preset !== "object") return false;
+		const preset = event.preset as { name?: unknown; source?: unknown };
+		if (typeof preset.name !== "string" || (preset.source !== "global" && preset.source !== "project")) return false;
+	} else if (event.preset !== undefined) {
+		return false;
+	}
+	return true;
+}
+
 function isModeState(value: unknown): value is ModeState {
 	if (!value || typeof value !== "object") return false;
 	return Object.entries(value).every(([axis, name]) => isAxis(axis) && typeof name === "string");
@@ -313,11 +381,24 @@ function isModeState(value: unknown): value is ModeState {
 function restoreState(ctx: ExtensionContext): ModeState {
 	let state: ModeState = {};
 	for (const entry of ctx.sessionManager.getBranch()) {
-		if (entry.type !== "custom" || entry.customType !== MODE_STATE_ENTRY) continue;
-		const data = entry.data as { version?: unknown; state?: unknown } | undefined;
-		if (data?.version === 1 && isModeState(data.state)) state = { ...data.state };
+		if (entry.type !== "custom") continue;
+		if (entry.customType === MODE_STATE_ENTRY) {
+			const data = entry.data as { version?: unknown; state?: unknown } | undefined;
+			if (data?.version === 1 && isModeState(data.state)) state = { ...data.state };
+		}
+		if (entry.customType === MODE_CHANGE_ENTRY && isModeChangeEvent(entry.data)) {
+			state = stateFromSnapshot(entry.data.after);
+		}
 	}
 	return state;
+}
+
+function formatRef(ref: ModeRef | null): string {
+	return ref ? `${ref.name} [${ref.source}]` : "(none)";
+}
+
+function formatSnapshot(snapshot: ModeSnapshot): string {
+	return AXES.map((axis) => `${axis}: ${formatRef(snapshot[axis])}`).join("; ");
 }
 
 function formatAvailable(discovery: ModeDiscovery, axis?: Axis): string {
@@ -339,6 +420,38 @@ export function registerModeExtension(
 	packageRoot = PACKAGE_MODES_ROOT,
 	globalRoot = join(getAgentDir(), "modes"),
 ): void {
+	pi.registerEntryRenderer<ModeChangeEvent>(MODE_CHANGE_ENTRY, (entry, { expanded }, theme) => {
+		const box = new Box(1, 1, (text) => theme.bg("customMessageBg", text));
+		const data = entry.data;
+		if (!isModeChangeEvent(data)) {
+			box.addChild(new Text(theme.fg("error", "[mode] invalid mode-change entry"), 0, 0));
+			return box;
+		}
+
+		let summary: string;
+		if (data.action === "set-axis") {
+			const axis = data.axis;
+			if (!axis) {
+				box.addChild(new Text(theme.fg("error", "[mode] invalid set-axis entry"), 0, 0));
+				return box;
+			}
+			summary = `[mode] ${axis}: ${formatRef(data.before[axis])} -> ${formatRef(data.after[axis])}`;
+		} else if (data.action === "apply-preset") {
+			summary = `[mode] preset ${data.preset?.name ?? "(unknown)"} applied`;
+		} else {
+			summary = "[mode] cleared";
+		}
+		box.addChild(new Text(theme.fg("accent", summary), 0, 0));
+		if (expanded) {
+			box.addChild(new Text(theme.fg("dim", `before: ${formatSnapshot(data.before)}`), 0, 0));
+			box.addChild(new Text(theme.fg("dim", `after: ${formatSnapshot(data.after)}`), 0, 0));
+			if (data.preset) {
+				box.addChild(new Text(theme.fg("dim", `preset: ${data.preset.name} [${data.preset.source}]`), 0, 0));
+			}
+		}
+		return box;
+	});
+
 	let discovery: ModeDiscovery = { components: new Map(), diagnostics: [] };
 	let presets: Map<string, ModePreset> = new Map();
 	let state: ModeState = {};
@@ -367,8 +480,21 @@ export function registerModeExtension(
 		if (discovery.components.size === 0 && discovery.diagnostics.length === 0) refresh(ctx);
 	}
 
-	function persist(): void {
-		pi.appendEntry(MODE_STATE_ENTRY, { version: 1, state: { ...state } });
+	function recordChange(
+		action: ModeAction,
+		before: ModeState,
+		after: ModeState,
+		options: { axis?: Axis; preset?: { name: string; source: PresetSource } } = {},
+	): void {
+		const event: ModeChangeEvent = {
+			version: 1,
+			action,
+			before: snapshotState(before, discovery),
+			after: snapshotState(after, discovery),
+		};
+		if (options.axis) event.axis = options.axis;
+		if (options.preset) event.preset = options.preset;
+		pi.appendEntry<ModeChangeEvent>(MODE_CHANGE_ENTRY, event);
 	}
 
 	function showState(ctx: ExtensionContext): void {
@@ -402,8 +528,10 @@ export function registerModeExtension(
 		const index = labels.indexOf(selected);
 		const component = components[index];
 		if (!component) return;
-		state = { ...state, [component.axis]: component.name };
-		persist();
+		const before = { ...state };
+		const after = { ...state, [component.axis]: component.name };
+		state = after;
+		recordChange("set-axis", before, after, { axis: component.axis });
 		ctx.ui.notify(`Mode ${component.axis} set to ${component.name}.`, "info");
 	}
 
@@ -413,8 +541,10 @@ export function registerModeExtension(
 			ctx.ui.notify(`Unknown mode preset "${name}". Available: ${formatPresetAvailable(presets)}.`, "error");
 			return;
 		}
-		state = { role: preset.role, authority: preset.authority, style: preset.style };
-		persist();
+		const before = { ...state };
+		const after = { role: preset.role, authority: preset.authority, style: preset.style };
+		state = after;
+		recordChange("apply-preset", before, after, { preset: { name: preset.name, source: preset.source } });
 		ctx.ui.notify(`Mode preset ${name} applied.`, "info");
 	}
 
@@ -473,8 +603,10 @@ export function registerModeExtension(
 			);
 			return;
 		}
-		state = { ...state, [axis]: name };
-		persist();
+		const before = { ...state };
+		const after = { ...state, [axis]: name };
+		state = after;
+		recordChange("set-axis", before, after, { axis });
 		ctx.ui.notify(`Mode ${axis} set to ${name}.`, "info");
 	}
 
@@ -493,8 +625,10 @@ export function registerModeExtension(
 				return;
 			}
 			if (command === "clear" && tokens.length === 1) {
-				state = {};
-				persist();
+				const before = { ...state };
+				const after: ModeState = {};
+				state = after;
+				recordChange("clear", before, after);
 				ctx.ui.notify("Active mode cleared.", "info");
 				return;
 			}

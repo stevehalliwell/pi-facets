@@ -68,6 +68,7 @@ function createHarness(
 ) {
 	const handlers = new Map<string, Handler[]>();
 	const commands = new Map<string, { handler: Handler }>();
+	const renderers = new Map<string, unknown>();
 	const entries: any[] = [...initialEntries];
 	let branch: any[] = entries;
 	let selectedOption: string | undefined;
@@ -78,6 +79,9 @@ function createHarness(
 		},
 		registerCommand(name: string, options: { handler: Handler }) {
 			commands.set(name, options);
+		},
+		registerEntryRenderer(customType: string, renderer: unknown) {
+			renderers.set(customType, renderer);
 		},
 		appendEntry(customType: string, data: unknown) {
 			const entry = { type: "custom", customType, data };
@@ -103,6 +107,7 @@ function createHarness(
 	return {
 		handlers,
 		commands,
+		renderers,
 		entries,
 		notifications,
 		context,
@@ -205,8 +210,16 @@ describe("mode extension", () => {
 		const harness = createHarness(packageRoot, globalRoot);
 
 		await handlersFor(harness.handlers, "session_start")({}, harness.context);
+		expect(harness.renderers.has("pi-facets.mode-change")).toBe(true);
 		await harness.commands.get("mode")!.handler("role product-owner", harness.context);
 		await harness.commands.get("mode")!.handler("role dev-peer", harness.context);
+		expect(harness.entries[0].customType).toBe("pi-facets.mode-change");
+		expect(harness.entries[0].data.action).toBe("set-axis");
+		expect(harness.entries[0].data.axis).toBe("role");
+		expect(harness.entries[0].data.before.role).toBeNull();
+		expect(harness.entries[0].data.after.role).toEqual({ name: "product-owner", source: "package" });
+		expect(harness.entries[1].data.before.role).toEqual({ name: "product-owner", source: "package" });
+		expect(harness.entries[1].data.after.role).toEqual({ name: "dev-peer", source: "package" });
 
 		const beforeAgentStart = handlersFor(harness.handlers, "before_agent_start");
 		let result = (await beforeAgentStart({ systemPrompt: "Base prompt" }, harness.context)) as
@@ -224,6 +237,9 @@ describe("mode extension", () => {
 		expect(result?.systemPrompt).not.toContain("Trace code paths.");
 
 		await harness.commands.get("mode")!.handler("clear", harness.context);
+		expect(harness.entries[2].data.action).toBe("clear");
+		expect(harness.entries[2].data.before.role).toEqual({ name: "product-owner", source: "package" });
+		expect(harness.entries[2].data.after).toEqual({ role: null, authority: null, style: null });
 		result = (await beforeAgentStart({ systemPrompt: "Base prompt" }, harness.context)) as
 			| { systemPrompt?: string }
 			| undefined;
@@ -292,6 +308,13 @@ describe("mode extension", () => {
 
 		await handlersFor(harness.handlers, "session_start")({}, harness.context);
 		await harness.commands.get("mode")!.handler("preset review", harness.context);
+		expect(harness.entries[0].data.action).toBe("apply-preset");
+		expect(harness.entries[0].data.preset).toEqual({ name: "review", source: "project" });
+		expect(harness.entries[0].data.after).toEqual({
+			role: { name: "product-owner", source: "package" },
+			authority: { name: "recommend-and-proceed", source: "package" },
+			style: { name: "critical", source: "package" },
+		});
 		const beforeAgentStart = handlersFor(harness.handlers, "before_agent_start");
 		let result = (await beforeAgentStart({ systemPrompt: "Base prompt" }, harness.context)) as
 			| { systemPrompt?: string }
@@ -350,5 +373,25 @@ describe("mode extension", () => {
 		)) as { systemPrompt?: string } | undefined;
 		expect(result?.systemPrompt).toContain("Base prompt");
 		expect(result?.systemPrompt).toContain("Prioritise outcomes.");
+	});
+
+	it("restores legacy mode-state entries", async () => {
+		const packageRoot = await createRoot();
+		const globalRoot = await createRoot();
+		await writeMode(packageRoot, "roles", "product-owner", "Prioritise outcomes.");
+		const legacyEntries = [
+			{
+				type: "custom",
+				customType: "pi-facets.mode-state",
+				data: { version: 1, state: { role: "product-owner" } },
+			},
+		];
+		const harness = createHarness(packageRoot, globalRoot, legacyEntries);
+		await handlersFor(harness.handlers, "session_start")({}, harness.context);
+		const legacyResult = (await handlersFor(harness.handlers, "before_agent_start")(
+			{ systemPrompt: "Base prompt" },
+			harness.context,
+		)) as { systemPrompt?: string } | undefined;
+		expect(legacyResult?.systemPrompt).toContain("Prioritise outcomes.");
 	});
 });
