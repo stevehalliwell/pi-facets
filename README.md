@@ -62,20 +62,22 @@ pi --approve --no-session --no-tools --mode json -p "Reply exactly: OK"
 
 ```text
 /mode
-/mode show
+/mode help
 /mode clear
+/mode role
 /mode role <name>
+/mode authority
 /mode authority <name>
+/mode style
 /mode style <name>
-/mode presets
 /mode preset
 /mode preset <name>
 /mode preset show <name>
 ```
 
-`/mode` and `/mode preset` open interactive selectors in TUI mode. Use explicit commands in print or non-interactive mode.
+`/mode help` lists all available commands. Bare `/mode` displays current role, authority, and style, then opens an interactive selector in TUI mode. Bare `/mode role`, `/mode authority`, and `/mode style` open axis-specific selectors with current component marked; outside TUI they print available choices. `/mode preset` opens a preset selector with the current preset marked when one matches.
 
-Selecting one component replaces the previous component on that axis. `/mode show` reports active component name, source, and path. Active state is stored in compact transcript entries and restored when the session or branch is resumed. If a persisted component is no longer available, Pi reports an actionable missing-reference warning.
+Selecting one component replaces the previous component on that axis. Active state is stored in compact transcript entries and restored when the session or branch is resumed. If a persisted component is no longer available, Pi reports an actionable missing-reference warning.
 
 ### Component format
 

@@ -509,22 +509,56 @@ export function registerModeExtension(
 		pi.appendEntry<ModeChangeEvent>(MODE_CHANGE_ENTRY, event);
 	}
 
-	function showState(ctx: ExtensionContext): void {
-		const lines = ["Active mode:"];
+	function showHelp(ctx: ExtensionContext): void {
+		ctx.ui.notify(
+			[
+				"Mode commands:",
+				"/mode — show current role, authority, and style; open TUI selector",
+				"/mode help — show this command list",
+				"/mode clear — clear all active facets",
+				"/mode role — list/select available roles",
+				"/mode role <name> — set role",
+				"/mode authority — list/select available authorities",
+				"/mode authority <name> — set authority",
+				"/mode style — list/select available styles",
+				"/mode style <name> — set style",
+				"/mode preset — select preset in TUI",
+				"/mode preset <name> — apply preset",
+				"/mode preset show <name> — inspect preset",
+			].join("\n"),
+			"info",
+		);
+	}
+
+	function showCurrentState(ctx: ExtensionContext): void {
+		const lines = ["Current mode:"];
 		const resolved = resolveModeState(state, discovery);
 		for (const axis of AXES) {
 			const name = state[axis];
 			const component = resolved.components[axis];
-			if (component) lines.push(`${axis}: ${component.name} [${component.source}] ${component.path}`);
+			if (component) lines.push(`${axis}: ${component.name} [${component.source}]`);
 			else if (name) lines.push(`${axis}: ${name} [missing]`);
 			else lines.push(`${axis}: (none)`);
 		}
 		ctx.ui.notify(lines.join("\n"), resolved.missing.length ? "warning" : "info");
 	}
 
+	function setAxis(axis: Axis, name: string, ctx: ExtensionContext): void {
+		const before = { ...state };
+		const after = { ...state, [axis]: name };
+		state = after;
+		recordChange("set-axis", before, after, { axis });
+		ctx.ui.notify(`Mode ${axis} set to ${name}.`, "info");
+	}
+
+	function componentLabel(component: ModeComponent): string {
+		const current = state[component.axis] === component.name ? " [current]" : "";
+		return `${component.name} — ${component.description} [${component.source}]${current}`;
+	}
+
 	async function selectMode(ctx: ExtensionContext): Promise<void> {
 		if (ctx.mode !== "tui") {
-			ctx.ui.notify("/mode selector requires interactive TUI; use /mode role|authority|style <name>.", "error");
+			ctx.ui.notify("/mode selector requires interactive TUI; use /mode <axis> <name>.", "error");
 			return;
 		}
 		const components = sortedComponents(discovery);
@@ -533,18 +567,32 @@ export function registerModeExtension(
 			return;
 		}
 		const labels = components.map(
-			(component) => `${component.axis}: ${component.name} — ${component.description}`,
+			(component) => `${component.axis}: ${componentLabel(component)}`,
 		);
 		const selected = await ctx.ui.select("Select mode component", labels);
 		if (!selected) return;
-		const index = labels.indexOf(selected);
-		const component = components[index];
-		if (!component) return;
-		const before = { ...state };
-		const after = { ...state, [component.axis]: component.name };
-		state = after;
-		recordChange("set-axis", before, after, { axis: component.axis });
-		ctx.ui.notify(`Mode ${component.axis} set to ${component.name}.`, "info");
+		const component = components[labels.indexOf(selected)];
+		if (component) setAxis(component.axis, component.name, ctx);
+	}
+
+	async function selectAxis(axis: Axis, ctx: ExtensionContext): Promise<void> {
+		const components = sortedComponents(discovery).filter((component) => component.axis === axis);
+		const labels = components.map(componentLabel);
+		if (ctx.mode !== "tui") {
+			ctx.ui.notify(
+				`Available ${axis} modes:\n${labels.map((label) => `- ${label}`).join("\n") || "(none)"}`,
+				"info",
+			);
+			return;
+		}
+		if (!components.length) {
+			ctx.ui.notify(`No valid ${axis} modes discovered.`, "error");
+			return;
+		}
+		const selected = await ctx.ui.select(`Select ${axis} mode`, labels);
+		if (!selected) return;
+		const component = components[labels.indexOf(selected)];
+		if (component) setAxis(axis, component.name, ctx);
 	}
 
 	function applyPreset(name: string, ctx: ExtensionContext): void {
@@ -560,6 +608,14 @@ export function registerModeExtension(
 		ctx.ui.notify(`Mode preset ${name} applied.`, "info");
 	}
 
+	function presetLabel(preset: ModePreset): string {
+		const current =
+			state.role === preset.role && state.authority === preset.authority && state.style === preset.style
+				? " [current]"
+				: "";
+		return `${preset.name} — ${preset.description} [${preset.source}]${current}`;
+	}
+
 	async function selectPreset(ctx: ExtensionContext): Promise<void> {
 		if (ctx.mode !== "tui") {
 			ctx.ui.notify("/mode preset selector requires interactive TUI; use /mode preset <name>.", "error");
@@ -570,21 +626,16 @@ export function registerModeExtension(
 			ctx.ui.notify("No valid mode presets discovered.", "error");
 			return;
 		}
-		const labels = values.map(
-			(preset) => `${preset.name} — ${preset.description} [${preset.source}]`,
+		const current = values.find(
+			(preset) =>
+				state.role === preset.role && state.authority === preset.authority && state.style === preset.style,
 		);
+		ctx.ui.notify(`Current preset: ${current?.name ?? "(none)"}`, "info");
+		const labels = values.map(presetLabel);
 		const selected = await ctx.ui.select("Select mode preset", labels);
 		if (!selected) return;
 		const preset = values[labels.indexOf(selected)];
 		if (preset) applyPreset(preset.name, ctx);
-	}
-
-	function listPresets(ctx: ExtensionContext): void {
-		const values = sortedPresets(presets);
-		const lines = values.length
-			? values.map((preset) => `${preset.name} [${preset.source}] ${preset.path}`)
-			: ["(none)"];
-		ctx.ui.notify(`Mode presets:\n${lines.join("\n")}`, values.length ? "info" : "warning");
 	}
 
 	function showPreset(name: string, ctx: ExtensionContext): void {
@@ -606,34 +657,19 @@ export function registerModeExtension(
 		ctx.ui.notify(lines.join("\n"), "info");
 	}
 
-	function selectAxis(axis: Axis, name: string, ctx: ExtensionContext): void {
-		const component = discovery.components.get(componentKey(axis, name));
-		if (!component) {
-			ctx.ui.notify(
-				`Unknown ${axis} mode "${name}". Available: ${formatAvailable(discovery, axis)}.`,
-				"error",
-			);
-			return;
-		}
-		const before = { ...state };
-		const after = { ...state, [axis]: name };
-		state = after;
-		recordChange("set-axis", before, after, { axis });
-		ctx.ui.notify(`Mode ${axis} set to ${name}.`, "info");
-	}
-
 	pi.registerCommand("mode", {
 		description: "Select and inspect composable role, authority, and style modes",
 		handler: async (args, ctx) => {
 			ensureDiscovery(ctx);
 			const tokens = args.trim().split(/\s+/).filter(Boolean);
 			if (tokens.length === 0) {
+				showCurrentState(ctx);
 				await selectMode(ctx);
 				return;
 			}
 			const command = tokens[0];
-			if (command === "show" && tokens.length === 1) {
-				showState(ctx);
+			if (command === "help" && tokens.length === 1) {
+				showHelp(ctx);
 				return;
 			}
 			if (command === "clear" && tokens.length === 1) {
@@ -642,10 +678,6 @@ export function registerModeExtension(
 				state = after;
 				recordChange("clear", before, after);
 				ctx.ui.notify("Active mode cleared.", "info");
-				return;
-			}
-			if (command === "presets" && tokens.length === 1) {
-				listPresets(ctx);
 				return;
 			}
 			if (command === "preset" && tokens.length === 1) {
@@ -660,12 +692,24 @@ export function registerModeExtension(
 				showPreset(tokens[2], ctx);
 				return;
 			}
+			if (isAxis(command) && tokens.length === 1) {
+				await selectAxis(command, ctx);
+				return;
+			}
 			if (isAxis(command) && tokens.length === 2) {
-				selectAxis(command, tokens[1], ctx);
+				const component = discovery.components.get(componentKey(command, tokens[1]));
+				if (!component) {
+					ctx.ui.notify(
+						`Unknown ${command} mode "${tokens[1]}". Available: ${formatAvailable(discovery, command)}.`,
+						"error",
+					);
+					return;
+				}
+				setAxis(command, component.name, ctx);
 				return;
 			}
 			ctx.ui.notify(
-				"Usage: /mode | /mode show | /mode clear | /mode presets | /mode preset [<name>|show <name>] | /mode role <name> | /mode authority <name> | /mode style <name>",
+				"Usage: /mode | /mode clear | /mode preset [<name>|show <name>] | /mode role [<name>] | /mode authority [<name>] | /mode style [<name>]",
 				"error",
 			);
 		},

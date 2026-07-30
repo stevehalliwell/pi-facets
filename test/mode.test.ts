@@ -295,27 +295,37 @@ describe("mode extension", () => {
 
 		await harness.commands.get("mode")!.handler("role missing", harness.context);
 		expect(harness.notifications.some((message) => message.includes("Available: dev-peer"))).toBe(true);
-		await harness.commands.get("mode")!.handler("role dev-peer", harness.context);
-		await harness.commands.get("mode")!.handler("authority advisory", harness.context);
-		await harness.commands.get("mode")!.handler("style concise", harness.context);
-		await harness.commands.get("mode")!.handler("show", harness.context);
-
-		const shown = harness.notifications.find((message) => message.startsWith("Active mode:"));
-		expect(shown).toContain("role: dev-peer [package]");
-		expect(shown).toContain(join(packageRoot, "roles", "dev-peer.md"));
-		expect(shown).toContain("authority: advisory [package]");
-		expect(shown).toContain("style: concise [package]");
 
 		harness.context.mode = "tui";
-		harness.setSelectedOption("style: concise — Short style");
+		harness.setSelectedOption("dev-peer — Test mode [package]");
+		await harness.commands.get("mode")!.handler("role", harness.context);
+		expect(harness.notifications.some((message) => message.includes("Mode role set to dev-peer."))).toBe(true);
+
+		await harness.commands.get("mode")!.handler("authority advisory", harness.context);
+		await harness.commands.get("mode")!.handler("style concise", harness.context);
+
+		harness.setSelectedOption("style: concise — Short style [package] [current]");
 		await harness.commands.get("mode")!.handler("", harness.context);
+		const shown = harness.notifications.find((message) => message.startsWith("Current mode:"));
+		expect(shown).toContain("role: dev-peer [package]");
+		expect(shown).toContain("authority: advisory [package]");
+		expect(shown).toContain("style: concise [package]");
 		expect(harness.notifications.some((message) => message.includes("Mode style set to concise."))).toBe(true);
 
 		harness.context.mode = "print";
-		await harness.commands.get("mode")!.handler("", harness.context);
-		expect(
-			harness.notifications.some((message) => message.includes("/mode selector requires interactive TUI")),
-		).toBe(true);
+		await harness.commands.get("mode")!.handler("role", harness.context);
+		expect(harness.notifications.some((message) => message.includes("Available role modes:") && message.includes("[current]"))).toBe(true);
+
+		await harness.commands.get("mode")!.handler("show", harness.context);
+		await harness.commands.get("mode")!.handler("presets", harness.context);
+		expect(harness.notifications.filter((message) => message.includes("Usage:")).length).toBeGreaterThanOrEqual(2);
+
+		const entriesBeforeHelp = harness.entries.length;
+		await harness.commands.get("mode")!.handler("help", harness.context);
+		const help = harness.notifications.find((message) => message.startsWith("Mode commands:"));
+		expect(help).toContain("/mode role <name> — set role");
+		expect(help).toContain("/mode preset show <name> — inspect preset");
+		expect(harness.entries).toHaveLength(entriesBeforeHelp);
 	});
 
 	it("loads project components and reports project source", async () => {
@@ -328,11 +338,10 @@ describe("mode extension", () => {
 
 		await handlersFor(harness.handlers, "session_start")({}, harness.context);
 		await harness.commands.get("mode")!.handler("role local-role", harness.context);
-		await harness.commands.get("mode")!.handler("show", harness.context);
+		await harness.commands.get("mode")!.handler("", harness.context);
 
-		const shown = harness.notifications.find((message) => message.startsWith("Active mode:"));
+		const shown = harness.notifications.find((message) => message.startsWith("Current mode:"));
 		expect(shown).toContain("role: local-role [project]");
-		expect(shown).toContain(join(projectModesRoot, "roles", "local-role.md"));
 		const result = (await handlersFor(harness.handlers, "before_agent_start")(
 			{ systemPrompt: "Base prompt" },
 			harness.context,
@@ -376,14 +385,22 @@ describe("mode extension", () => {
 		expect(result?.systemPrompt).not.toContain("Inspection-only notes.");
 		expect(harness.entries).toHaveLength(1);
 
+		harness.context.mode = "tui";
+		harness.setSelectedOption("review — Review preset [project] [current]");
+		await harness.commands.get("mode")!.handler("preset", harness.context);
+		expect(harness.notifications.some((message) => message.includes("Current preset: review"))).toBe(true);
+		expect(harness.notifications.some((message) => message.includes("Mode preset review applied."))).toBe(true);
+		expect(harness.entries).toHaveLength(2);
+
+		harness.context.mode = "print";
 		await harness.commands.get("mode")!.handler("preset show review", harness.context);
 		const inspected = harness.notifications.find((message) => message.startsWith("Mode preset: review"));
 		expect(inspected).toContain("source: project");
 		expect(inspected).toContain("Inspection-only notes.");
-		expect(harness.entries).toHaveLength(1);
+		expect(harness.entries).toHaveLength(2);
 
 		await harness.commands.get("mode")!.handler("presets", harness.context);
-		expect(harness.notifications.some((message) => message.includes("review [project]") && message.includes("presets"))).toBe(true);
+		expect(harness.notifications.some((message) => message.includes("Usage:") && message.includes("/mode preset"))).toBe(true);
 
 		await harness.commands.get("mode")!.handler("role dev-peer", harness.context);
 		result = (await beforeAgentStart({ systemPrompt: "Base prompt" }, harness.context)) as
