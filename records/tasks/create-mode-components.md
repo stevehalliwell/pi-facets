@@ -4,8 +4,8 @@ name: create-mode-components
 created_at: 2026-07-30T01:25:04.757Z
 desc: ""
 tags: []
-status: todo
-scope: draft
+status: done
+scope: agreed
 depends_on: []
 ---
 
@@ -59,15 +59,20 @@ Create first-milestone Markdown mode components consumed by the `/mode` extensio
 ## Implemented so far
 
 - Task captured from implementation brief.
+- Added eight first-milestone Markdown components under `modes/roles/`, `modes/authority/`, and `modes/style/`.
+- Components use validated single-axis frontmatter and focused composable instructions.
+- Extension discovery and composition tests cover the component contract.
 
 ## Checks
 
-- Not started.
+- `npm run check` — passed.
+- `npm test` — passed: 5 tests.
+- Pi JSON smoke check — passed; package and mode extension loaded without startup errors.
 
 ## Review / next slice
 
-- Ready for review: no; scope remains draft.
-- Likely next slice/task: agree component wording and frontmatter contract.
+- User review approved; component task complete.
+- Likely next slice/task: refine project-local mode discovery or initial skills.
 
 ## Notes
 
