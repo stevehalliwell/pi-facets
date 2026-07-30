@@ -6,6 +6,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import {
 	composeModePrompt,
 	discoverModes,
+	discoverPresets,
 	registerModeExtension,
 	type ModeState,
 } from "../extensions/mode.js";
@@ -39,13 +40,32 @@ async function writeMode(
 	);
 }
 
+async function writePreset(
+	root: string,
+	name: string,
+	refs: { role: string; authority: string; style: string },
+	description = "Test preset",
+	notes = "Preset notes",
+): Promise<void> {
+	await mkdir(root, { recursive: true });
+	await writeFile(
+		join(root, `${name}.md`),
+		`---\nname: ${name}\ndescription: ${description}\nrole: ${refs.role}\nauthority: ${refs.authority}\nstyle: ${refs.style}\n---\n\n${notes}\n`,
+	);
+}
+
 function handlersFor(handlers: Map<string, Handler[]>, event: string): Handler {
 	const handler = handlers.get(event)?.[0];
 	if (!handler) throw new Error(`Missing handler: ${event}`);
 	return handler;
 }
 
-function createHarness(packageRoot: string, globalRoot: string, initialEntries: any[] = []) {
+function createHarness(
+	packageRoot: string,
+	globalRoot: string,
+	initialEntries: any[] = [],
+	options: { cwd?: string; trusted?: boolean } = {},
+) {
 	const handlers = new Map<string, Handler[]>();
 	const commands = new Map<string, { handler: Handler }>();
 	const entries: any[] = [...initialEntries];
@@ -68,6 +88,8 @@ function createHarness(packageRoot: string, globalRoot: string, initialEntries: 
 	const context: any = {
 		mode: "print",
 		hasUI: false,
+		cwd: options.cwd ?? globalRoot,
+		isProjectTrusted: () => options.trusted ?? true,
 		ui: {
 			notify(message: string) {
 				notifications.push(message);
@@ -124,6 +146,53 @@ describe("mode discovery", () => {
 			"## Active mode\n\n### role: dev-peer\n\nTrace code paths.",
 		);
 		expect(composeModePrompt("Base prompt", state, discovery)).toContain("### style: concise");
+	});
+});
+
+describe("preset discovery", () => {
+	it("discovers Markdown presets with project precedence, validation, and trust gating", async () => {
+		const packageRoot = await createRoot();
+		const globalRoot = await createRoot();
+		const projectRoot = await createRoot();
+		for (const [directory, name] of [
+			["roles", "product-owner"],
+			["authority", "recommend-and-proceed"],
+			["style", "critical"],
+		] as const) {
+			await writeMode(packageRoot, directory, name, `${directory} body`);
+		}
+
+		await writePreset(join(globalRoot, "presets"), "review", {
+			role: "product-owner",
+			authority: "recommend-and-proceed",
+			style: "critical",
+		}, "Global review");
+		await writePreset(join(globalRoot, "presets"), "shadowed", {
+			role: "product-owner",
+			authority: "recommend-and-proceed",
+			style: "critical",
+		});
+		const projectPresets = join(projectRoot, ".pi", "modes", "presets");
+		await writePreset(projectPresets, "review", {
+			role: "product-owner",
+			authority: "recommend-and-proceed",
+			style: "critical",
+		}, "Project review", "Project notes");
+		await writePreset(projectPresets, "shadowed", {
+			role: "missing-role",
+			authority: "recommend-and-proceed",
+			style: "critical",
+		});
+
+		const modes = discoverModes(packageRoot, globalRoot);
+		const result = discoverPresets(join(globalRoot, "presets"), projectPresets, modes.components, true);
+		expect(result.presets.get("review")?.source).toBe("project");
+		expect(result.presets.get("review")?.notes).toBe("Project notes");
+		expect(result.presets.has("shadowed")).toBe(false);
+		expect(result.diagnostics.some((diagnostic) => diagnostic.path.endsWith("shadowed.md"))).toBe(true);
+
+		const untrusted = discoverPresets(join(globalRoot, "presets"), projectPresets, modes.components, false);
+		expect(untrusted.presets.get("review")?.source).toBe("global");
 	});
 });
 
@@ -202,6 +271,66 @@ describe("mode extension", () => {
 		expect(
 			harness.notifications.some((message) => message.includes("/mode selector requires interactive TUI")),
 		).toBe(true);
+	});
+
+	it("applies, inspects, lists, selects, and materializes presets", async () => {
+		const packageRoot = await createRoot();
+		const globalRoot = await createRoot();
+		const projectRoot = await createRoot();
+		await writeMode(packageRoot, "roles", "product-owner", "Prioritise outcomes.");
+		await writeMode(packageRoot, "roles", "dev-peer", "Trace code paths.");
+		await writeMode(packageRoot, "authority", "recommend-and-proceed", "Recommend then proceed.");
+		await writeMode(packageRoot, "style", "critical", "Challenge assumptions.");
+		await writePreset(
+			join(projectRoot, ".pi", "modes", "presets"),
+			"review",
+			{ role: "product-owner", authority: "recommend-and-proceed", style: "critical" },
+			"Review preset",
+			"Inspection-only notes.",
+		);
+		const harness = createHarness(packageRoot, globalRoot, [], { cwd: projectRoot });
+
+		await handlersFor(harness.handlers, "session_start")({}, harness.context);
+		await harness.commands.get("mode")!.handler("preset review", harness.context);
+		const beforeAgentStart = handlersFor(harness.handlers, "before_agent_start");
+		let result = (await beforeAgentStart({ systemPrompt: "Base prompt" }, harness.context)) as
+			| { systemPrompt?: string }
+			| undefined;
+		expect(result?.systemPrompt).toContain("Prioritise outcomes.");
+		expect(result?.systemPrompt).toContain("Recommend then proceed.");
+		expect(result?.systemPrompt).toContain("Challenge assumptions.");
+		expect(result?.systemPrompt).not.toContain("Inspection-only notes.");
+		expect(harness.entries).toHaveLength(1);
+
+		await harness.commands.get("mode")!.handler("preset show review", harness.context);
+		const inspected = harness.notifications.find((message) => message.startsWith("Mode preset: review"));
+		expect(inspected).toContain("source: project");
+		expect(inspected).toContain("Inspection-only notes.");
+		expect(harness.entries).toHaveLength(1);
+
+		await harness.commands.get("mode")!.handler("presets", harness.context);
+		expect(harness.notifications.some((message) => message.includes("review [project]") && message.includes("presets"))).toBe(true);
+
+		await harness.commands.get("mode")!.handler("role dev-peer", harness.context);
+		result = (await beforeAgentStart({ systemPrompt: "Base prompt" }, harness.context)) as
+			| { systemPrompt?: string }
+			| undefined;
+		expect(result?.systemPrompt).toContain("Trace code paths.");
+		expect(result?.systemPrompt).not.toContain("Prioritise outcomes.");
+
+		harness.context.mode = "tui";
+		harness.setSelectedOption("review — Review preset [project]");
+		await harness.commands.get("mode")!.handler("preset", harness.context);
+		expect(harness.notifications.some((message) => message.includes("Mode preset review applied."))).toBe(true);
+
+		const resumed = createHarness(packageRoot, globalRoot, harness.entries, { cwd: projectRoot });
+		await handlersFor(resumed.handlers, "session_start")({}, resumed.context);
+		const resumedResult = (await handlersFor(resumed.handlers, "before_agent_start")(
+			{ systemPrompt: "Base prompt" },
+			resumed.context,
+		)) as { systemPrompt?: string } | undefined;
+		expect(resumedResult?.systemPrompt).toContain("Prioritise outcomes.");
+		expect(resumedResult?.systemPrompt).toContain("Challenge assumptions.");
 	});
 
 	it("restores state directly on session_start", async () => {

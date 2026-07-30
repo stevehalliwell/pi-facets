@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+	CONFIG_DIR_NAME,
 	getAgentDir,
 	parseFrontmatter,
 	type ExtensionAPI,
@@ -17,6 +18,19 @@ export interface ModeComponent {
 	description: string;
 	body: string;
 	source: ModeSource;
+	path: string;
+}
+
+export type PresetSource = "global" | "project";
+
+export interface ModePreset {
+	name: string;
+	description: string;
+	role: string;
+	authority: string;
+	style: string;
+	notes: string;
+	source: PresetSource;
 	path: string;
 }
 
@@ -134,6 +148,124 @@ export function discoverModes(packageRoot: string, globalRoot: string): ModeDisc
 	};
 }
 
+const PRESET_FIELDS = new Set(["name", "description", "role", "authority", "style"]);
+
+function availableComponentNames(components: Map<string, ModeComponent>, axis: Axis): string {
+	const names = [...components.values()]
+		.filter((component) => component.axis === axis)
+		.map((component) => component.name)
+		.sort((a, b) => a.localeCompare(b));
+	return names.length ? names.join(", ") : "(none)";
+}
+
+function readPresetSource(
+	root: string,
+	source: PresetSource,
+	components: Map<string, ModeComponent>,
+): { presets: Map<string, ModePreset>; claimed: Set<string>; diagnostics: ModeDiagnostic[] } {
+	const presets = new Map<string, ModePreset>();
+	const claimed = new Set<string>();
+	const diagnostics: ModeDiagnostic[] = [];
+	if (!existsSync(root)) return { presets, claimed, diagnostics };
+
+	let entries;
+	try {
+		entries = readdirSync(root, { withFileTypes: true });
+	} catch (error) {
+		diagnostics.push({ path: root, message: `cannot read directory: ${errorMessage(error)}` });
+		return { presets, claimed, diagnostics };
+	}
+
+	for (const entry of entries) {
+		if (!entry.isFile() || extname(entry.name) !== ".md") continue;
+		const path = join(root, entry.name);
+		let nameHint: string | undefined;
+		try {
+			const content = readFileSync(path, "utf8");
+			const parsed = parseFrontmatter<Record<string, unknown>>(content);
+			const filename = basename(entry.name, ".md");
+			const name = parsed.frontmatter.name;
+			nameHint = typeof name === "string" && name.trim() ? name : undefined;
+
+			if (Object.keys(parsed.frontmatter).some((field) => !PRESET_FIELDS.has(field))) {
+				const unknown = Object.keys(parsed.frontmatter).filter((field) => !PRESET_FIELDS.has(field));
+				throw new Error(`unknown frontmatter field(s): ${unknown.join(", ")}`);
+			}
+			if (typeof name !== "string" || !name.trim()) throw new Error("frontmatter `name` must be non-empty");
+			if (name !== filename) throw new Error("frontmatter `name` must match filename stem");
+
+			const description = parsed.frontmatter.description;
+			if (typeof description !== "string" || !description.trim()) {
+				throw new Error("frontmatter `description` must be non-empty");
+			}
+
+			const refs = {} as Record<Axis, string>;
+			for (const axis of AXES) {
+				const value = parsed.frontmatter[axis];
+				if (typeof value !== "string" || !value.trim()) {
+					throw new Error(`frontmatter \`${axis}\` must be non-empty`);
+				}
+				if (!components.has(componentKey(axis, value))) {
+					throw new Error(
+						`unknown ${axis} component "${value}" (available: ${availableComponentNames(components, axis)})`,
+					);
+				}
+				refs[axis] = value;
+			}
+
+			if (claimed.has(name)) {
+				presets.delete(name);
+				diagnostics.push({ path, message: `duplicate preset ${name}` });
+				continue;
+			}
+			claimed.add(name);
+			presets.set(name, {
+				name,
+				description: description.trim(),
+				role: refs.role,
+				authority: refs.authority,
+				style: refs.style,
+				notes: parsed.body.trim(),
+				source,
+				path,
+			});
+		} catch (error) {
+			if (nameHint) {
+				claimed.add(nameHint);
+				presets.delete(nameHint);
+			}
+			diagnostics.push({ path, message: `invalid preset: ${errorMessage(error)}` });
+		}
+	}
+
+	return { presets, claimed, diagnostics };
+}
+
+export function discoverPresets(
+	globalRoot: string,
+	projectRoot: string,
+	components: Map<string, ModeComponent>,
+	projectTrusted: boolean,
+): { presets: Map<string, ModePreset>; diagnostics: ModeDiagnostic[] } {
+	const globalResult = readPresetSource(globalRoot, "global", components);
+	const projectResult = projectTrusted
+		? readPresetSource(projectRoot, "project", components)
+		: { presets: new Map<string, ModePreset>(), claimed: new Set<string>(), diagnostics: [] };
+	const presets = new Map(globalResult.presets);
+
+	for (const name of projectResult.claimed) presets.delete(name);
+	for (const [name, preset] of projectResult.presets) presets.set(name, preset);
+
+	return {
+		presets,
+		diagnostics: [...globalResult.diagnostics, ...projectResult.diagnostics],
+	};
+}
+
+export function sortedPresets(presets: Map<string, ModePreset>): ModePreset[] {
+	return [...presets.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export function sortedComponents(discovery: ModeDiscovery): ModeComponent[] {
 	return [...discovery.components.values()].sort(
 		(a, b) => AXES.indexOf(a.axis) - AXES.indexOf(b.axis) || a.name.localeCompare(b.name),
@@ -197,18 +329,28 @@ function formatDiagnostics(diagnostics: ModeDiagnostic[]): string {
 	return diagnostics.map((diagnostic) => `- ${diagnostic.path}: ${diagnostic.message}`).join("\n");
 }
 
+function formatPresetAvailable(presets: Map<string, ModePreset>): string {
+	const values = sortedPresets(presets);
+	return values.length ? values.map((preset) => `${preset.name} [${preset.source}]`).join(", ") : "(none)";
+}
+
 export function registerModeExtension(
 	pi: ExtensionAPI,
 	packageRoot = PACKAGE_MODES_ROOT,
 	globalRoot = join(getAgentDir(), "modes"),
 ): void {
 	let discovery: ModeDiscovery = { components: new Map(), diagnostics: [] };
+	let presets: Map<string, ModePreset> = new Map();
 	let state: ModeState = {};
 
 	function refresh(ctx: ExtensionContext): void {
 		discovery = discoverModes(packageRoot, globalRoot);
-		if (discovery.diagnostics.length) {
-			ctx.ui.notify(`Mode discovery diagnostics:\n${formatDiagnostics(discovery.diagnostics)}`, "warning");
+		const projectRoot = join(ctx.cwd, CONFIG_DIR_NAME, "modes", "presets");
+		const result = discoverPresets(join(globalRoot, "presets"), projectRoot, discovery.components, ctx.isProjectTrusted());
+		presets = result.presets;
+		const diagnostics = [...discovery.diagnostics, ...result.diagnostics];
+		if (diagnostics.length) {
+			ctx.ui.notify(`Mode discovery diagnostics:\n${formatDiagnostics(diagnostics)}`, "warning");
 		}
 	}
 
@@ -265,6 +407,63 @@ export function registerModeExtension(
 		ctx.ui.notify(`Mode ${component.axis} set to ${component.name}.`, "info");
 	}
 
+	function applyPreset(name: string, ctx: ExtensionContext): void {
+		const preset = presets.get(name);
+		if (!preset) {
+			ctx.ui.notify(`Unknown mode preset "${name}". Available: ${formatPresetAvailable(presets)}.`, "error");
+			return;
+		}
+		state = { role: preset.role, authority: preset.authority, style: preset.style };
+		persist();
+		ctx.ui.notify(`Mode preset ${name} applied.`, "info");
+	}
+
+	async function selectPreset(ctx: ExtensionContext): Promise<void> {
+		if (ctx.mode !== "tui") {
+			ctx.ui.notify("/mode preset selector requires interactive TUI; use /mode preset <name>.", "error");
+			return;
+		}
+		const values = sortedPresets(presets);
+		if (!values.length) {
+			ctx.ui.notify("No valid mode presets discovered.", "error");
+			return;
+		}
+		const labels = values.map(
+			(preset) => `${preset.name} — ${preset.description} [${preset.source}]`,
+		);
+		const selected = await ctx.ui.select("Select mode preset", labels);
+		if (!selected) return;
+		const preset = values[labels.indexOf(selected)];
+		if (preset) applyPreset(preset.name, ctx);
+	}
+
+	function listPresets(ctx: ExtensionContext): void {
+		const values = sortedPresets(presets);
+		const lines = values.length
+			? values.map((preset) => `${preset.name} [${preset.source}] ${preset.path}`)
+			: ["(none)"];
+		ctx.ui.notify(`Mode presets:\n${lines.join("\n")}`, values.length ? "info" : "warning");
+	}
+
+	function showPreset(name: string, ctx: ExtensionContext): void {
+		const preset = presets.get(name);
+		if (!preset) {
+			ctx.ui.notify(`Unknown mode preset "${name}". Available: ${formatPresetAvailable(presets)}.`, "error");
+			return;
+		}
+		const lines = [
+			`Mode preset: ${preset.name}`,
+			`description: ${preset.description}`,
+			`source: ${preset.source}`,
+			`path: ${preset.path}`,
+			`role: ${preset.role}`,
+			`authority: ${preset.authority}`,
+			`style: ${preset.style}`,
+		];
+		if (preset.notes) lines.push(`notes:\n${preset.notes}`);
+		ctx.ui.notify(lines.join("\n"), "info");
+	}
+
 	function selectAxis(axis: Axis, name: string, ctx: ExtensionContext): void {
 		const component = discovery.components.get(componentKey(axis, name));
 		if (!component) {
@@ -299,12 +498,28 @@ export function registerModeExtension(
 				ctx.ui.notify("Active mode cleared.", "info");
 				return;
 			}
+			if (command === "presets" && tokens.length === 1) {
+				listPresets(ctx);
+				return;
+			}
+			if (command === "preset" && tokens.length === 1) {
+				await selectPreset(ctx);
+				return;
+			}
+			if (command === "preset" && tokens.length === 2) {
+				applyPreset(tokens[1], ctx);
+				return;
+			}
+			if (command === "preset" && tokens[1] === "show" && tokens.length === 3) {
+				showPreset(tokens[2], ctx);
+				return;
+			}
 			if (isAxis(command) && tokens.length === 2) {
 				selectAxis(command, tokens[1], ctx);
 				return;
 			}
 			ctx.ui.notify(
-				"Usage: /mode | /mode show | /mode clear | /mode role <name> | /mode authority <name> | /mode style <name>",
+				"Usage: /mode | /mode show | /mode clear | /mode presets | /mode preset [<name>|show <name>] | /mode role <name> | /mode authority <name> | /mode style <name>",
 				"error",
 			);
 		},
