@@ -10,3 +10,4 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 ### Added
 
 - Initial project guidance, README, design brief, and Attendant-backed task/decision collections.
+- Minimal Pi package manifest, TypeScript check, Vitest check, and project-local self-load settings.

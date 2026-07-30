@@ -24,12 +24,27 @@ Not included in first milestone: automatic inference, model switching, or projec
 
 ## Requirements
 
-- Pi coding agent runtime.
-- TypeScript-capable Pi extension environment: [TBD]
+- Node.js `>=22.19.0`.
+- Pi coding agent `>=0.83.0`.
+- npm.
+
+Pi loads TypeScript extensions through jiti. No extension build step required.
 
 ## Quick start
 
-Toolchain setup is not configured yet: [TBD].
+```sh
+npm install
+npm run check
+npm test
+```
+
+Project `.pi/settings.json` loads repository root as a local Pi package. For non-interactive checks, approve project resources explicitly:
+
+```sh
+pi --approve --no-session --no-tools --mode json -p "Reply exactly: OK"
+```
+
+`package.json` declares `extensions/` and `skills/` as package resources. Add resources there; Pi discovers them through project settings.
 
 ## Usage
 
@@ -47,7 +62,9 @@ After first milestone implementation:
 ## Test
 
 ```sh
-[TBD: test command]
+npm test
+npm run check
+npm test -- test/package.test.ts
 ```
 
 ## Documentation

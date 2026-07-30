@@ -2,10 +2,10 @@
 id: 019fb0a2-b50c-72b7-8101-e45bb21f6bd0
 name: setup-pi-extension-package-requirements
 created_at: 2026-07-30T01:28:01.036Z
-desc: ""
+desc: "Set up Pi package metadata, local package loading, and development checks for pi-facets."
 tags: []
-status: todo
-scope: draft
+status: done
+scope: agreed
 depends_on: []
 ---
 
@@ -39,8 +39,8 @@ Establish package and runtime requirements needed to develop, test, and load the
 
 - Extension package requirements are identified and documented.
 - Minimal package/config files allow extension development and test commands to run.
-- Required setup/test commands are recorded in `README.md` and `AGENTS.md`.
-- `README.md` and `AGENTS.md` are reviewed and corrected after package setup is working.
+- Human-facing setup and test commands are recorded in `README.md`.
+- `AGENTS.md` routes agents to `README.md` and contains only agent-specific rules after package setup is working.
 - Dependency choices include compatible versions and rationale where non-obvious.
 
 ## Open questions
@@ -53,7 +53,10 @@ Establish package and runtime requirements needed to develop, test, and load the
 ## Decisions
 
 - Start with smallest package surface compatible with Pi extension APIs.
-- Do not install or commit dependencies until package/toolchain choices are confirmed.
+- Pi loads TypeScript extensions through jiti; no extension build step needed.
+- Use ESM package metadata with Pi conventional resource directories.
+- Keep `@earendil-works/pi-coding-agent` as a peer dependency; pin matching local dev types only.
+- Use project `.pi/settings.json` with local package path so this repo loads itself during tests.
 
 ## Plan
 
@@ -65,16 +68,26 @@ Establish package and runtime requirements needed to develop, test, and load the
 
 ## Implemented so far
 
-- Task captured from user request.
+- Added ESM `package.json` with `pi` resource manifest, peer/runtime boundary, and pinned development tools.
+- Added `package-lock.json`, `tsconfig.json`, and package self-check in `test/package.test.ts`.
+- Added `.pi/settings.json` loading repository root (`..`) as project-local Pi package.
+- Updated README with human-facing setup/check instructions.
+- Reduced AGENTS.md to README routing, agent-only context/rules, and protected paths.
+- Updated CHANGELOG and `.gitignore`.
 
 ## Checks
 
-- Not started.
+- `npm install` — passed; npm reported one dev-tree high advisory.
+- `npm run check` — passed.
+- `npm test` — passed: 2 tests.
+- `npm test -- test/package.test.ts` — passed: 2 tests.
+- `npm audit --omit=dev --audit-level=high` — passed: 0 runtime vulnerabilities.
+- `pi --approve --no-session --no-tools --mode json -p "Reply exactly: OK"` — passed; project package settings loaded without startup errors.
 
 ## Review / next slice
 
-- Ready for review: no; scope remains draft.
-- Likely next slice/task: inspect Pi extension package requirements and propose exact config.
+- Approved complete; package/toolchain setup is done.
+- Next slice/task: implement mode components, then mode extension.
 
 ## Notes
 

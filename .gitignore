@@ -1,2 +1,5 @@
 # Attendant generated local state
 .attendant/
+
+# Local npm install
+node_modules/
