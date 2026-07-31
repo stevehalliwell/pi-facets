@@ -5,7 +5,7 @@ created_at: 2026-07-30T09:07:16.846Z
 desc: ""
 tags: []
 status: todo
-scope: draft
+scope: agreed
 depends_on: []
 ---
 
@@ -13,19 +13,30 @@ depends_on: []
 
 ### Desired outcome
 
-- Expand built-in default mode components across each facet category and add representative presets for manual and automated testing.
+Ship representative package examples across role, authority, style, presets, and prompt templates so intended facet composition is visible and testable.
 
 ### In scope
 
-- Add more default role components.
-- Add more default authority components.
-- Add more default style components.
-- Add presets that exercise representative facet combinations.
-- Add or extend tests using the presets.
+- Add roles `marketing-strategist`, `researcher`, and `delivery-lead`.
+- Add styles `exploratory`, `explanatory`, and `structured`.
+- Retain existing authority set; add no authority component.
+- Add package presets:
+  - `implementation-review`: `dev-peer` + `advisory` + `critical`.
+  - `backlog-refinement`: `product-owner` + `recommend-and-proceed` + `concise`.
+  - `messaging-strategy`: `marketing-strategist` + `recommend-and-proceed` + `explanatory`.
+  - `research-exploration`: `researcher` + `advisory` + `exploratory`.
+  - `delivery-planning`: `delivery-lead` + `decisive` + `structured`.
+- Add prompt templates `explore-options` and `decision-brief` as package resources.
+- Register package prompt resources in `package.json`.
+- Extend preset discovery to support `modes/presets/` with project → package → global precedence.
+- Add focused discovery, precedence, application, prompt-resource, and documentation checks.
 
 ### Out of scope
 
-- TBD: exact component names, content, and preset combinations.
+- New facet axes or changes to role, authority, or style semantics.
+- Automatic mode inference or prompt-triggered facet mutation.
+- Replacing skills with prompt templates.
+- Broad prompt-template workflows or duplicated skill content.
 
 ### Existing behavior to preserve
 
@@ -33,38 +44,48 @@ depends_on: []
 
 ### Acceptance
 
-- TBD: agreed list of default components and presets exists.
-- TBD: tests cover preset discovery and application using committed fixtures.
+- All agreed role, style, preset, and prompt-template resources exist with valid frontmatter/content.
+- Package presets are discovered with source `package`; project overrides package; package overrides global.
+- Invalid package preset references produce diagnostics without silently applying the preset.
+- Each agreed preset applies all three referenced components atomically.
+- `/explore-options <topic>` and `/decision-brief <topic>` are discoverable prompt templates with argument expansion.
+- Prompt templates do not change active facet state.
+- README and facet-grid examples list shipped resources and boundaries.
+- `npm run check`, focused tests, full tests, and `git diff --check` pass.
 
 ## Open questions
 
-- Which roles, authorities, and styles should become defaults?
-- Which preset combinations represent useful workflows?
-- Should presets be package defaults, project fixtures, or both?
+- None.
 
 ## Decisions
 
-- None yet; keep task draft until component and preset scope is agreed.
+- Ship package examples, not test-only fixtures.
+- Add package preset precedence project → package → global.
+- Ship two short, non-mutating prompt templates.
+- See `records/decisions/ship-package-mode-examples.md`.
 
 ## Plan
 
-- Refine component names/content and preset fixture strategy.
-- Add Markdown components and presets.
-- Add focused discovery/application tests.
+- Add agreed role and style Markdown components.
+- Add package presets and package-preset discovery precedence.
+- Add prompt templates and package manifest registration.
+- Extend tests, README, and facet-grid examples.
+- Run acceptance checks.
 
 ## Implemented so far
 
-- Future task captured from user request.
+- Scope agreed; implementation not started.
+- Package example set and preset precedence recorded.
 
 ## Checks
 
-- Not started.
+- Attendant validation pending after task update.
 
 ## Review / next slice
 
-- Ready for review: no; draft requires refinement.
-- Likely next slice/task: refine default component and preset list.
+- Ready for review: no; implementation pending.
+- Likely next slice/task: implement package examples and discovery changes.
 
 ## Notes
 
-- Do not implement until scope is agreed.
+- Keep prompt templates short and non-duplicative; skills remain workflow source of truth.

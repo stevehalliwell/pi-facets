@@ -1,32 +1,32 @@
 # pi-facets
 
-Composable modes, skills, and extensions for Pi agent.
+Composable facets, skills, and extensions for Pi agent.
 
 ## Overview
 
 pi-facets separates persistent agent behavior from task workflows, project context, and references:
 
-- **Modes** provide role, decision authority, and conversation style.
+- **Facets** provide role, decision authority, and conversation style.
 - **Skills** provide repeatable task workflows and output contracts.
-- **Project context** provides repository and product facts outside modes and skills.
+- **Project context** provides repository and product facts outside facets and skills.
 - **References** provide framework or standards material loaded only when needed.
 
-A thin Pi extension composes selected mode components into each agent run. pi-facets does not limit or gate tool calls.
+A thin Pi extension composes selected facet components into each agent run. pi-facets does not limit or gate tool calls.
 
 ## Status
 
 Core implementation is complete for:
 
-- `/mode` selection, inspection, clearing, and session restoration;
+- `/facets` selection, inspection, clearing, and session restoration;
 - role, authority, and style components;
-- global, package, and trusted project-local mode discovery;
-- named mode presets;
+- global, package, and trusted project-local facet discovery;
+- named facet presets;
 - four independently invokable workflow skills;
 - focused extension and package tests.
 
 Deferred until evidence or a concrete need appears:
 
-- automatic mode inference or task/mode mismatch detection;
+- automatic facet inference or task/facet mismatch detection;
 - model switching;
 - separate persistent facets for user interaction versus generated artifacts;
 - project-local tool restrictions;
@@ -56,26 +56,26 @@ pi --approve --no-session --no-tools --mode json -p "Reply exactly: OK"
 
 `package.json` declares `extensions/` and `skills/` as package resources. Pi discovers them through project settings.
 
-## Modes
+## Facets
 
 ### Commands
 
 ```text
-/mode
-/mode help
-/mode clear
-/mode role
-/mode role <name>
-/mode authority
-/mode authority <name>
-/mode style
-/mode style <name>
-/mode preset
-/mode preset <name>
-/mode preset show <name>
+/facets
+/facets help
+/facets clear
+/facets role
+/facets role <name>
+/facets authority
+/facets authority <name>
+/facets style
+/facets style <name>
+/facets preset
+/facets preset <name>
+/facets preset show <name>
 ```
 
-`/mode help` lists all available commands. Bare `/mode` displays current role, authority, and style, then opens an interactive selector in TUI mode. Bare `/mode role`, `/mode authority`, and `/mode style` open axis-specific selectors with current component marked; outside TUI they print available choices. `/mode preset` opens a preset selector with the current preset marked when one matches.
+`/facets help` lists all available commands. Bare `/facets` displays current role, authority, and style, then opens an interactive selector in TUI mode. Bare `/facets role`, `/facets authority`, and `/facets style` open axis-specific selectors with current component marked; outside TUI they print available choices. `/facets preset` opens a preset selector with the current preset marked when one matches.
 
 Selecting one component replaces the previous component on that axis. Active state is stored in compact transcript entries and restored when the session or branch is resumed. If a persisted component is no longer available, Pi reports an actionable missing-reference warning.
 
@@ -102,17 +102,17 @@ Supported axes:
 - `authority` — default decision authority;
 - `style` — conversation style.
 
-Add a package component under `modes/{roles,authority,style}/`. No extension-code change is required.
+Add a package component under `facets/{roles,authority,style}/`. No extension-code change is required.
 
 ### Discovery and precedence
 
 Sources resolve in this order:
 
-1. trusted project: `<cwd>/.pi/modes/{roles,authority,style}/`;
-2. package: `modes/{roles,authority,style}/`;
-3. global: `~/.pi/agent/modes/{roles,authority,style}/`.
+1. trusted project: `<cwd>/.pi/facets/{roles,authority,style}/`;
+2. package: `facets/{roles,authority,style}/`;
+3. global: `~/.pi/agent/facets/{roles,authority,style}/`.
 
-A higher-precedence component shadows a same-named lower-precedence component. Files are never merged. Project discovery uses current `cwd` only. Untrusted projects skip local mode Markdown and retain package/global components. Invalid trusted components produce diagnostics.
+A higher-precedence component shadows a same-named lower-precedence component. Files are never merged. Project discovery uses current `cwd` only. Untrusted projects skip local facet Markdown and retain package/global components. Invalid trusted components produce diagnostics.
 
 ## Named presets
 
@@ -127,10 +127,10 @@ authority: advisory
 style: critical
 ---
 
-Optional notes shown by `/mode preset show implementation-review`.
+Optional notes shown by `/facets preset show implementation-review`.
 ```
 
-Global presets live under `~/.pi/agent/modes/presets/`. Trusted project presets live under `<cwd>/.pi/modes/presets/` and shadow same-named global presets. Preset references must resolve to available components.
+Global presets live under `~/.pi/agent/facets/presets/`. Trusted project presets live under `<cwd>/.pi/facets/presets/` and shadow same-named global presets. Preset references must resolve to available components.
 
 ## Skills
 
@@ -153,7 +153,7 @@ description: Trigger-rich description of when to use the skill and its goal.
 ---
 ```
 
-Pi exposes skill descriptions for automatic routing and registers `/skill:<name>` commands for explicit invocation. Keep workflows, output contracts, and workflow-specific references in skills. Do not duplicate persistent mode behavior, project facts, or tool policy. Add references or helper files only when they reduce context or repetition.
+Pi exposes skill descriptions for automatic routing and registers `/skill:<name>` commands for explicit invocation. Keep workflows, output contracts, and workflow-specific references in skills. Do not duplicate persistent facet behavior, project facts, or tool policy. Add references or helper files only when they reduce context or repetition.
 
 Current skills:
 
@@ -166,7 +166,7 @@ Add a skill under `skills/<name>/SKILL.md`; extension code does not need changin
 
 ## Project context and references
 
-Project facts belong in `AGENTS.md`, product docs, architecture docs, or other project context files. Frameworks, standards, and detailed supporting material belong in skill references. Modes and skills should point to these sources rather than duplicate them.
+Project facts belong in `AGENTS.md`, product docs, architecture docs, or other project context files. Frameworks, standards, and detailed supporting material belong in skill references. Facets and skills should point to these sources rather than duplicate them.
 
 ## Tool policy
 
@@ -183,7 +183,7 @@ npm test -- test/package.test.ts
 ## Documentation and layout
 
 - `extensions/` — thin stateful Pi extensions;
-- `modes/` — package mode components;
+- `facets/` — package facet components;
 - `skills/` — independently invokable workflows and references;
 - `records/tasks/` — Attendant-backed task records;
 - `records/decisions/` — Attendant-backed durable decisions;

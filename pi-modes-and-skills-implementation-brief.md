@@ -1,4 +1,4 @@
-# Pi Modes and Skills — Implementation Brief
+# Pi Facets and Skills — Implementation Brief
 
 > **Indicative only.** This ChatGPT-produced brief is a starting hypothesis, not binding specification. Refine details as pi-facets develops. Current project decision: do not limit or gate tool calls.
 
@@ -8,7 +8,7 @@ Create a lightweight system for composing agent behaviour from separate concerns
 
 The system should distinguish between:
 
-- **Modes**: persistent session behaviour and perspective.
+- **Facets**: persistent session behaviour and perspective.
 - **Skills**: task-specific processes and methods.
 - **Project context**: facts about the current product, business, repository, and users.
 - **References**: frameworks, standards, checklists, and supporting material.
@@ -26,8 +26,8 @@ The initial implementation should stay small, Markdown-driven, and easy to exten
 4. Use a Pi extension only where state, enforcement, or UI is required.
 5. Avoid duplicating domain facts or reference material across skills.
 6. Prefer a few broad skills with lazily loaded references over many narrowly overlapping skills.
-7. Make automatic mode selection conservative and transparent.
-8. Allow the user to override any inferred mode explicitly.
+7. Make automatic facet selection conservative and transparent.
+8. Allow the user to override any inferred facet explicitly.
 
 ---
 
@@ -35,13 +35,13 @@ The initial implementation should stay small, Markdown-driven, and easy to exten
 
 | Axis | Purpose | Storage / implementation |
 |---|---|---|
-| Role | Perspective used for decisions | Mode Markdown, selected by extension |
+| Role | Perspective used for decisions | Facet Markdown, selected by extension |
 | Workflow | Procedure followed for a task | Pi skill |
-| Decision authority | Whether the agent advises, recommends, or decides by default | Mode component |
+| Decision authority | Whether the agent advises, recommends, or decides by default | Facet component |
 | Execution authority | Whether the agent may edit files, run commands, deploy, etc. | Extension-enforced tool policy |
 | Domain context | Facts about the business, product, customer, and repository | Project `AGENTS.md` and project docs |
 | Reference material | Frameworks, standards, checklists, and examples | Skill reference files |
-| Conversation style | Concise, exploratory, blunt, explanatory, etc. | Global defaults or switchable mode component |
+| Conversation style | Concise, exploratory, blunt, explanatory, etc. | Global defaults or switchable facet component |
 | Output contract | Expected deliverable format | Skill instructions or prompt template |
 | Session phase | Discovery, planning, implementation, review | Optional extension state |
 | Model/tool profile | Model choice and enabled tools | Optional extension behaviour |
@@ -54,8 +54,8 @@ The initial implementation should stay small, Markdown-driven, and easy to exten
 ~/.pi/agent/
 ├── AGENTS.md
 ├── extensions/
-│   └── mode.ts
-├── modes/
+│   └── facets.ts
+├── facets/
 │   ├── roles/
 │   │   ├── pragmatic-collaborator.md
 │   │   ├── product-owner.md
@@ -109,37 +109,32 @@ The global file should contain only stable working preferences and routing rules
 It should tell the agent to:
 
 - infer the appropriate role and workflow from the request;
-- avoid asking for a mode when the choice is obvious;
-- ask only when plausible modes would produce materially different outcomes;
+- avoid asking for a facet when the choice is obvious;
+- ask only when plausible facets would produce materially different outcomes;
 - recommend a default when asking;
-- state inferred mode changes briefly;
+- state inferred facet changes briefly;
 - load relevant skills and project instructions;
 - respect the active tool policy;
-- allow explicit mode overrides.
+- allow explicit facet overrides.
 
 It should not contain detailed role definitions, workflow procedures, business facts, or large reference frameworks.
 
 ---
 
-## Mode extension
+## Facet extension
 
 The extension should be a thin stateful loader, not a large agent framework.
 
 ### Required commands
 
 ```text
-/mode
-/mode show
-/mode clear
-/mode role <name>
-/mode authority <name>
-/mode style <name>
-```
-
-A shorter shorthand may also be supported:
-
-```text
-/mode product-owner
+/facets
+/facets help
+/facets clear
+/facets role [<name>]
+/facets authority [<name>]
+/facets style [<name>]
+/facets preset [<name>|show <name>]
 ```
 
 ### Required behaviour
@@ -148,26 +143,26 @@ The extension should:
 
 1. Track the active role, decision authority, and conversation style.
 2. Load their Markdown definitions.
-3. Inject the composed mode into the system prompt before each agent run.
-4. Persist mode state in the Pi session.
-5. Restore mode state when a session is resumed.
+3. Inject the composed facet into the system prompt before each agent run.
+4. Persist facet state in the Pi session.
+5. Restore facet state when a session is resumed.
 6. Ensure a newly selected component supersedes the old component on the same axis.
-7. Show the active mode through `/mode show`.
-8. Provide a simple selector when `/mode` is called without arguments.
-9. Allow all mode components to be cleared.
-10. Fail clearly when a referenced mode file is missing or invalid.
+7. Show the active facet through bare `/facets`.
+8. Provide a simple selector when `/facets` is called without arguments.
+9. Allow all facet components to be cleared.
+10. Fail clearly when a referenced facet file is missing or invalid.
 
 ### Optional behaviour
 
 Later iterations may add:
 
 - footer or status-line display;
-- automatic mode suggestions;
+- automatic facet suggestions;
 - session-phase tracking;
-- model selection by mode;
-- mode-specific tool sets;
+- model selection by facet;
+- facet-specific tool sets;
 - tool-call permission checks;
-- project-local mode definitions;
+- project-local facet definitions;
 - named presets composed from several axes.
 
 Example preset:
@@ -183,9 +178,9 @@ Presets should reference components rather than duplicate their contents.
 
 ---
 
-## Mode file format
+## Facet file format
 
-Keep mode files small and declarative.
+Keep facet files small and declarative.
 
 Example:
 
@@ -216,7 +211,7 @@ Challenge:
 Do not override execution permissions or workflow instructions.
 ```
 
-Each mode component should define only one axis.
+Each facet component should define only one axis.
 
 ---
 
@@ -337,7 +332,7 @@ Tool policy: may edit content files, may not deploy
 Build only:
 
 1. A short global `AGENTS.md`.
-2. The `/mode` extension.
+2. The `/facets` extension.
 3. Three role files:
    - `pragmatic-collaborator`
    - `product-owner`
@@ -354,7 +349,7 @@ Build only:
    - `competitor-analysis`
    - `website-messaging`
    - `technical-review`
-7. Basic tests for mode loading, switching, clearing, and session restoration.
+7. Basic tests for facet loading, switching, clearing, and session restoration.
 
 Do not build automatic inference, model switching, or complex permission profiles in the first milestone.
 
@@ -362,17 +357,17 @@ Do not build automatic inference, model switching, or complex permission profile
 
 ## Acceptance criteria
 
-- `/mode` lists available components.
+- `/facets` lists available components.
 - A role, authority, and style can be selected independently.
 - Selecting a component replaces the previous component on the same axis.
-- `/mode show` reports the composed active mode.
-- `/mode clear` returns to global defaults.
-- Active mode state survives session resume.
+- Bare `/facets` reports the composed active facet.
+- `/facets clear` returns to global defaults.
+- Active facet state survives session resume.
 - The composed instructions are injected before every agent run.
-- Missing or malformed mode files produce actionable errors.
+- Missing or malformed facet files produce actionable errors.
 - Skills remain independently invokable.
-- Skill content does not duplicate mode content.
-- Project context remains outside global skills and modes.
+- Skill content does not duplicate facet content.
+- Project context remains outside global skills and facets.
 - The implementation is documented well enough to add a new role or skill without changing extension code.
 
 ---
@@ -381,10 +376,10 @@ Do not build automatic inference, model switching, or complex permission profile
 
 Resolve after using the first version:
 
-- Should project-local modes be supported?
-- Should mode presets be first-class?
-- Should the extension suggest mode changes automatically?
+- Should project-local facets be supported?
+- Should facet presets be first-class?
+- Should the extension suggest facet changes automatically?
 - Should execution authority be enforced through explicit tool profiles?
-- Should active mode be shown persistently in the UI?
+- Should active facet be shown persistently in the UI?
 - Should workflow phase become a separate axis?
-- Should mode changes be recorded in the transcript?
+- Should facet changes be recorded in the transcript?

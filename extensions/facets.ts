@@ -11,20 +11,20 @@ import {
 import { Box, Text } from "@earendil-works/pi-tui";
 
 export type Axis = "role" | "authority" | "style";
-export type ModeSource = "project" | "package" | "global";
+export type FacetSource = "project" | "package" | "global";
 
-export interface ModeComponent {
+export interface FacetComponent {
 	name: string;
 	axis: Axis;
 	description: string;
 	body: string;
-	source: ModeSource;
+	source: FacetSource;
 	path: string;
 }
 
 export type PresetSource = "global" | "project";
 
-export interface ModePreset {
+export interface FacetPreset {
 	name: string;
 	description: string;
 	role: string;
@@ -35,26 +35,26 @@ export interface ModePreset {
 	path: string;
 }
 
-export interface ModeDiagnostic {
+export interface FacetDiagnostic {
 	path: string;
 	message: string;
 }
 
-export interface ModeDiscovery {
-	components: Map<string, ModeComponent>;
-	diagnostics: ModeDiagnostic[];
+export interface FacetDiscovery {
+	components: Map<string, FacetComponent>;
+	diagnostics: FacetDiagnostic[];
 }
 
-export type ModeState = Partial<Record<Axis, string>>;
-export type ModeAction = "set-axis" | "apply-preset" | "clear";
-export type ModeRef = { name: string; source: ModeSource | "missing" };
-export type ModeSnapshot = Record<Axis, ModeRef | null>;
+export type FacetState = Partial<Record<Axis, string>>;
+export type FacetAction = "set-axis" | "apply-preset" | "clear";
+export type FacetRef = { name: string; source: FacetSource | "missing" };
+export type FacetSnapshot = Record<Axis, FacetRef | null>;
 
-export interface ModeChangeEvent {
+export interface FacetChangeEvent {
 	version: 1;
-	action: ModeAction;
-	before: ModeSnapshot;
-	after: ModeSnapshot;
+	action: FacetAction;
+	before: FacetSnapshot;
+	after: FacetSnapshot;
 	axis?: Axis;
 	preset?: { name: string; source: PresetSource };
 }
@@ -65,9 +65,9 @@ const AXIS_DIRECTORIES: Record<Axis, string> = {
 	authority: "authority",
 	style: "style",
 };
-const MODE_STATE_ENTRY = "pi-facets.mode-state";
-const MODE_CHANGE_ENTRY = "pi-facets.mode-change";
-const PACKAGE_MODES_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "modes");
+const FACET_STATE_ENTRY = "pi-facets.facet-state";
+const FACET_CHANGE_ENTRY = "pi-facets.facet-change";
+const PACKAGE_FACETS_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "facets");
 
 function componentKey(axis: Axis, name: string): string {
 	return `${axis}:${name}`;
@@ -77,9 +77,9 @@ function isAxis(value: unknown): value is Axis {
 	return typeof value === "string" && AXES.includes(value as Axis);
 }
 
-function readSource(root: string, source: ModeSource): { components: Map<string, ModeComponent>; diagnostics: ModeDiagnostic[] } {
-	const components = new Map<string, ModeComponent>();
-	const diagnostics: ModeDiagnostic[] = [];
+function readSource(root: string, source: FacetSource): { components: Map<string, FacetComponent>; diagnostics: FacetDiagnostic[] } {
+	const components = new Map<string, FacetComponent>();
+	const diagnostics: FacetDiagnostic[] = [];
 
 	for (const axis of AXES) {
 		const directory = join(root, AXIS_DIRECTORIES[axis]);
@@ -147,18 +147,18 @@ function readSource(root: string, source: ModeSource): { components: Map<string,
 	return { components, diagnostics };
 }
 
-export function discoverModes(
+export function discoverFacets(
 	packageRoot: string,
 	globalRoot: string,
 	projectRoot?: string,
 	projectTrusted = true,
-): ModeDiscovery {
+): FacetDiscovery {
 	const results = [
 		...(projectRoot && projectTrusted ? [readSource(projectRoot, "project")] : []),
 		readSource(packageRoot, "package"),
 		readSource(globalRoot, "global"),
 	];
-	const components = new Map<string, ModeComponent>();
+	const components = new Map<string, FacetComponent>();
 
 	for (const result of results) {
 		for (const [key, component] of result.components) {
@@ -174,7 +174,7 @@ export function discoverModes(
 
 const PRESET_FIELDS = new Set(["name", "description", "role", "authority", "style"]);
 
-function availableComponentNames(components: Map<string, ModeComponent>, axis: Axis): string {
+function availableComponentNames(components: Map<string, FacetComponent>, axis: Axis): string {
 	const names = [...components.values()]
 		.filter((component) => component.axis === axis)
 		.map((component) => component.name)
@@ -185,11 +185,11 @@ function availableComponentNames(components: Map<string, ModeComponent>, axis: A
 function readPresetSource(
 	root: string,
 	source: PresetSource,
-	components: Map<string, ModeComponent>,
-): { presets: Map<string, ModePreset>; claimed: Set<string>; diagnostics: ModeDiagnostic[] } {
-	const presets = new Map<string, ModePreset>();
+	components: Map<string, FacetComponent>,
+): { presets: Map<string, FacetPreset>; claimed: Set<string>; diagnostics: FacetDiagnostic[] } {
+	const presets = new Map<string, FacetPreset>();
 	const claimed = new Set<string>();
-	const diagnostics: ModeDiagnostic[] = [];
+	const diagnostics: FacetDiagnostic[] = [];
 	if (!existsSync(root)) return { presets, claimed, diagnostics };
 
 	let entries;
@@ -265,16 +265,16 @@ function readPresetSource(
 	return { presets, claimed, diagnostics };
 }
 
-export function discoverPresets(
+export function discoverFacetPresets(
 	globalRoot: string,
 	projectRoot: string,
-	components: Map<string, ModeComponent>,
+	components: Map<string, FacetComponent>,
 	projectTrusted: boolean,
-): { presets: Map<string, ModePreset>; diagnostics: ModeDiagnostic[] } {
+): { presets: Map<string, FacetPreset>; diagnostics: FacetDiagnostic[] } {
 	const globalResult = readPresetSource(globalRoot, "global", components);
 	const projectResult = projectTrusted
 		? readPresetSource(projectRoot, "project", components)
-		: { presets: new Map<string, ModePreset>(), claimed: new Set<string>(), diagnostics: [] };
+		: { presets: new Map<string, FacetPreset>(), claimed: new Set<string>(), diagnostics: [] };
 	const presets = new Map(globalResult.presets);
 
 	for (const name of projectResult.claimed) presets.delete(name);
@@ -286,21 +286,21 @@ export function discoverPresets(
 	};
 }
 
-export function sortedPresets(presets: Map<string, ModePreset>): ModePreset[] {
+export function sortedPresets(presets: Map<string, FacetPreset>): FacetPreset[] {
 	return [...presets.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export function sortedComponents(discovery: ModeDiscovery): ModeComponent[] {
+export function sortedComponents(discovery: FacetDiscovery): FacetComponent[] {
 	return [...discovery.components.values()].sort(
 		(a, b) => AXES.indexOf(a.axis) - AXES.indexOf(b.axis) || a.name.localeCompare(b.name),
 	);
 }
 
-export function resolveModeState(
-	state: ModeState,
-	discovery: ModeDiscovery,
-): { components: Partial<Record<Axis, ModeComponent>>; missing: Array<{ axis: Axis; name: string }> } {
-	const components: Partial<Record<Axis, ModeComponent>> = {};
+export function resolveFacetState(
+	state: FacetState,
+	discovery: FacetDiscovery,
+): { components: Partial<Record<Axis, FacetComponent>>; missing: Array<{ axis: Axis; name: string }> } {
+	const components: Partial<Record<Axis, FacetComponent>> = {};
 	const missing: Array<{ axis: Axis; name: string }> = [];
 
 	for (const axis of AXES) {
@@ -314,23 +314,23 @@ export function resolveModeState(
 	return { components, missing };
 }
 
-export function composeModePrompt(systemPrompt: string, state: ModeState, discovery: ModeDiscovery): string {
-	const resolved = resolveModeState(state, discovery);
+export function composeFacetPrompt(systemPrompt: string, state: FacetState, discovery: FacetDiscovery): string {
+	const resolved = resolveFacetState(state, discovery);
 	const components = AXES.map((axis) => resolved.components[axis]).filter(
-		(component): component is ModeComponent => component !== undefined,
+		(component): component is FacetComponent => component !== undefined,
 	);
 	if (components.length === 0) return systemPrompt;
 
 	const sections = components.map((component) => `### ${component.axis}: ${component.name}\n\n${component.body}`);
-	return `${systemPrompt}\n\n## Active mode\n\n${sections.join("\n\n")}`;
+	return `${systemPrompt}\n\n## Active facets\n\n${sections.join("\n\n")}`;
 }
 
 function errorMessage(error: unknown): string {
 	return error instanceof Error ? error.message : String(error);
 }
 
-function snapshotState(state: ModeState, discovery: ModeDiscovery): ModeSnapshot {
-	const snapshot = {} as ModeSnapshot;
+function snapshotState(state: FacetState, discovery: FacetDiscovery): FacetSnapshot {
+	const snapshot = {} as FacetSnapshot;
 	for (const axis of AXES) {
 		const name = state[axis];
 		if (!name) {
@@ -343,8 +343,8 @@ function snapshotState(state: ModeState, discovery: ModeDiscovery): ModeSnapshot
 	return snapshot;
 }
 
-function stateFromSnapshot(snapshot: ModeSnapshot): ModeState {
-	const state: ModeState = {};
+function facetStateFromSnapshot(snapshot: FacetSnapshot): FacetState {
+	const state: FacetState = {};
 	for (const axis of AXES) {
 		const ref = snapshot[axis];
 		if (ref) state[axis] = ref.name;
@@ -352,7 +352,7 @@ function stateFromSnapshot(snapshot: ModeSnapshot): ModeState {
 	return state;
 }
 
-function isModeRef(value: unknown): value is ModeRef {
+function isFacetRef(value: unknown): value is FacetRef {
 	if (!value || typeof value !== "object") return false;
 	const ref = value as { name?: unknown; source?: unknown };
 	return (
@@ -361,17 +361,17 @@ function isModeRef(value: unknown): value is ModeRef {
 	);
 }
 
-function isModeSnapshot(value: unknown): value is ModeSnapshot {
+function isFacetSnapshot(value: unknown): value is FacetSnapshot {
 	if (!value || typeof value !== "object") return false;
 	const snapshot = value as Record<string, unknown>;
-	return AXES.every((axis) => snapshot[axis] === null || isModeRef(snapshot[axis]));
+	return AXES.every((axis) => snapshot[axis] === null || isFacetRef(snapshot[axis]));
 }
 
-function isModeChangeEvent(value: unknown): value is ModeChangeEvent {
+function isFacetChangeEvent(value: unknown): value is FacetChangeEvent {
 	if (!value || typeof value !== "object") return false;
 	const event = value as Record<string, unknown>;
 	if (event.version !== 1 || !["set-axis", "apply-preset", "clear"].includes(String(event.action))) return false;
-	if (!isModeSnapshot(event.before) || !isModeSnapshot(event.after)) return false;
+	if (!isFacetSnapshot(event.before) || !isFacetSnapshot(event.after)) return false;
 	if (event.action === "set-axis" ? !isAxis(event.axis) : event.axis !== undefined) return false;
 	if (event.action === "apply-preset") {
 		if (!event.preset || typeof event.preset !== "object") return false;
@@ -383,58 +383,58 @@ function isModeChangeEvent(value: unknown): value is ModeChangeEvent {
 	return true;
 }
 
-function isModeState(value: unknown): value is ModeState {
+function isFacetState(value: unknown): value is FacetState {
 	if (!value || typeof value !== "object") return false;
 	return Object.entries(value).every(([axis, name]) => isAxis(axis) && typeof name === "string");
 }
 
-function restoreState(ctx: ExtensionContext): ModeState {
-	let state: ModeState = {};
+function restoreState(ctx: ExtensionContext): FacetState {
+	let state: FacetState = {};
 	for (const entry of ctx.sessionManager.getBranch()) {
 		if (entry.type !== "custom") continue;
-		if (entry.customType === MODE_STATE_ENTRY) {
+		if (entry.customType === FACET_STATE_ENTRY) {
 			const data = entry.data as { version?: unknown; state?: unknown } | undefined;
-			if (data?.version === 1 && isModeState(data.state)) state = { ...data.state };
+			if (data?.version === 1 && isFacetState(data.state)) state = { ...data.state };
 		}
-		if (entry.customType === MODE_CHANGE_ENTRY && isModeChangeEvent(entry.data)) {
-			state = stateFromSnapshot(entry.data.after);
+		if (entry.customType === FACET_CHANGE_ENTRY && isFacetChangeEvent(entry.data)) {
+			state = facetStateFromSnapshot(entry.data.after);
 		}
 	}
 	return state;
 }
 
-function formatRef(ref: ModeRef | null): string {
+function formatRef(ref: FacetRef | null): string {
 	return ref ? `${ref.name} [${ref.source}]` : "(none)";
 }
 
-function formatSnapshot(snapshot: ModeSnapshot): string {
+function formatSnapshot(snapshot: FacetSnapshot): string {
 	return AXES.map((axis) => `${axis}: ${formatRef(snapshot[axis])}`).join("; ");
 }
 
-function formatAvailable(discovery: ModeDiscovery, axis?: Axis): string {
+function formatAvailable(discovery: FacetDiscovery, axis?: Axis): string {
 	const components = sortedComponents(discovery).filter((component) => !axis || component.axis === axis);
 	return components.length ? components.map((component) => component.name).join(", ") : "(none)";
 }
 
-function formatDiagnostics(diagnostics: ModeDiagnostic[]): string {
+function formatDiagnostics(diagnostics: FacetDiagnostic[]): string {
 	return diagnostics.map((diagnostic) => `- ${diagnostic.path}: ${diagnostic.message}`).join("\n");
 }
 
-function formatPresetAvailable(presets: Map<string, ModePreset>): string {
+function formatPresetAvailable(presets: Map<string, FacetPreset>): string {
 	const values = sortedPresets(presets);
 	return values.length ? values.map((preset) => `${preset.name} [${preset.source}]`).join(", ") : "(none)";
 }
 
-export function registerModeExtension(
+export function registerFacetExtension(
 	pi: ExtensionAPI,
-	packageRoot = PACKAGE_MODES_ROOT,
-	globalRoot = join(getAgentDir(), "modes"),
+	packageRoot = PACKAGE_FACETS_ROOT,
+	globalRoot = join(getAgentDir(), "facets"),
 ): void {
-	pi.registerEntryRenderer<ModeChangeEvent>(MODE_CHANGE_ENTRY, (entry, { expanded }, theme) => {
+	pi.registerEntryRenderer<FacetChangeEvent>(FACET_CHANGE_ENTRY, (entry, { expanded }, theme) => {
 		const box = new Box(1, 1, (text) => theme.bg("customMessageBg", text));
 		const data = entry.data;
-		if (!isModeChangeEvent(data)) {
-			box.addChild(new Text(theme.fg("error", "[mode] invalid mode-change entry"), 0, 0));
+		if (!isFacetChangeEvent(data)) {
+			box.addChild(new Text(theme.fg("error", "[facets] invalid facet-change entry"), 0, 0));
 			return box;
 		}
 
@@ -442,14 +442,14 @@ export function registerModeExtension(
 		if (data.action === "set-axis") {
 			const axis = data.axis;
 			if (!axis) {
-				box.addChild(new Text(theme.fg("error", "[mode] invalid set-axis entry"), 0, 0));
+				box.addChild(new Text(theme.fg("error", "[facets] invalid set-axis entry"), 0, 0));
 				return box;
 			}
-			summary = `[mode] ${axis}: ${formatRef(data.before[axis])} -> ${formatRef(data.after[axis])}`;
+			summary = `[facets] ${axis}: ${formatRef(data.before[axis])} -> ${formatRef(data.after[axis])}`;
 		} else if (data.action === "apply-preset") {
-			summary = `[mode] preset ${data.preset?.name ?? "(unknown)"} applied`;
+			summary = `[facets] preset ${data.preset?.name ?? "(unknown)"} applied`;
 		} else {
-			summary = "[mode] cleared";
+			summary = "[facets] cleared";
 		}
 		box.addChild(new Text(theme.fg("accent", summary), 0, 0));
 		if (expanded) {
@@ -462,30 +462,30 @@ export function registerModeExtension(
 		return box;
 	});
 
-	let discovery: ModeDiscovery = { components: new Map(), diagnostics: [] };
-	let presets: Map<string, ModePreset> = new Map();
-	let state: ModeState = {};
+	let discovery: FacetDiscovery = { components: new Map(), diagnostics: [] };
+	let presets: Map<string, FacetPreset> = new Map();
+	let state: FacetState = {};
 
 	function refresh(ctx: ExtensionContext): void {
-		const projectModesRoot = join(ctx.cwd, CONFIG_DIR_NAME, "modes");
+		const projectFacetsRoot = join(ctx.cwd, CONFIG_DIR_NAME, "facets");
 		const projectTrusted = ctx.isProjectTrusted();
-		discovery = discoverModes(packageRoot, globalRoot, projectModesRoot, projectTrusted);
-		const projectPresetRoot = join(projectModesRoot, "presets");
-		const result = discoverPresets(join(globalRoot, "presets"), projectPresetRoot, discovery.components, projectTrusted);
+		discovery = discoverFacets(packageRoot, globalRoot, projectFacetsRoot, projectTrusted);
+		const projectPresetRoot = join(projectFacetsRoot, "presets");
+		const result = discoverFacetPresets(join(globalRoot, "presets"), projectPresetRoot, discovery.components, projectTrusted);
 		presets = result.presets;
 		const diagnostics = [...discovery.diagnostics, ...result.diagnostics];
 		if (diagnostics.length) {
-			ctx.ui.notify(`Mode discovery diagnostics:\n${formatDiagnostics(diagnostics)}`, "warning");
+			ctx.ui.notify(`Facet discovery diagnostics:\n${formatDiagnostics(diagnostics)}`, "warning");
 		}
 	}
 
 	function reportMissing(ctx: ExtensionContext): void {
-		const missing = resolveModeState(state, discovery).missing;
+		const missing = resolveFacetState(state, discovery).missing;
 		if (!missing.length) return;
 		const details = missing
 			.map(({ axis, name }) => `${axis}/${name} (available: ${formatAvailable(discovery, axis)})`)
 			.join("; ");
-		ctx.ui.notify(`Active mode reference unavailable: ${details}. Choose a replacement.`, "error");
+		ctx.ui.notify(`Active facet reference unavailable: ${details}. Choose a replacement.`, "error");
 	}
 
 	function ensureDiscovery(ctx: ExtensionContext): void {
@@ -493,12 +493,12 @@ export function registerModeExtension(
 	}
 
 	function recordChange(
-		action: ModeAction,
-		before: ModeState,
-		after: ModeState,
+		action: FacetAction,
+		before: FacetState,
+		after: FacetState,
 		options: { axis?: Axis; preset?: { name: string; source: PresetSource } } = {},
 	): void {
-		const event: ModeChangeEvent = {
+		const event: FacetChangeEvent = {
 			version: 1,
 			action,
 			before: snapshotState(before, discovery),
@@ -506,33 +506,33 @@ export function registerModeExtension(
 		};
 		if (options.axis) event.axis = options.axis;
 		if (options.preset) event.preset = options.preset;
-		pi.appendEntry<ModeChangeEvent>(MODE_CHANGE_ENTRY, event);
+		pi.appendEntry<FacetChangeEvent>(FACET_CHANGE_ENTRY, event);
 	}
 
 	function showHelp(ctx: ExtensionContext): void {
 		ctx.ui.notify(
 			[
-				"Mode commands:",
-				"/mode — show current role, authority, and style; open TUI selector",
-				"/mode help — show this command list",
-				"/mode clear — clear all active facets",
-				"/mode role — list/select available roles",
-				"/mode role <name> — set role",
-				"/mode authority — list/select available authorities",
-				"/mode authority <name> — set authority",
-				"/mode style — list/select available styles",
-				"/mode style <name> — set style",
-				"/mode preset — select preset in TUI",
-				"/mode preset <name> — apply preset",
-				"/mode preset show <name> — inspect preset",
+				"Facet commands:",
+				"/facets — show current role, authority, and style; open TUI selector",
+				"/facets help — show this command list",
+				"/facets clear — clear all active facets",
+				"/facets role — list/select available roles",
+				"/facets role <name> — set role",
+				"/facets authority — list/select available authorities",
+				"/facets authority <name> — set authority",
+				"/facets style — list/select available styles",
+				"/facets style <name> — set style",
+				"/facets preset — select preset in TUI",
+				"/facets preset <name> — apply preset",
+				"/facets preset show <name> — inspect preset",
 			].join("\n"),
 			"info",
 		);
 	}
 
 	function showCurrentState(ctx: ExtensionContext): void {
-		const lines = ["Current mode:"];
-		const resolved = resolveModeState(state, discovery);
+		const lines = ["Current facets:"];
+		const resolved = resolveFacetState(state, discovery);
 		for (const axis of AXES) {
 			const name = state[axis];
 			const component = resolved.components[axis];
@@ -548,28 +548,28 @@ export function registerModeExtension(
 		const after = { ...state, [axis]: name };
 		state = after;
 		recordChange("set-axis", before, after, { axis });
-		ctx.ui.notify(`Mode ${axis} set to ${name}.`, "info");
+		ctx.ui.notify(`Facet ${axis} set to ${name}.`, "info");
 	}
 
-	function componentLabel(component: ModeComponent): string {
+	function componentLabel(component: FacetComponent): string {
 		const current = state[component.axis] === component.name ? " [current]" : "";
 		return `${component.name} — ${component.description} [${component.source}]${current}`;
 	}
 
-	async function selectMode(ctx: ExtensionContext): Promise<void> {
+	async function selectFacets(ctx: ExtensionContext): Promise<void> {
 		if (ctx.mode !== "tui") {
-			ctx.ui.notify("/mode selector requires interactive TUI; use /mode <axis> <name>.", "error");
+			ctx.ui.notify("/facets selector requires interactive TUI; use /facets <axis> <name>.", "error");
 			return;
 		}
 		const components = sortedComponents(discovery);
 		if (!components.length) {
-			ctx.ui.notify("No valid mode components discovered.", "error");
+			ctx.ui.notify("No valid facet components discovered.", "error");
 			return;
 		}
 		const labels = components.map(
 			(component) => `${component.axis}: ${componentLabel(component)}`,
 		);
-		const selected = await ctx.ui.select("Select mode component", labels);
+		const selected = await ctx.ui.select("Select facet component", labels);
 		if (!selected) return;
 		const component = components[labels.indexOf(selected)];
 		if (component) setAxis(component.axis, component.name, ctx);
@@ -580,16 +580,16 @@ export function registerModeExtension(
 		const labels = components.map(componentLabel);
 		if (ctx.mode !== "tui") {
 			ctx.ui.notify(
-				`Available ${axis} modes:\n${labels.map((label) => `- ${label}`).join("\n") || "(none)"}`,
+				`Available ${axis} facets:\n${labels.map((label) => `- ${label}`).join("\n") || "(none)"}`,
 				"info",
 			);
 			return;
 		}
 		if (!components.length) {
-			ctx.ui.notify(`No valid ${axis} modes discovered.`, "error");
+			ctx.ui.notify(`No valid ${axis} facets discovered.`, "error");
 			return;
 		}
-		const selected = await ctx.ui.select(`Select ${axis} mode`, labels);
+		const selected = await ctx.ui.select(`Select ${axis} facet`, labels);
 		if (!selected) return;
 		const component = components[labels.indexOf(selected)];
 		if (component) setAxis(axis, component.name, ctx);
@@ -598,17 +598,17 @@ export function registerModeExtension(
 	function applyPreset(name: string, ctx: ExtensionContext): void {
 		const preset = presets.get(name);
 		if (!preset) {
-			ctx.ui.notify(`Unknown mode preset "${name}". Available: ${formatPresetAvailable(presets)}.`, "error");
+			ctx.ui.notify(`Unknown facet preset "${name}". Available: ${formatPresetAvailable(presets)}.`, "error");
 			return;
 		}
 		const before = { ...state };
 		const after = { role: preset.role, authority: preset.authority, style: preset.style };
 		state = after;
 		recordChange("apply-preset", before, after, { preset: { name: preset.name, source: preset.source } });
-		ctx.ui.notify(`Mode preset ${name} applied.`, "info");
+		ctx.ui.notify(`Facet preset ${name} applied.`, "info");
 	}
 
-	function presetLabel(preset: ModePreset): string {
+	function presetLabel(preset: FacetPreset): string {
 		const current =
 			state.role === preset.role && state.authority === preset.authority && state.style === preset.style
 				? " [current]"
@@ -618,12 +618,12 @@ export function registerModeExtension(
 
 	async function selectPreset(ctx: ExtensionContext): Promise<void> {
 		if (ctx.mode !== "tui") {
-			ctx.ui.notify("/mode preset selector requires interactive TUI; use /mode preset <name>.", "error");
+			ctx.ui.notify("/facets preset selector requires interactive TUI; use /facets preset <name>.", "error");
 			return;
 		}
 		const values = sortedPresets(presets);
 		if (!values.length) {
-			ctx.ui.notify("No valid mode presets discovered.", "error");
+			ctx.ui.notify("No valid facet presets discovered.", "error");
 			return;
 		}
 		const current = values.find(
@@ -632,7 +632,7 @@ export function registerModeExtension(
 		);
 		ctx.ui.notify(`Current preset: ${current?.name ?? "(none)"}`, "info");
 		const labels = values.map(presetLabel);
-		const selected = await ctx.ui.select("Select mode preset", labels);
+		const selected = await ctx.ui.select("Select facet preset", labels);
 		if (!selected) return;
 		const preset = values[labels.indexOf(selected)];
 		if (preset) applyPreset(preset.name, ctx);
@@ -641,11 +641,11 @@ export function registerModeExtension(
 	function showPreset(name: string, ctx: ExtensionContext): void {
 		const preset = presets.get(name);
 		if (!preset) {
-			ctx.ui.notify(`Unknown mode preset "${name}". Available: ${formatPresetAvailable(presets)}.`, "error");
+			ctx.ui.notify(`Unknown facet preset "${name}". Available: ${formatPresetAvailable(presets)}.`, "error");
 			return;
 		}
 		const lines = [
-			`Mode preset: ${preset.name}`,
+			`Facet preset: ${preset.name}`,
 			`description: ${preset.description}`,
 			`source: ${preset.source}`,
 			`path: ${preset.path}`,
@@ -657,14 +657,14 @@ export function registerModeExtension(
 		ctx.ui.notify(lines.join("\n"), "info");
 	}
 
-	pi.registerCommand("mode", {
-		description: "Select and inspect composable role, authority, and style modes",
+	pi.registerCommand("facets", {
+		description: "Select and inspect composable role, authority, and style facets",
 		handler: async (args, ctx) => {
 			ensureDiscovery(ctx);
 			const tokens = args.trim().split(/\s+/).filter(Boolean);
 			if (tokens.length === 0) {
 				showCurrentState(ctx);
-				await selectMode(ctx);
+				await selectFacets(ctx);
 				return;
 			}
 			const command = tokens[0];
@@ -674,10 +674,10 @@ export function registerModeExtension(
 			}
 			if (command === "clear" && tokens.length === 1) {
 				const before = { ...state };
-				const after: ModeState = {};
+				const after: FacetState = {};
 				state = after;
 				recordChange("clear", before, after);
-				ctx.ui.notify("Active mode cleared.", "info");
+				ctx.ui.notify("Active facets cleared.", "info");
 				return;
 			}
 			if (command === "preset" && tokens.length === 1) {
@@ -700,7 +700,7 @@ export function registerModeExtension(
 				const component = discovery.components.get(componentKey(command, tokens[1]));
 				if (!component) {
 					ctx.ui.notify(
-						`Unknown ${command} mode "${tokens[1]}". Available: ${formatAvailable(discovery, command)}.`,
+						`Unknown ${command} facet "${tokens[1]}". Available: ${formatAvailable(discovery, command)}.`,
 						"error",
 					);
 					return;
@@ -709,7 +709,7 @@ export function registerModeExtension(
 				return;
 			}
 			ctx.ui.notify(
-				"Usage: /mode | /mode clear | /mode preset [<name>|show <name>] | /mode role [<name>] | /mode authority [<name>] | /mode style [<name>]",
+				"Usage: /facets | /facets clear | /facets preset [<name>|show <name>] | /facets role [<name>] | /facets authority [<name>] | /facets style [<name>]",
 				"error",
 			);
 		},
@@ -728,11 +728,11 @@ export function registerModeExtension(
 	});
 
 	pi.on("before_agent_start", async (event) => {
-		const prompt = composeModePrompt(event.systemPrompt, state, discovery);
+		const prompt = composeFacetPrompt(event.systemPrompt, state, discovery);
 		return prompt === event.systemPrompt ? undefined : { systemPrompt: prompt };
 	});
 }
 
-export default function modeExtension(pi: ExtensionAPI): void {
-	registerModeExtension(pi);
+export default function facetsExtension(pi: ExtensionAPI): void {
+	registerFacetExtension(pi);
 }

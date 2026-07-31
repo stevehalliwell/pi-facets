@@ -4,12 +4,12 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import {
-	composeModePrompt,
-	discoverModes,
-	discoverPresets,
-	registerModeExtension,
-	type ModeState,
-} from "../extensions/mode.js";
+	composeFacetPrompt,
+	discoverFacets,
+	discoverFacetPresets,
+	registerFacetExtension,
+	type FacetState,
+} from "../extensions/facets.js";
 
 type Handler = (...args: any[]) => unknown;
 
@@ -20,17 +20,17 @@ afterEach(async () => {
 });
 
 async function createRoot(): Promise<string> {
-	const directory = await mkdtemp(join(tmpdir(), "pi-facets-mode-"));
+	const directory = await mkdtemp(join(tmpdir(), "pi-facets-facet-"));
 	temporaryDirectories.push(directory);
 	return directory;
 }
 
-async function writeMode(
+async function writeFacet(
 	root: string,
 	directory: string,
 	name: string,
 	body: string,
-	description = "Test mode",
+	description = "Test facet",
 ): Promise<void> {
 	const targetDirectory = join(root, directory);
 	await mkdir(targetDirectory, { recursive: true });
@@ -103,7 +103,7 @@ function createHarness(
 		sessionManager: { getBranch: () => branch },
 	};
 
-	registerModeExtension(pi, packageRoot, globalRoot);
+	registerFacetExtension(pi, packageRoot, globalRoot);
 	return {
 		handlers,
 		commands,
@@ -120,17 +120,17 @@ function createHarness(
 	};
 }
 
-describe("mode discovery", () => {
+describe("facet discovery", () => {
 	it("validates components and gives package definitions precedence", async () => {
 		const packageRoot = await createRoot();
 		const globalRoot = await createRoot();
-		await writeMode(packageRoot, "roles", "shared", "Package body");
-		await writeMode(globalRoot, "roles", "shared", "Global body");
-		await writeMode(globalRoot, "roles", "fallback", "Fallback body");
+		await writeFacet(packageRoot, "roles", "shared", "Package body");
+		await writeFacet(globalRoot, "roles", "shared", "Global body");
+		await writeFacet(globalRoot, "roles", "fallback", "Fallback body");
 		await mkdir(join(globalRoot, "style"), { recursive: true });
 		await writeFile(join(globalRoot, "style", "broken.md"), "---\nname: broken\naxis: role\n---\n");
 
-		const result = discoverModes(packageRoot, globalRoot);
+		const result = discoverFacets(packageRoot, globalRoot);
 
 		expect(result.components.get("role:shared")?.body).toBe("Package body");
 		expect(result.components.get("role:fallback")?.source).toBe("global");
@@ -141,27 +141,27 @@ describe("mode discovery", () => {
 	it("discovers trusted project components with project/package/global precedence", async () => {
 		const packageRoot = await createRoot();
 		const globalRoot = await createRoot();
-		const projectModesRoot = join(await createRoot(), ".pi", "modes");
-		await writeMode(packageRoot, "roles", "shared", "Package body");
-		await writeMode(packageRoot, "roles", "package-only", "Package-only body");
-		await writeMode(globalRoot, "roles", "shared", "Global body");
-		await writeMode(globalRoot, "roles", "global-only", "Global-only body");
-		await writeMode(projectModesRoot, "roles", "shared", "Project body");
-		await writeMode(projectModesRoot, "roles", "project-only", "Project-only body");
-		await mkdir(join(projectModesRoot, "style"), { recursive: true });
+		const projectFacetsRoot = join(await createRoot(), ".pi", "facets");
+		await writeFacet(packageRoot, "roles", "shared", "Package body");
+		await writeFacet(packageRoot, "roles", "package-only", "Package-only body");
+		await writeFacet(globalRoot, "roles", "shared", "Global body");
+		await writeFacet(globalRoot, "roles", "global-only", "Global-only body");
+		await writeFacet(projectFacetsRoot, "roles", "shared", "Project body");
+		await writeFacet(projectFacetsRoot, "roles", "project-only", "Project-only body");
+		await mkdir(join(projectFacetsRoot, "style"), { recursive: true });
 		await writeFile(
-			join(projectModesRoot, "style", "broken.md"),
-			"---\nname: broken\naxis: role\ndescription: Broken mode\n---\n\nBody\n",
+			join(projectFacetsRoot, "style", "broken.md"),
+			"---\nname: broken\naxis: role\ndescription: Broken facet\n---\n\nBody\n",
 		);
 
-		const trusted = discoverModes(packageRoot, globalRoot, projectModesRoot, true);
+		const trusted = discoverFacets(packageRoot, globalRoot, projectFacetsRoot, true);
 		expect(trusted.components.get("role:shared")?.source).toBe("project");
 		expect(trusted.components.get("role:package-only")?.source).toBe("package");
 		expect(trusted.components.get("role:global-only")?.source).toBe("global");
 		expect(trusted.components.get("role:project-only")?.source).toBe("project");
 		expect(trusted.diagnostics.some((diagnostic) => diagnostic.path.endsWith("broken.md"))).toBe(true);
 
-		const untrusted = discoverModes(packageRoot, globalRoot, projectModesRoot, false);
+		const untrusted = discoverFacets(packageRoot, globalRoot, projectFacetsRoot, false);
 		expect(untrusted.components.get("role:shared")?.source).toBe("package");
 		expect(untrusted.components.has("role:project-only")).toBe(false);
 		expect(untrusted.diagnostics.some((diagnostic) => diagnostic.path.endsWith("broken.md"))).toBe(false);
@@ -170,16 +170,16 @@ describe("mode discovery", () => {
 	it("composes active component bodies without changing an empty prompt", async () => {
 		const packageRoot = await createRoot();
 		const globalRoot = await createRoot();
-		await writeMode(packageRoot, "roles", "dev-peer", "Trace code paths.");
-		await writeMode(packageRoot, "style", "concise", "Use short bullets.");
-		const discovery = discoverModes(packageRoot, globalRoot);
-		const state: ModeState = { role: "dev-peer", style: "concise" };
+		await writeFacet(packageRoot, "roles", "dev-peer", "Trace code paths.");
+		await writeFacet(packageRoot, "style", "concise", "Use short bullets.");
+		const discovery = discoverFacets(packageRoot, globalRoot);
+		const state: FacetState = { role: "dev-peer", style: "concise" };
 
-		expect(composeModePrompt("Base prompt", {}, discovery)).toBe("Base prompt");
-		expect(composeModePrompt("Base prompt", state, discovery)).toContain(
-			"## Active mode\n\n### role: dev-peer\n\nTrace code paths.",
+		expect(composeFacetPrompt("Base prompt", {}, discovery)).toBe("Base prompt");
+		expect(composeFacetPrompt("Base prompt", state, discovery)).toContain(
+			"## Active facets\n\n### role: dev-peer\n\nTrace code paths.",
 		);
-		expect(composeModePrompt("Base prompt", state, discovery)).toContain("### style: concise");
+		expect(composeFacetPrompt("Base prompt", state, discovery)).toContain("### style: concise");
 	});
 });
 
@@ -193,7 +193,7 @@ describe("preset discovery", () => {
 			["authority", "recommend-and-proceed"],
 			["style", "critical"],
 		] as const) {
-			await writeMode(packageRoot, directory, name, `${directory} body`);
+			await writeFacet(packageRoot, directory, name, `${directory} body`);
 		}
 
 		await writePreset(join(globalRoot, "presets"), "review", {
@@ -206,7 +206,7 @@ describe("preset discovery", () => {
 			authority: "recommend-and-proceed",
 			style: "critical",
 		});
-		const projectPresets = join(projectRoot, ".pi", "modes", "presets");
+		const projectPresets = join(projectRoot, ".pi", "facets", "presets");
 		await writePreset(projectPresets, "review", {
 			role: "product-owner",
 			authority: "recommend-and-proceed",
@@ -218,31 +218,33 @@ describe("preset discovery", () => {
 			style: "critical",
 		});
 
-		const modes = discoverModes(packageRoot, globalRoot);
-		const result = discoverPresets(join(globalRoot, "presets"), projectPresets, modes.components, true);
+		const facets = discoverFacets(packageRoot, globalRoot);
+		const result = discoverFacetPresets(join(globalRoot, "presets"), projectPresets, facets.components, true);
 		expect(result.presets.get("review")?.source).toBe("project");
 		expect(result.presets.get("review")?.notes).toBe("Project notes");
 		expect(result.presets.has("shadowed")).toBe(false);
 		expect(result.diagnostics.some((diagnostic) => diagnostic.path.endsWith("shadowed.md"))).toBe(true);
 
-		const untrusted = discoverPresets(join(globalRoot, "presets"), projectPresets, modes.components, false);
+		const untrusted = discoverFacetPresets(join(globalRoot, "presets"), projectPresets, facets.components, false);
 		expect(untrusted.presets.get("review")?.source).toBe("global");
 	});
 });
 
-describe("mode extension", () => {
-	it("switches, persists, restores by branch, and clears active modes", async () => {
+describe("facet extension", () => {
+	it("switches, persists, restores by branch, and clears active facets", async () => {
 		const packageRoot = await createRoot();
 		const globalRoot = await createRoot();
-		await writeMode(packageRoot, "roles", "product-owner", "Prioritise outcomes.");
-		await writeMode(packageRoot, "roles", "dev-peer", "Trace code paths.");
+		await writeFacet(packageRoot, "roles", "product-owner", "Prioritise outcomes.");
+		await writeFacet(packageRoot, "roles", "dev-peer", "Trace code paths.");
 		const harness = createHarness(packageRoot, globalRoot);
 
 		await handlersFor(harness.handlers, "session_start")({}, harness.context);
-		expect(harness.renderers.has("pi-facets.mode-change")).toBe(true);
-		await harness.commands.get("mode")!.handler("role product-owner", harness.context);
-		await harness.commands.get("mode")!.handler("role dev-peer", harness.context);
-		expect(harness.entries[0].customType).toBe("pi-facets.mode-change");
+		expect(harness.renderers.has("pi-facets.facet-change")).toBe(true);
+		expect(harness.commands.has("facets")).toBe(true);
+		expect(harness.commands.has("mode")).toBe(false);
+		await harness.commands.get("facets")!.handler("role product-owner", harness.context);
+		await harness.commands.get("facets")!.handler("role dev-peer", harness.context);
+		expect(harness.entries[0].customType).toBe("pi-facets.facet-change");
 		expect(harness.entries[0].data.action).toBe("set-axis");
 		expect(harness.entries[0].data.axis).toBe("role");
 		expect(harness.entries[0].data.before.role).toBeNull();
@@ -265,7 +267,7 @@ describe("mode extension", () => {
 		expect(result?.systemPrompt).toContain("Prioritise outcomes.");
 		expect(result?.systemPrompt).not.toContain("Trace code paths.");
 
-		await harness.commands.get("mode")!.handler("clear", harness.context);
+		await harness.commands.get("facets")!.handler("clear", harness.context);
 		expect(harness.entries[2].data.action).toBe("clear");
 		expect(harness.entries[2].data.before.role).toEqual({ name: "product-owner", source: "package" });
 		expect(harness.entries[2].data.after).toEqual({ role: null, authority: null, style: null });
@@ -274,57 +276,57 @@ describe("mode extension", () => {
 			| undefined;
 		expect(result).toBeUndefined();
 		expect(harness.entries).toHaveLength(3);
-		expect(harness.notifications.some((message) => message.includes("Active mode cleared."))).toBe(true);
+		expect(harness.notifications.some((message) => message.includes("Active facets cleared."))).toBe(true);
 	});
 
 	it("switches all axes, shows sources, handles errors, and supports selector boundaries", async () => {
 		const packageRoot = await createRoot();
 		const globalRoot = await createRoot();
-		await writeMode(packageRoot, "roles", "dev-peer", "Trace code paths.");
-		await writeMode(packageRoot, "authority", "advisory", "Present options.");
-		await writeMode(packageRoot, "style", "concise", "Use short bullets.", "Short style");
+		await writeFacet(packageRoot, "roles", "dev-peer", "Trace code paths.");
+		await writeFacet(packageRoot, "authority", "advisory", "Present options.");
+		await writeFacet(packageRoot, "style", "concise", "Use short bullets.", "Short style");
 		await mkdir(join(globalRoot, "roles"), { recursive: true });
 		await writeFile(
 			join(globalRoot, "roles", "broken.md"),
-			"---\nname: broken\naxis: style\ndescription: Broken mode\n---\n\nBody\n",
+			"---\nname: broken\naxis: style\ndescription: Broken facet\n---\n\nBody\n",
 		);
 		const harness = createHarness(packageRoot, globalRoot);
 
 		await handlersFor(harness.handlers, "session_start")({}, harness.context);
 		expect(harness.notifications.some((message) => message.includes("broken.md") && message.includes("axis"))).toBe(true);
 
-		await harness.commands.get("mode")!.handler("role missing", harness.context);
+		await harness.commands.get("facets")!.handler("role missing", harness.context);
 		expect(harness.notifications.some((message) => message.includes("Available: dev-peer"))).toBe(true);
 
 		harness.context.mode = "tui";
-		harness.setSelectedOption("dev-peer — Test mode [package]");
-		await harness.commands.get("mode")!.handler("role", harness.context);
-		expect(harness.notifications.some((message) => message.includes("Mode role set to dev-peer."))).toBe(true);
+		harness.setSelectedOption("dev-peer — Test facet [package]");
+		await harness.commands.get("facets")!.handler("role", harness.context);
+		expect(harness.notifications.some((message) => message.includes("Facet role set to dev-peer."))).toBe(true);
 
-		await harness.commands.get("mode")!.handler("authority advisory", harness.context);
-		await harness.commands.get("mode")!.handler("style concise", harness.context);
+		await harness.commands.get("facets")!.handler("authority advisory", harness.context);
+		await harness.commands.get("facets")!.handler("style concise", harness.context);
 
 		harness.setSelectedOption("style: concise — Short style [package] [current]");
-		await harness.commands.get("mode")!.handler("", harness.context);
-		const shown = harness.notifications.find((message) => message.startsWith("Current mode:"));
+		await harness.commands.get("facets")!.handler("", harness.context);
+		const shown = harness.notifications.find((message) => message.startsWith("Current facets:"));
 		expect(shown).toContain("role: dev-peer [package]");
 		expect(shown).toContain("authority: advisory [package]");
 		expect(shown).toContain("style: concise [package]");
-		expect(harness.notifications.some((message) => message.includes("Mode style set to concise."))).toBe(true);
+		expect(harness.notifications.some((message) => message.includes("Facet style set to concise."))).toBe(true);
 
 		harness.context.mode = "print";
-		await harness.commands.get("mode")!.handler("role", harness.context);
-		expect(harness.notifications.some((message) => message.includes("Available role modes:") && message.includes("[current]"))).toBe(true);
+		await harness.commands.get("facets")!.handler("role", harness.context);
+		expect(harness.notifications.some((message) => message.includes("Available role facets:") && message.includes("[current]"))).toBe(true);
 
-		await harness.commands.get("mode")!.handler("show", harness.context);
-		await harness.commands.get("mode")!.handler("presets", harness.context);
+		await harness.commands.get("facets")!.handler("show", harness.context);
+		await harness.commands.get("facets")!.handler("presets", harness.context);
 		expect(harness.notifications.filter((message) => message.includes("Usage:")).length).toBeGreaterThanOrEqual(2);
 
 		const entriesBeforeHelp = harness.entries.length;
-		await harness.commands.get("mode")!.handler("help", harness.context);
-		const help = harness.notifications.find((message) => message.startsWith("Mode commands:"));
-		expect(help).toContain("/mode role <name> — set role");
-		expect(help).toContain("/mode preset show <name> — inspect preset");
+		await harness.commands.get("facets")!.handler("help", harness.context);
+		const help = harness.notifications.find((message) => message.startsWith("Facet commands:"));
+		expect(help).toContain("/facets role <name> — set role");
+		expect(help).toContain("/facets preset show <name> — inspect preset");
 		expect(harness.entries).toHaveLength(entriesBeforeHelp);
 	});
 
@@ -332,15 +334,15 @@ describe("mode extension", () => {
 		const packageRoot = await createRoot();
 		const globalRoot = await createRoot();
 		const projectRoot = await createRoot();
-		const projectModesRoot = join(projectRoot, ".pi", "modes");
-		await writeMode(projectModesRoot, "roles", "local-role", "Project-local body.");
+		const projectFacetsRoot = join(projectRoot, ".pi", "facets");
+		await writeFacet(projectFacetsRoot, "roles", "local-role", "Project-local body.");
 		const harness = createHarness(packageRoot, globalRoot, [], { cwd: projectRoot });
 
 		await handlersFor(harness.handlers, "session_start")({}, harness.context);
-		await harness.commands.get("mode")!.handler("role local-role", harness.context);
-		await harness.commands.get("mode")!.handler("", harness.context);
+		await harness.commands.get("facets")!.handler("role local-role", harness.context);
+		await harness.commands.get("facets")!.handler("", harness.context);
 
-		const shown = harness.notifications.find((message) => message.startsWith("Current mode:"));
+		const shown = harness.notifications.find((message) => message.startsWith("Current facets:"));
 		expect(shown).toContain("role: local-role [project]");
 		const result = (await handlersFor(harness.handlers, "before_agent_start")(
 			{ systemPrompt: "Base prompt" },
@@ -353,12 +355,12 @@ describe("mode extension", () => {
 		const packageRoot = await createRoot();
 		const globalRoot = await createRoot();
 		const projectRoot = await createRoot();
-		await writeMode(packageRoot, "roles", "product-owner", "Prioritise outcomes.");
-		await writeMode(packageRoot, "roles", "dev-peer", "Trace code paths.");
-		await writeMode(packageRoot, "authority", "recommend-and-proceed", "Recommend then proceed.");
-		await writeMode(packageRoot, "style", "critical", "Challenge assumptions.");
+		await writeFacet(packageRoot, "roles", "product-owner", "Prioritise outcomes.");
+		await writeFacet(packageRoot, "roles", "dev-peer", "Trace code paths.");
+		await writeFacet(packageRoot, "authority", "recommend-and-proceed", "Recommend then proceed.");
+		await writeFacet(packageRoot, "style", "critical", "Challenge assumptions.");
 		await writePreset(
-			join(projectRoot, ".pi", "modes", "presets"),
+			join(projectRoot, ".pi", "facets", "presets"),
 			"review",
 			{ role: "product-owner", authority: "recommend-and-proceed", style: "critical" },
 			"Review preset",
@@ -367,7 +369,7 @@ describe("mode extension", () => {
 		const harness = createHarness(packageRoot, globalRoot, [], { cwd: projectRoot });
 
 		await handlersFor(harness.handlers, "session_start")({}, harness.context);
-		await harness.commands.get("mode")!.handler("preset review", harness.context);
+		await harness.commands.get("facets")!.handler("preset review", harness.context);
 		expect(harness.entries[0].data.action).toBe("apply-preset");
 		expect(harness.entries[0].data.preset).toEqual({ name: "review", source: "project" });
 		expect(harness.entries[0].data.after).toEqual({
@@ -387,22 +389,22 @@ describe("mode extension", () => {
 
 		harness.context.mode = "tui";
 		harness.setSelectedOption("review — Review preset [project] [current]");
-		await harness.commands.get("mode")!.handler("preset", harness.context);
+		await harness.commands.get("facets")!.handler("preset", harness.context);
 		expect(harness.notifications.some((message) => message.includes("Current preset: review"))).toBe(true);
-		expect(harness.notifications.some((message) => message.includes("Mode preset review applied."))).toBe(true);
+		expect(harness.notifications.some((message) => message.includes("Facet preset review applied."))).toBe(true);
 		expect(harness.entries).toHaveLength(2);
 
 		harness.context.mode = "print";
-		await harness.commands.get("mode")!.handler("preset show review", harness.context);
-		const inspected = harness.notifications.find((message) => message.startsWith("Mode preset: review"));
+		await harness.commands.get("facets")!.handler("preset show review", harness.context);
+		const inspected = harness.notifications.find((message) => message.startsWith("Facet preset: review"));
 		expect(inspected).toContain("source: project");
 		expect(inspected).toContain("Inspection-only notes.");
 		expect(harness.entries).toHaveLength(2);
 
-		await harness.commands.get("mode")!.handler("presets", harness.context);
-		expect(harness.notifications.some((message) => message.includes("Usage:") && message.includes("/mode preset"))).toBe(true);
+		await harness.commands.get("facets")!.handler("presets", harness.context);
+		expect(harness.notifications.some((message) => message.includes("Usage:") && message.includes("/facets preset"))).toBe(true);
 
-		await harness.commands.get("mode")!.handler("role dev-peer", harness.context);
+		await harness.commands.get("facets")!.handler("role dev-peer", harness.context);
 		result = (await beforeAgentStart({ systemPrompt: "Base prompt" }, harness.context)) as
 			| { systemPrompt?: string }
 			| undefined;
@@ -411,8 +413,8 @@ describe("mode extension", () => {
 
 		harness.context.mode = "tui";
 		harness.setSelectedOption("review — Review preset [project]");
-		await harness.commands.get("mode")!.handler("preset", harness.context);
-		expect(harness.notifications.some((message) => message.includes("Mode preset review applied."))).toBe(true);
+		await harness.commands.get("facets")!.handler("preset", harness.context);
+		expect(harness.notifications.some((message) => message.includes("Facet preset review applied."))).toBe(true);
 
 		const resumed = createHarness(packageRoot, globalRoot, harness.entries, { cwd: projectRoot });
 		await handlersFor(resumed.handlers, "session_start")({}, resumed.context);
@@ -427,11 +429,11 @@ describe("mode extension", () => {
 	it("restores state directly on session_start", async () => {
 		const packageRoot = await createRoot();
 		const globalRoot = await createRoot();
-		await writeMode(packageRoot, "roles", "product-owner", "Prioritise outcomes.");
+		await writeFacet(packageRoot, "roles", "product-owner", "Prioritise outcomes.");
 
 		const first = createHarness(packageRoot, globalRoot);
 		await handlersFor(first.handlers, "session_start")({}, first.context);
-		await first.commands.get("mode")!.handler("role product-owner", first.context);
+		await first.commands.get("facets")!.handler("role product-owner", first.context);
 
 		const resumed = createHarness(packageRoot, globalRoot, first.entries);
 		await handlersFor(resumed.handlers, "session_start")({}, resumed.context);
@@ -443,14 +445,14 @@ describe("mode extension", () => {
 		expect(result?.systemPrompt).toContain("Prioritise outcomes.");
 	});
 
-	it("restores legacy mode-state entries", async () => {
+	it("restores facet-state entries", async () => {
 		const packageRoot = await createRoot();
 		const globalRoot = await createRoot();
-		await writeMode(packageRoot, "roles", "product-owner", "Prioritise outcomes.");
+		await writeFacet(packageRoot, "roles", "product-owner", "Prioritise outcomes.");
 		const legacyEntries = [
 			{
 				type: "custom",
-				customType: "pi-facets.mode-state",
+				customType: "pi-facets.facet-state",
 				data: { version: 1, state: { role: "product-owner" } },
 			},
 		];
