@@ -16,6 +16,6 @@ Project examples compose one role, one authority, and one style. Presets are nam
 - Authorities: `advisory`, `recommend-and-proceed`, `decisive`.
 - Styles: `concise`, `critical`, `exploratory`, `explanatory`, `structured`.
 - Presets: `implementation-review`, `backlog-refinement`, `messaging-strategy`, `research-exploration`, `delivery-planning`.
-- Prompt templates: `/explore-options <topic>`, `/decision-brief <topic>`.
+- Project prompt templates: `/explore-options <topic>`, `/decision-brief <topic>`.
 
 Skills remain workflow source of truth. Prompt templates do not select or mutate facets.

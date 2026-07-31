@@ -11,9 +11,7 @@
     "test:watch": "vitest"
   },
   "pi": {
-    "extensions": ["./extensions"],
-    "skills": ["./skills"],
-    "prompts": ["./prompts"]
+    "extensions": ["./extensions"]
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*",

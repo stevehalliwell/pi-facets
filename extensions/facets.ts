@@ -512,18 +512,6 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		pi.appendEntry<FacetChangeEvent>(FACET_CHANGE_ENTRY, event);
 	}
 
-	function showHelp(ctx: ExtensionContext): void {
-		ctx.ui.notify(
-			[
-				"Facet menu:",
-				"/facets — open facet menu",
-				"Each menu item shows its current selection.",
-				"Choose Presets, Role, Authority, Style, or Clear all facets.",
-			].join("\n"),
-			"info",
-		);
-	}
-
 	function showCurrentState(ctx: ExtensionContext): void {
 		const lines = ["Current facets:"];
 		const resolved = resolveFacetState(state, discovery);
@@ -651,75 +639,15 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		return "done";
 	}
 
-	function showPreset(name: string, ctx: ExtensionContext): void {
-		const preset = presets.get(name);
-		if (!preset) {
-			ctx.ui.notify(`Unknown facet preset "${name}". Available: ${formatPresetAvailable(presets)}.`, "error");
-			return;
-		}
-		const lines = [
-			`Facet preset: ${preset.name}`,
-			`description: ${preset.description}`,
-			`source: ${preset.source}`,
-			`path: ${preset.path}`,
-			`role: ${preset.role}`,
-			`authority: ${preset.authority}`,
-			`style: ${preset.style}`,
-		];
-		if (preset.notes) lines.push(`notes:\n${preset.notes}`);
-		ctx.ui.notify(lines.join("\n"), "info");
-	}
-
 	pi.registerCommand("facets", {
 		description: "Select and inspect composable role, authority, and style facets",
 		handler: async (args, ctx) => {
 			ensureDiscovery(ctx);
-			const tokens = args.trim().split(/\s+/).filter(Boolean);
-			if (tokens.length === 0) {
-				await selectFacets(ctx);
+			if (args.trim()) {
+				ctx.ui.notify("Usage: /facets", "error");
 				return;
 			}
-			const command = tokens[0];
-			if (command === "help" && tokens.length === 1) {
-				showHelp(ctx);
-				return;
-			}
-			if (command === "clear" && tokens.length === 1) {
-				clearFacets(ctx);
-				return;
-			}
-			if (command === "preset" && tokens.length === 1) {
-				await selectPreset(ctx);
-				return;
-			}
-			if (command === "preset" && tokens.length === 2) {
-				applyPreset(tokens[1], ctx);
-				return;
-			}
-			if (command === "preset" && tokens[1] === "show" && tokens.length === 3) {
-				showPreset(tokens[2], ctx);
-				return;
-			}
-			if (isAxis(command) && tokens.length === 1) {
-				await selectAxis(command, ctx);
-				return;
-			}
-			if (isAxis(command) && tokens.length === 2) {
-				const component = discovery.components.get(componentKey(command, tokens[1]));
-				if (!component) {
-					ctx.ui.notify(
-						`Unknown ${command} facet "${tokens[1]}". Available: ${formatAvailable(discovery, command)}.`,
-						"error",
-					);
-					return;
-				}
-				setAxis(command, component.name, ctx);
-				return;
-			}
-			ctx.ui.notify(
-				"Usage: /facets | /facets clear | /facets preset [<name>|show <name>] | /facets role [<name>] | /facets authority [<name>] | /facets style [<name>]",
-				"error",
-			);
+			await selectFacets(ctx);
 		},
 	});
 

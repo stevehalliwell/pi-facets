@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { parseFrontmatter } from "@earendil-works/pi-coding-agent";
 
 type PackageManifest = {
-  pi: { extensions: string[]; skills: string[]; prompts: string[] };
+  pi: { extensions: string[] };
 };
 
 type PiSettings = { packages: string[] };
@@ -18,8 +18,8 @@ describe("local Pi package setup", () => {
     const manifest = await readJson<PackageManifest>(resolve("package.json"));
 
     expect(manifest.pi.extensions).toEqual(["./extensions"]);
-    expect(manifest.pi.skills).toEqual(["./skills"]);
-    expect(manifest.pi.prompts).toEqual(["./prompts"]);
+    expect(manifest.pi).not.toHaveProperty("skills");
+    expect(manifest.pi).not.toHaveProperty("prompts");
   });
 
   it("loads this repository through project Pi settings", async () => {
@@ -30,6 +30,10 @@ describe("local Pi package setup", () => {
 
   it("ships agreed facet, preset, prompt, and grid resources", async () => {
     const resources = [
+      ".pi/skills/backlog-refinement/SKILL.md",
+      ".pi/skills/competitor-analysis/SKILL.md",
+      ".pi/skills/technical-review/SKILL.md",
+      ".pi/skills/website-messaging/SKILL.md",
       ".pi/facets/roles/marketing-strategist.md",
       ".pi/facets/roles/researcher.md",
       ".pi/facets/roles/delivery-lead.md",
@@ -52,7 +56,7 @@ describe("local Pi package setup", () => {
   it("defines argument-aware prompt templates", async () => {
     for (const name of ["explore-options", "decision-brief"]) {
       const parsed = parseFrontmatter<Record<string, unknown>>(
-        await readFile(resolve("prompts", `${name}.md`), "utf8"),
+        await readFile(resolve(".pi", "prompts", `${name}.md`), "utf8"),
       );
       expect(parsed.frontmatter.description).toEqual(expect.any(String));
       expect(parsed.frontmatter["argument-hint"]).toBe("<topic>");

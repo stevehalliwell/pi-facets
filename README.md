@@ -21,7 +21,7 @@ Core implementation is complete for:
 - role, authority, and style components;
 - trusted project-local and global facet discovery;
 - named facet presets;
-- four independently invokable workflow skills;
+- four trusted project-local workflow skills;
 - focused extension and package tests.
 
 Deferred until evidence or a concrete need appears:
@@ -54,7 +54,7 @@ Project `.pi/settings.json` loads the repository root as a local Pi package. For
 pi --approve --no-session --no-tools --mode json -p "Reply exactly: OK"
 ```
 
-`package.json` declares `extensions/`, `skills/`, and `prompts/` as package resources. Pi discovers them through project settings.
+`package.json` declares extension resources. Pi discovers trusted project skills and prompts from `.pi/skills/` and `.pi/prompts/`.
 
 ## Facets
 
@@ -64,7 +64,7 @@ pi --approve --no-session --no-tools --mode json -p "Reply exactly: OK"
 /facets
 ```
 
-`/facets` opens the interactive facet menu. Each Presets, Role, Authority, and Style item shows its current selection; choose one to drill in. Role, Authority, and Style selections return to menu for another change. Submenus offer `(none)` to clear that selection and Back to return to menu. Choose Clear all facets to reset selection. Outside TUI, it prints current facet state.
+`/facets` opens the interactive facet menu. Each Presets, Role, Authority, and Style item shows its current selection; choose one to drill in. Role, Authority, and Style selections return to menu for another change. Their `(none)` option clears that axis; Presets `(none)` clears all facets. Back returns to menu. Choose Clear all facets to reset selection. Outside TUI, it prints current facet state.
 
 Selecting one component replaces the previous component on that axis. Active state is stored in compact transcript entries and restored when the session or branch is resumed. If a persisted component is no longer available, Pi reports an actionable missing-reference warning.
 
@@ -120,7 +120,7 @@ Optional notes may document intended use.
 
 Global presets live under `~/.pi/agent/facets/presets/`. Trusted project presets live under `<cwd>/.pi/facets/presets/`. Sources resolve project → global; a project definition shadows a global one, including invalid definitions. Preset references must resolve to available components.
 
-### Package examples
+### Project examples
 
 Project ships representative compositions for implementation review, backlog refinement, messaging strategy, research exploration, and delivery planning. See [`docs/facet-grid.md`](docs/facet-grid.md) for the resource grid.
 
@@ -138,7 +138,7 @@ They do not select or mutate facets. Skills remain workflow source of truth.
 Skills are independently invokable workflows. Each skill is a directory containing `SKILL.md`:
 
 ```text
-skills/
+.pi/skills/
 ├── backlog-refinement/SKILL.md
 ├── competitor-analysis/SKILL.md
 ├── website-messaging/SKILL.md
@@ -163,7 +163,7 @@ Current skills:
 - `website-messaging` — review or rewrite positioning, page copy, proof, and calls to action;
 - `technical-review` — assess feasibility, trade-offs, risks, and validation before coding.
 
-Add a skill under `skills/<name>/SKILL.md`; extension code does not need changing.
+Add a trusted project skill under `.pi/skills/<name>/SKILL.md`; extension code does not need changing.
 
 ## Project context and references
 
@@ -185,9 +185,9 @@ npm test -- test/package.test.ts
 
 - `extensions/` — thin stateful Pi extensions;
 - `.pi/facets/` — project facet components and presets;
-- `prompts/` — package prompt templates;
-- `skills/` — independently invokable workflows and references;
-- `docs/facet-grid.md` — package resource examples;
+- `.pi/prompts/` — project prompt templates;
+- `.pi/skills/` — project-local workflows and references;
+- `docs/facet-grid.md` — project facet resource examples;
 - `records/tasks/` — Attendant-backed task records;
 - `records/decisions/` — Attendant-backed durable decisions;
 - `pi-modes-and-skills-implementation-brief.md` — indicative design context, not binding specification.
