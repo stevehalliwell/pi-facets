@@ -4,7 +4,7 @@ name: expand-default-modes-and-test-presets
 created_at: 2026-07-30T09:07:16.846Z
 desc: ""
 tags: []
-status: todo
+status: done
 scope: agreed
 depends_on: []
 ---
@@ -74,17 +74,22 @@ Ship representative package examples across role, authority, style, presets, and
 
 ## Implemented so far
 
-- Scope agreed; implementation not started.
-- Package example set and preset precedence recorded.
+- Scope agreed; implementation complete.
+- Added package role/style examples, presets, prompt templates, discovery precedence, tests, and docs.
 
 ## Checks
 
+- `npm run check` — passed.
+- `npm test` — passed: 15 tests.
+- `npm test -- test/package.test.ts` — passed.
+- `git diff --check` — passed.
 - Attendant validation pending after task update.
 
 ## Review / next slice
 
-- Ready for review: no; implementation pending.
-- Likely next slice/task: implement package examples and discovery changes.
+- User approved implementation.
+- Ready for review: yes; implementation complete and approved.
+- No remaining slice.
 
 ## Notes
 

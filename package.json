@@ -12,7 +12,8 @@
   },
   "pi": {
     "extensions": ["./extensions"],
-    "skills": ["./skills"]
+    "skills": ["./skills"],
+    "prompts": ["./prompts"]
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*",

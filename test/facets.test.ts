@@ -1,6 +1,6 @@
 import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import {
@@ -184,6 +184,30 @@ describe("facet discovery", () => {
 });
 
 describe("preset discovery", () => {
+	it("discovers shipped package presets with valid component references", async () => {
+		const globalRoot = await createRoot();
+		const packageRoot = resolve("facets");
+		const discovery = discoverFacets(packageRoot, globalRoot);
+		const result = discoverFacetPresets(
+			join(packageRoot, "presets"),
+			join(globalRoot, "presets"),
+			join(await createRoot(), ".pi", "facets", "presets"),
+			discovery.components,
+			true,
+		);
+
+		expect(discovery.diagnostics).toEqual([]);
+		expect(result.diagnostics).toEqual([]);
+		expect([...result.presets.keys()].sort()).toEqual([
+			"backlog-refinement",
+			"delivery-planning",
+			"implementation-review",
+			"messaging-strategy",
+			"research-exploration",
+		]);
+		expect([...result.presets.values()].every((preset) => preset.source === "package")).toBe(true);
+	});
+
 	it("discovers Markdown presets with project precedence, validation, and trust gating", async () => {
 		const packageRoot = await createRoot();
 		const globalRoot = await createRoot();
@@ -206,6 +230,26 @@ describe("preset discovery", () => {
 			authority: "recommend-and-proceed",
 			style: "critical",
 		});
+		await writePreset(join(globalRoot, "presets"), "package-only", {
+			role: "product-owner",
+			authority: "recommend-and-proceed",
+			style: "critical",
+		}, "Global fallback");
+		await writePreset(join(globalRoot, "presets"), "invalid-package", {
+			role: "product-owner",
+			authority: "recommend-and-proceed",
+			style: "critical",
+		});
+		await writePreset(join(packageRoot, "presets"), "package-only", {
+			role: "product-owner",
+			authority: "recommend-and-proceed",
+			style: "critical",
+		}, "Package preset");
+		await writePreset(join(packageRoot, "presets"), "invalid-package", {
+			role: "missing-role",
+			authority: "recommend-and-proceed",
+			style: "critical",
+		});
 		const projectPresets = join(projectRoot, ".pi", "facets", "presets");
 		await writePreset(projectPresets, "review", {
 			role: "product-owner",
@@ -219,13 +263,28 @@ describe("preset discovery", () => {
 		});
 
 		const facets = discoverFacets(packageRoot, globalRoot);
-		const result = discoverFacetPresets(join(globalRoot, "presets"), projectPresets, facets.components, true);
+		const result = discoverFacetPresets(
+			join(packageRoot, "presets"),
+			join(globalRoot, "presets"),
+			projectPresets,
+			facets.components,
+			true,
+		);
 		expect(result.presets.get("review")?.source).toBe("project");
 		expect(result.presets.get("review")?.notes).toBe("Project notes");
+		expect(result.presets.get("package-only")?.source).toBe("package");
+		expect(result.presets.get("package-only")?.description).toBe("Package preset");
+		expect(result.presets.has("invalid-package")).toBe(false);
 		expect(result.presets.has("shadowed")).toBe(false);
 		expect(result.diagnostics.some((diagnostic) => diagnostic.path.endsWith("shadowed.md"))).toBe(true);
 
-		const untrusted = discoverFacetPresets(join(globalRoot, "presets"), projectPresets, facets.components, false);
+		const untrusted = discoverFacetPresets(
+			join(packageRoot, "presets"),
+			join(globalRoot, "presets"),
+			projectPresets,
+			facets.components,
+			false,
+		);
 		expect(untrusted.presets.get("review")?.source).toBe("global");
 	});
 });

@@ -22,7 +22,7 @@ export interface FacetComponent {
 	path: string;
 }
 
-export type PresetSource = "global" | "project";
+export type PresetSource = FacetSource;
 
 export interface FacetPreset {
 	name: string;
@@ -266,23 +266,32 @@ function readPresetSource(
 }
 
 export function discoverFacetPresets(
+	packageRoot: string,
 	globalRoot: string,
 	projectRoot: string,
 	components: Map<string, FacetComponent>,
 	projectTrusted: boolean,
 ): { presets: Map<string, FacetPreset>; diagnostics: FacetDiagnostic[] } {
-	const globalResult = readPresetSource(globalRoot, "global", components);
-	const projectResult = projectTrusted
-		? readPresetSource(projectRoot, "project", components)
-		: { presets: new Map<string, FacetPreset>(), claimed: new Set<string>(), diagnostics: [] };
-	const presets = new Map(globalResult.presets);
+	const sources = [
+		...(projectTrusted ? [readPresetSource(projectRoot, "project", components)] : []),
+		readPresetSource(packageRoot, "package", components),
+		readPresetSource(globalRoot, "global", components),
+	];
+	const presets = new Map<string, FacetPreset>();
+	const claimed = new Set<string>();
 
-	for (const name of projectResult.claimed) presets.delete(name);
-	for (const [name, preset] of projectResult.presets) presets.set(name, preset);
+	for (const source of sources) {
+		for (const name of source.claimed) {
+			if (claimed.has(name)) continue;
+			claimed.add(name);
+			const preset = source.presets.get(name);
+			if (preset) presets.set(name, preset);
+		}
+	}
 
 	return {
 		presets,
-		diagnostics: [...globalResult.diagnostics, ...projectResult.diagnostics],
+		diagnostics: sources.flatMap((source) => source.diagnostics),
 	};
 }
 
@@ -376,7 +385,10 @@ function isFacetChangeEvent(value: unknown): value is FacetChangeEvent {
 	if (event.action === "apply-preset") {
 		if (!event.preset || typeof event.preset !== "object") return false;
 		const preset = event.preset as { name?: unknown; source?: unknown };
-		if (typeof preset.name !== "string" || (preset.source !== "global" && preset.source !== "project")) return false;
+		if (
+			typeof preset.name !== "string" ||
+			(preset.source !== "global" && preset.source !== "package" && preset.source !== "project")
+		) return false;
 	} else if (event.preset !== undefined) {
 		return false;
 	}
@@ -471,7 +483,13 @@ export function registerFacetExtension(
 		const projectTrusted = ctx.isProjectTrusted();
 		discovery = discoverFacets(packageRoot, globalRoot, projectFacetsRoot, projectTrusted);
 		const projectPresetRoot = join(projectFacetsRoot, "presets");
-		const result = discoverFacetPresets(join(globalRoot, "presets"), projectPresetRoot, discovery.components, projectTrusted);
+		const result = discoverFacetPresets(
+			join(packageRoot, "presets"),
+			join(globalRoot, "presets"),
+			projectPresetRoot,
+			discovery.components,
+			projectTrusted,
+		);
 		presets = result.presets;
 		const diagnostics = [...discovery.diagnostics, ...result.diagnostics];
 		if (diagnostics.length) {

@@ -54,7 +54,7 @@ Project `.pi/settings.json` loads the repository root as a local Pi package. For
 pi --approve --no-session --no-tools --mode json -p "Reply exactly: OK"
 ```
 
-`package.json` declares `extensions/` and `skills/` as package resources. Pi discovers them through project settings.
+`package.json` declares `extensions/`, `skills/`, and `prompts/` as package resources. Pi discovers them through project settings.
 
 ## Facets
 
@@ -130,7 +130,20 @@ style: critical
 Optional notes shown by `/facets preset show implementation-review`.
 ```
 
-Global presets live under `~/.pi/agent/facets/presets/`. Trusted project presets live under `<cwd>/.pi/facets/presets/` and shadow same-named global presets. Preset references must resolve to available components.
+Package presets live under `facets/presets/`. Global presets live under `~/.pi/agent/facets/presets/`. Trusted project presets live under `<cwd>/.pi/facets/presets/`. Sources resolve project → package → global; a higher-precedence definition shadows a lower one, including invalid definitions. Preset references must resolve to available components.
+
+### Package examples
+
+Package ships representative compositions for implementation review, backlog refinement, messaging strategy, research exploration, and delivery planning. See [`docs/facet-grid.md`](docs/facet-grid.md) for the resource grid.
+
+Prompt templates are short, non-mutating request frames:
+
+```text
+/explore-options <topic>
+/decision-brief <topic>
+```
+
+They do not select or mutate facets. Skills remain workflow source of truth.
 
 ## Skills
 
@@ -183,8 +196,10 @@ npm test -- test/package.test.ts
 ## Documentation and layout
 
 - `extensions/` — thin stateful Pi extensions;
-- `facets/` — package facet components;
+- `facets/` — package facet components and presets;
+- `prompts/` — package prompt templates;
 - `skills/` — independently invokable workflows and references;
+- `docs/facet-grid.md` — package resource examples;
 - `records/tasks/` — Attendant-backed task records;
 - `records/decisions/` — Attendant-backed durable decisions;
 - `pi-modes-and-skills-implementation-brief.md` — indicative design context, not binding specification.
