@@ -19,7 +19,7 @@ Core implementation is complete for:
 
 - `/facets` selection, inspection, clearing, and session restoration;
 - role, authority, and style components;
-- global, package, and trusted project-local facet discovery;
+- trusted project-local and global facet discovery;
 - named facet presets;
 - four independently invokable workflow skills;
 - focused extension and package tests.
@@ -62,20 +62,9 @@ pi --approve --no-session --no-tools --mode json -p "Reply exactly: OK"
 
 ```text
 /facets
-/facets help
-/facets clear
-/facets role
-/facets role <name>
-/facets authority
-/facets authority <name>
-/facets style
-/facets style <name>
-/facets preset
-/facets preset <name>
-/facets preset show <name>
 ```
 
-`/facets help` lists all available commands. Bare `/facets` displays current role, authority, and style, then opens an interactive selector in TUI mode. Bare `/facets role`, `/facets authority`, and `/facets style` open axis-specific selectors with current component marked; outside TUI they print available choices. `/facets preset` opens a preset selector with the current preset marked when one matches.
+`/facets` opens the interactive facet menu. Each Presets, Role, Authority, and Style item shows its current selection; choose one to drill in. Role, Authority, and Style selections return to menu for another change. Submenus offer `(none)` to clear that selection and Back to return to menu. Choose Clear all facets to reset selection. Outside TUI, it prints current facet state.
 
 Selecting one component replaces the previous component on that axis. Active state is stored in compact transcript entries and restored when the session or branch is resumed. If a persisted component is no longer available, Pi reports an actionable missing-reference warning.
 
@@ -102,17 +91,16 @@ Supported axes:
 - `authority` — default decision authority;
 - `style` — conversation style.
 
-Add a package component under `facets/{roles,authority,style}/`. No extension-code change is required.
+Add a project component under `.pi/facets/{roles,authority,style}/`. No extension-code change is required.
 
 ### Discovery and precedence
 
 Sources resolve in this order:
 
 1. trusted project: `<cwd>/.pi/facets/{roles,authority,style}/`;
-2. package: `facets/{roles,authority,style}/`;
-3. global: `~/.pi/agent/facets/{roles,authority,style}/`.
+2. global: `~/.pi/agent/facets/{roles,authority,style}/`.
 
-A higher-precedence component shadows a same-named lower-precedence component. Files are never merged. Project discovery uses current `cwd` only. Untrusted projects skip local facet Markdown and retain package/global components. Invalid trusted components produce diagnostics.
+Project components shadow same-named global components. Files are never merged. Project discovery uses current `cwd` only. Untrusted projects skip local facet Markdown and retain global components. Invalid trusted components produce diagnostics.
 
 ## Named presets
 
@@ -127,14 +115,14 @@ authority: advisory
 style: critical
 ---
 
-Optional notes shown by `/facets preset show implementation-review`.
+Optional notes may document intended use.
 ```
 
-Package presets live under `facets/presets/`. Global presets live under `~/.pi/agent/facets/presets/`. Trusted project presets live under `<cwd>/.pi/facets/presets/`. Sources resolve project → package → global; a higher-precedence definition shadows a lower one, including invalid definitions. Preset references must resolve to available components.
+Global presets live under `~/.pi/agent/facets/presets/`. Trusted project presets live under `<cwd>/.pi/facets/presets/`. Sources resolve project → global; a project definition shadows a global one, including invalid definitions. Preset references must resolve to available components.
 
 ### Package examples
 
-Package ships representative compositions for implementation review, backlog refinement, messaging strategy, research exploration, and delivery planning. See [`docs/facet-grid.md`](docs/facet-grid.md) for the resource grid.
+Project ships representative compositions for implementation review, backlog refinement, messaging strategy, research exploration, and delivery planning. See [`docs/facet-grid.md`](docs/facet-grid.md) for the resource grid.
 
 Prompt templates are short, non-mutating request frames:
 
@@ -196,7 +184,7 @@ npm test -- test/package.test.ts
 ## Documentation and layout
 
 - `extensions/` — thin stateful Pi extensions;
-- `facets/` — package facet components and presets;
+- `.pi/facets/` — project facet components and presets;
 - `prompts/` — package prompt templates;
 - `skills/` — independently invokable workflows and references;
 - `docs/facet-grid.md` — package resource examples;

@@ -1,6 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { basename, dirname, extname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { basename, extname, join } from "node:path";
 import {
 	CONFIG_DIR_NAME,
 	getAgentDir,
@@ -11,7 +10,7 @@ import {
 import { Box, Text } from "@earendil-works/pi-tui";
 
 export type Axis = "role" | "authority" | "style";
-export type FacetSource = "project" | "package" | "global";
+export type FacetSource = "project" | "global";
 
 export interface FacetComponent {
 	name: string;
@@ -67,7 +66,6 @@ const AXIS_DIRECTORIES: Record<Axis, string> = {
 };
 const FACET_STATE_ENTRY = "pi-facets.facet-state";
 const FACET_CHANGE_ENTRY = "pi-facets.facet-change";
-const PACKAGE_FACETS_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "facets");
 
 function componentKey(axis: Axis, name: string): string {
 	return `${axis}:${name}`;
@@ -147,15 +145,9 @@ function readSource(root: string, source: FacetSource): { components: Map<string
 	return { components, diagnostics };
 }
 
-export function discoverFacets(
-	packageRoot: string,
-	globalRoot: string,
-	projectRoot?: string,
-	projectTrusted = true,
-): FacetDiscovery {
+export function discoverFacets(globalRoot: string, projectRoot?: string, projectTrusted = true): FacetDiscovery {
 	const results = [
 		...(projectRoot && projectTrusted ? [readSource(projectRoot, "project")] : []),
-		readSource(packageRoot, "package"),
 		readSource(globalRoot, "global"),
 	];
 	const components = new Map<string, FacetComponent>();
@@ -266,7 +258,6 @@ function readPresetSource(
 }
 
 export function discoverFacetPresets(
-	packageRoot: string,
 	globalRoot: string,
 	projectRoot: string,
 	components: Map<string, FacetComponent>,
@@ -274,7 +265,6 @@ export function discoverFacetPresets(
 ): { presets: Map<string, FacetPreset>; diagnostics: FacetDiagnostic[] } {
 	const sources = [
 		...(projectTrusted ? [readPresetSource(projectRoot, "project", components)] : []),
-		readPresetSource(packageRoot, "package", components),
 		readPresetSource(globalRoot, "global", components),
 	];
 	const presets = new Map<string, FacetPreset>();
@@ -366,7 +356,7 @@ function isFacetRef(value: unknown): value is FacetRef {
 	const ref = value as { name?: unknown; source?: unknown };
 	return (
 		typeof ref.name === "string" &&
-		(ref.source === "project" || ref.source === "package" || ref.source === "global" || ref.source === "missing")
+		(ref.source === "project" || ref.source === "global" || ref.source === "missing")
 	);
 }
 
@@ -387,7 +377,7 @@ function isFacetChangeEvent(value: unknown): value is FacetChangeEvent {
 		const preset = event.preset as { name?: unknown; source?: unknown };
 		if (
 			typeof preset.name !== "string" ||
-			(preset.source !== "global" && preset.source !== "package" && preset.source !== "project")
+			(preset.source !== "global" && preset.source !== "project")
 		) return false;
 	} else if (event.preset !== undefined) {
 		return false;
@@ -437,11 +427,7 @@ function formatPresetAvailable(presets: Map<string, FacetPreset>): string {
 	return values.length ? values.map((preset) => `${preset.name} [${preset.source}]`).join(", ") : "(none)";
 }
 
-export function registerFacetExtension(
-	pi: ExtensionAPI,
-	packageRoot = PACKAGE_FACETS_ROOT,
-	globalRoot = join(getAgentDir(), "facets"),
-): void {
+export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAgentDir(), "facets")): void {
 	pi.registerEntryRenderer<FacetChangeEvent>(FACET_CHANGE_ENTRY, (entry, { expanded }, theme) => {
 		const box = new Box(1, 1, (text) => theme.bg("customMessageBg", text));
 		const data = entry.data;
@@ -481,10 +467,9 @@ export function registerFacetExtension(
 	function refresh(ctx: ExtensionContext): void {
 		const projectFacetsRoot = join(ctx.cwd, CONFIG_DIR_NAME, "facets");
 		const projectTrusted = ctx.isProjectTrusted();
-		discovery = discoverFacets(packageRoot, globalRoot, projectFacetsRoot, projectTrusted);
+		discovery = discoverFacets(globalRoot, projectFacetsRoot, projectTrusted);
 		const projectPresetRoot = join(projectFacetsRoot, "presets");
 		const result = discoverFacetPresets(
-			join(packageRoot, "presets"),
 			join(globalRoot, "presets"),
 			projectPresetRoot,
 			discovery.components,
@@ -530,19 +515,10 @@ export function registerFacetExtension(
 	function showHelp(ctx: ExtensionContext): void {
 		ctx.ui.notify(
 			[
-				"Facet commands:",
-				"/facets — show current role, authority, and style; open TUI selector",
-				"/facets help — show this command list",
-				"/facets clear — clear all active facets",
-				"/facets role — list/select available roles",
-				"/facets role <name> — set role",
-				"/facets authority — list/select available authorities",
-				"/facets authority <name> — set authority",
-				"/facets style — list/select available styles",
-				"/facets style <name> — set style",
-				"/facets preset — select preset in TUI",
-				"/facets preset <name> — apply preset",
-				"/facets preset show <name> — inspect preset",
+				"Facet menu:",
+				"/facets — open facet menu",
+				"Each menu item shows its current selection.",
+				"Choose Presets, Role, Authority, Style, or Clear all facets.",
 			].join("\n"),
 			"info",
 		);
@@ -569,6 +545,23 @@ export function registerFacetExtension(
 		ctx.ui.notify(`Facet ${axis} set to ${name}.`, "info");
 	}
 
+	function clearFacets(ctx: ExtensionContext): void {
+		const before = { ...state };
+		const after: FacetState = {};
+		state = after;
+		recordChange("clear", before, after);
+		ctx.ui.notify("Active facets cleared.", "info");
+	}
+
+	function clearAxis(axis: Axis, ctx: ExtensionContext): void {
+		const before = { ...state };
+		const after = { ...state };
+		delete after[axis];
+		state = after;
+		recordChange("set-axis", before, after, { axis });
+		ctx.ui.notify(`Facet ${axis} cleared.`, "info");
+	}
+
 	function componentLabel(component: FacetComponent): string {
 		const current = state[component.axis] === component.name ? " [current]" : "";
 		return `${component.name} — ${component.description} [${component.source}]${current}`;
@@ -576,41 +569,51 @@ export function registerFacetExtension(
 
 	async function selectFacets(ctx: ExtensionContext): Promise<void> {
 		if (ctx.mode !== "tui") {
-			ctx.ui.notify("/facets selector requires interactive TUI; use /facets <axis> <name>.", "error");
+			showCurrentState(ctx);
 			return;
 		}
-		const components = sortedComponents(discovery);
-		if (!components.length) {
-			ctx.ui.notify("No valid facet components discovered.", "error");
-			return;
+		for (;;) {
+			const snapshot = snapshotState(state, discovery);
+			const options = [
+				`Presets — ${currentPreset()?.name ?? "(none)"}`,
+				`Role — ${formatRef(snapshot.role)}`,
+				`Authority — ${formatRef(snapshot.authority)}`,
+				`Style — ${formatRef(snapshot.style)}`,
+				"Clear all facets",
+			];
+			const selected = await ctx.ui.select("Facets", options);
+			switch (options.indexOf(selected ?? "")) {
+				case 0:
+					if ((await selectPreset(ctx)) === "back") continue;
+					return;
+				case 1:
+					if ((await selectAxis("role", ctx)) === "cancel") return;
+					continue;
+				case 2:
+					if ((await selectAxis("authority", ctx)) === "cancel") return;
+					continue;
+				case 3:
+					if ((await selectAxis("style", ctx)) === "cancel") return;
+					continue;
+				case 4:
+					clearFacets(ctx);
+					return;
+				default:
+					return;
+			}
 		}
-		const labels = components.map(
-			(component) => `${component.axis}: ${componentLabel(component)}`,
-		);
-		const selected = await ctx.ui.select("Select facet component", labels);
-		if (!selected) return;
-		const component = components[labels.indexOf(selected)];
-		if (component) setAxis(component.axis, component.name, ctx);
 	}
 
-	async function selectAxis(axis: Axis, ctx: ExtensionContext): Promise<void> {
+	async function selectAxis(axis: Axis, ctx: ExtensionContext): Promise<"back" | "selected" | "cancel"> {
 		const components = sortedComponents(discovery).filter((component) => component.axis === axis);
 		const labels = components.map(componentLabel);
-		if (ctx.mode !== "tui") {
-			ctx.ui.notify(
-				`Available ${axis} facets:\n${labels.map((label) => `- ${label}`).join("\n") || "(none)"}`,
-				"info",
-			);
-			return;
-		}
-		if (!components.length) {
-			ctx.ui.notify(`No valid ${axis} facets discovered.`, "error");
-			return;
-		}
-		const selected = await ctx.ui.select(`Select ${axis} facet`, labels);
-		if (!selected) return;
+		const selected = await ctx.ui.select(`Select ${axis} facet`, [...labels, "(none)", "Back"]);
+		if (selected === undefined) return "cancel";
+		if (selected === "Back") return "back";
+		if (selected === "(none)") clearAxis(axis, ctx);
 		const component = components[labels.indexOf(selected)];
 		if (component) setAxis(axis, component.name, ctx);
+		return "selected";
 	}
 
 	function applyPreset(name: string, ctx: ExtensionContext): void {
@@ -626,34 +629,26 @@ export function registerFacetExtension(
 		ctx.ui.notify(`Facet preset ${name} applied.`, "info");
 	}
 
-	function presetLabel(preset: FacetPreset): string {
-		const current =
-			state.role === preset.role && state.authority === preset.authority && state.style === preset.style
-				? " [current]"
-				: "";
-		return `${preset.name} — ${preset.description} [${preset.source}]${current}`;
-	}
-
-	async function selectPreset(ctx: ExtensionContext): Promise<void> {
-		if (ctx.mode !== "tui") {
-			ctx.ui.notify("/facets preset selector requires interactive TUI; use /facets preset <name>.", "error");
-			return;
-		}
-		const values = sortedPresets(presets);
-		if (!values.length) {
-			ctx.ui.notify("No valid facet presets discovered.", "error");
-			return;
-		}
-		const current = values.find(
+	function currentPreset(): FacetPreset | undefined {
+		return [...presets.values()].find(
 			(preset) =>
 				state.role === preset.role && state.authority === preset.authority && state.style === preset.style,
 		);
-		ctx.ui.notify(`Current preset: ${current?.name ?? "(none)"}`, "info");
+	}
+
+	function presetLabel(preset: FacetPreset): string {
+		return `${preset.name} — ${preset.description} [${preset.source}]${currentPreset() === preset ? " [current]" : ""}`;
+	}
+
+	async function selectPreset(ctx: ExtensionContext): Promise<"back" | "done"> {
+		const values = sortedPresets(presets);
 		const labels = values.map(presetLabel);
-		const selected = await ctx.ui.select("Select facet preset", labels);
-		if (!selected) return;
-		const preset = values[labels.indexOf(selected)];
+		const selected = await ctx.ui.select("Select facet preset", [...labels, "(none)", "Back"]);
+		if (selected === "Back") return "back";
+		if (selected === "(none)") clearFacets(ctx);
+		const preset = values[labels.indexOf(selected ?? "")];
 		if (preset) applyPreset(preset.name, ctx);
+		return "done";
 	}
 
 	function showPreset(name: string, ctx: ExtensionContext): void {
@@ -681,7 +676,6 @@ export function registerFacetExtension(
 			ensureDiscovery(ctx);
 			const tokens = args.trim().split(/\s+/).filter(Boolean);
 			if (tokens.length === 0) {
-				showCurrentState(ctx);
 				await selectFacets(ctx);
 				return;
 			}
@@ -691,11 +685,7 @@ export function registerFacetExtension(
 				return;
 			}
 			if (command === "clear" && tokens.length === 1) {
-				const before = { ...state };
-				const after: FacetState = {};
-				state = after;
-				recordChange("clear", before, after);
-				ctx.ui.notify("Active facets cleared.", "info");
+				clearFacets(ctx);
 				return;
 			}
 			if (command === "preset" && tokens.length === 1) {

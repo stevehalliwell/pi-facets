@@ -30,17 +30,17 @@ describe("local Pi package setup", () => {
 
   it("ships agreed facet, preset, prompt, and grid resources", async () => {
     const resources = [
-      "facets/roles/marketing-strategist.md",
-      "facets/roles/researcher.md",
-      "facets/roles/delivery-lead.md",
-      "facets/style/exploratory.md",
-      "facets/style/explanatory.md",
-      "facets/style/structured.md",
-      "facets/presets/implementation-review.md",
-      "facets/presets/backlog-refinement.md",
-      "facets/presets/messaging-strategy.md",
-      "facets/presets/research-exploration.md",
-      "facets/presets/delivery-planning.md",
+      ".pi/facets/roles/marketing-strategist.md",
+      ".pi/facets/roles/researcher.md",
+      ".pi/facets/roles/delivery-lead.md",
+      ".pi/facets/style/exploratory.md",
+      ".pi/facets/style/explanatory.md",
+      ".pi/facets/style/structured.md",
+      ".pi/facets/presets/implementation-review.md",
+      ".pi/facets/presets/backlog-refinement.md",
+      ".pi/facets/presets/messaging-strategy.md",
+      ".pi/facets/presets/research-exploration.md",
+      ".pi/facets/presets/delivery-planning.md",
       "docs/facet-grid.md",
     ];
 

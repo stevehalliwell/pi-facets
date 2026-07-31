@@ -1,6 +1,6 @@
 # Facet grid
 
-Package examples compose one role, one authority, and one style. Presets are named shortcuts; prompt templates frame one request without changing active facets.
+Project examples compose one role, one authority, and one style. Presets are named shortcuts; prompt templates frame one request without changing active facets.
 
 | Use case | Role | Authority | Style | Resource |
 | --- | --- | --- | --- | --- |
@@ -10,7 +10,7 @@ Package examples compose one role, one authority, and one style. Presets are nam
 | Research exploration | `researcher` | `advisory` | `exploratory` | `research-exploration` |
 | Delivery planning | `delivery-lead` | `decisive` | `structured` | `delivery-planning` |
 
-## Package resources
+## Project resources
 
 - Roles: `dev-peer`, `pragmatic-collaborator`, `product-owner`, `marketing-strategist`, `researcher`, `delivery-lead`.
 - Authorities: `advisory`, `recommend-and-proceed`, `decisive`.
