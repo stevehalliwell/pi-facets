@@ -323,6 +323,15 @@ export function sortedPresets(presets: Map<string, FacetPreset>): FacetPreset[] 
 	return [...presets.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
 
+export function formatFacetStatus(state: FacetState, presets: Map<string, FacetPreset>): string | undefined {
+	const preset = [...presets.values()].find(
+		(candidate) => state.role === candidate.role && state.authority === candidate.authority && state.style === candidate.style,
+	);
+	if (preset) return `facets: ${preset.name}`;
+	const values = AXES.flatMap((axis) => (state[axis] ? [`${axis}=${state[axis]}`] : []));
+	return values.length ? `facets: ${values.join(" · ")}` : undefined;
+}
+
 export function sortedComponents(discovery: FacetDiscovery): FacetComponent[] {
 	return [...discovery.components.values()].sort(
 		(a, b) => AXES.indexOf(a.axis) - AXES.indexOf(b.axis) || a.name.localeCompare(b.name),
@@ -567,6 +576,12 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		if (warnings.length) ctx.ui.notify(`Active facet warnings:\n${warnings.map((warning) => `- ${warning}`).join("\n")}`, "warning");
 	}
 
+	function updateStatus(ctx: ExtensionContext): void {
+		if (ctx.mode !== "tui") return;
+		const text = formatFacetStatus(state, presets);
+		ctx.ui.setStatus("pi-facets", text ? ctx.ui.theme.fg("accent", "facets:") + ctx.ui.theme.fg("muted", text.slice("facets:".length)) : undefined);
+	}
+
 	function ensureDiscovery(ctx: ExtensionContext): void {
 		if (discovery.components.size === 0 && discovery.diagnostics.length === 0) refresh(ctx);
 	}
@@ -607,6 +622,7 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		state = after;
 		recordChange("set-axis", before, after, { axis });
 		ctx.ui.notify(`Facet ${axis} set to ${name}.`, "info");
+		updateStatus(ctx);
 		reportFacetWarnings(ctx);
 	}
 
@@ -616,6 +632,7 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		state = after;
 		recordChange("clear", before, after);
 		ctx.ui.notify("Active facets cleared.", "info");
+		updateStatus(ctx);
 	}
 
 	function clearAxis(axis: Axis, ctx: ExtensionContext): void {
@@ -625,6 +642,7 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		state = after;
 		recordChange("set-axis", before, after, { axis });
 		ctx.ui.notify(`Facet ${axis} cleared.`, "info");
+		updateStatus(ctx);
 	}
 
 	function componentLabel(component: FacetComponent): string {
@@ -692,6 +710,7 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		state = after;
 		recordChange("apply-preset", before, after, { preset: { name: preset.name, source: preset.source } });
 		ctx.ui.notify(`Facet preset ${name} applied.`, "info");
+		updateStatus(ctx);
 		reportFacetWarnings(ctx);
 	}
 
@@ -732,6 +751,7 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 	pi.on("session_start", async (_event, ctx) => {
 		refresh(ctx);
 		state = restoreOrDefault(ctx);
+		updateStatus(ctx);
 		reportMissing(ctx);
 		reportFacetWarnings(ctx);
 	});
@@ -739,8 +759,13 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 	pi.on("session_tree", async (_event, ctx) => {
 		refresh(ctx);
 		state = restoreOrDefault(ctx);
+		updateStatus(ctx);
 		reportMissing(ctx);
 		reportFacetWarnings(ctx);
+	});
+
+	pi.on("session_shutdown", async (_event, ctx) => {
+		if (ctx.mode === "tui") ctx.ui.setStatus("pi-facets", undefined);
 	});
 
 	pi.on("before_agent_start", async (event) => {

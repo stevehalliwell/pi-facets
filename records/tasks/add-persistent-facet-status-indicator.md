@@ -4,7 +4,7 @@ name: add-persistent-facet-status-indicator
 created_at: 2026-08-01T06:25:10.166Z
 desc: "Show compact persistent active-facet state in Pi UI."
 tags: []
-status: todo
+status: done
 scope: agreed
 ---
 
@@ -68,16 +68,20 @@ scope: agreed
 
 ## Implemented so far
 
-- Task refinement only; no implementation changes.
+- Added TUI-only `pi-facets` footer status formatter and updater using `ctx.ui.setStatus`.
+- Matching composition shows preset name; partial/custom composition lists populated axes; empty state clears status.
+- Updates on session restore/tree navigation, axis/preset changes, clearing, and session shutdown. Non-TUI modes remain untouched.
 
 ## Checks
 
-- Refinement confirmed by user on 2026-08-01.
+- Focused: `npm test -- --run test/facets.test.ts` — 8 tests pass.
+- Full: `npm test` — 14 tests pass; `npm run check` and `git diff --check` pass.
+- Product discovery already documents matching-composition preset identity; no wording change needed.
 
 ## Review / next slice
 
-- Ready for review: no; ready to select for implementation.
-- Likely next slice/task: mark `doing`, then add formatter and session/mutation update coverage.
+- User approved footer placement on 2026-08-02; task complete.
+- Lifecycle test covers restore, explicit clear, and shutdown status updates.
 
 ## Notes
 

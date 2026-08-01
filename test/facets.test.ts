@@ -10,6 +10,7 @@ import {
 	discoverFacets,
 	estimateTokens,
 	facetWarnings,
+	formatFacetStatus,
 	registerFacetExtension,
 	type FacetPreset,
 } from "../extensions/facets.js";
@@ -95,6 +96,13 @@ describe("facet discovery", () => {
 		expect(composeFacetPrompt("Base", {}, discovery)).toBe("Base");
 	});
 
+	it("formats preset and partial facet status", () => {
+		const presets = new Map<string, FacetPreset>([["review", { name: "review", role: "dev-peer", authority: "advisory", style: "concise" } as FacetPreset]]);
+		expect(formatFacetStatus({ role: "dev-peer", authority: "advisory", style: "concise" }, presets)).toBe("facets: review");
+		expect(formatFacetStatus({ role: "dev-peer", style: "concise" }, presets)).toBe("facets: role=dev-peer · style=concise");
+		expect(formatFacetStatus({}, presets)).toBeUndefined();
+	});
+
 	it("warns about source format and active token budgets", async () => {
 		const global = await root();
 		await facet(global, "roles", "dev-peer", "# Heading\n\nText");
@@ -126,6 +134,7 @@ describe("facet menu", () => {
 		await defaultPreset(global, "---\npreset: default\n---\n");
 		const handlers = new Map<string, (event: any, ctx: any) => Promise<any>>();
 		const entries: any[] = [];
+		const statuses: Array<[string, string | undefined]> = [];
 		const pi = {
 			on(name: string, handler: any) { handlers.set(name, handler); },
 			registerCommand() {},
@@ -134,12 +143,13 @@ describe("facet menu", () => {
 		} as unknown as ExtensionAPI;
 		const ctx: any = {
 			mode: "tui", cwd: project, isProjectTrusted: () => true,
-			ui: { notify() {}, select: async () => undefined },
+			ui: { notify() {}, select: async () => undefined, setStatus: (key: string, text: string | undefined) => statuses.push([key, text]), theme: { fg: (_: string, text: string) => text } },
 			sessionManager: { getBranch: () => entries },
 		};
 		registerFacetExtension(pi, global);
 		await handlers.get("session_start")!({}, ctx);
 		expect(entries).toEqual([]);
+		expect(statuses.at(-1)).toEqual(["pi-facets", "facets: default"]);
 		expect((await handlers.get("before_agent_start")!({ systemPrompt: "Base" }, ctx))?.systemPrompt).toContain("**role: dev-peer**");
 		entries.push({
 			type: "custom",
@@ -152,7 +162,10 @@ describe("facet menu", () => {
 			},
 		});
 		await handlers.get("session_tree")!({}, ctx);
+		expect(statuses.at(-1)).toEqual(["pi-facets", undefined]);
 		expect(await handlers.get("before_agent_start")!({ systemPrompt: "Base" }, ctx)).toBeUndefined();
+		await handlers.get("session_shutdown")!({}, ctx);
+		expect(statuses.at(-1)).toEqual(["pi-facets", undefined]);
 	});
 
 	it("shows project selections and returns to menu after an axis selection", async () => {
@@ -173,7 +186,7 @@ describe("facet menu", () => {
 		} as unknown as ExtensionAPI;
 		const ctx: any = {
 			mode: "tui", cwd: project, isProjectTrusted: () => true,
-			ui: { notify() {}, select: async (title: string) => { titles.push(title); return choices.shift(); } },
+			ui: { notify() {}, select: async (title: string) => { titles.push(title); return choices.shift(); }, setStatus() {}, theme: { fg: (_: string, text: string) => text } },
 			sessionManager: { getBranch: () => entries },
 		};
 		registerFacetExtension(pi, global);
