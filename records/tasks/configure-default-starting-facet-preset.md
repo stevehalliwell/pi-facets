@@ -30,13 +30,19 @@ scope: draft
 
 ### Acceptance
 
-- Project default wins over global default.
-- Global default applies when project default is absent.
+- Valid project default wins over valid global default.
+- Missing or invalid project default silently falls through to valid global default.
+- Missing or invalid global default starts with no facets.
 - Explicit facet selection remains effective.
 
 ## Open questions
 
-- Config file format and whether an invalid configured preset warns or starts with no facets.
+- Config file format and supported preset-reference syntax.
+
+## Decisions
+
+- New-session resolution is project default → global default → no facets.
+- Invalid configuration falls through silently; status shows resulting state.
 
 ## Notes
 

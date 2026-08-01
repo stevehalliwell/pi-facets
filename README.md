@@ -11,7 +11,7 @@ pi-facets separates persistent agent behavior from task workflows, project conte
 - **Project context** provides repository and product facts outside facets and skills.
 - **References** provide framework or standards material loaded only when needed.
 
-A thin Pi extension composes selected facet components into each agent run. pi-facets does not limit or gate tool calls.
+A thin Pi extension composes selected facet components into each agent run. Facets stay compact because this prompt context repeats every turn. Skills are larger, on-demand workflows; Pi loads their instructions only when relevant or explicitly invoked, not as part of per-turn facet injection. pi-facets does not limit or gate tool calls.
 
 ## Status
 
@@ -154,7 +154,7 @@ description: Trigger-rich description of when to use the skill and its goal.
 ---
 ```
 
-Pi exposes skill descriptions for automatic routing and registers `/skill:<name>` commands for explicit invocation. Keep workflows, output contracts, and workflow-specific references in skills. Do not duplicate persistent facet behavior, project facts, or tool policy. Add references or helper files only when they reduce context or repetition.
+Pi exposes skill descriptions for automatic routing and registers `/skill:<name>` commands for explicit invocation. Keep workflows, output contracts, and workflow-specific references in skills. Skills may contain substantial procedures and references because they load on demand; do not copy them into compact facet components injected each turn. Do not duplicate persistent facet behavior, project facts, or tool policy. Add references or helper files only when they reduce context or repetition.
 
 Current skills:
 
