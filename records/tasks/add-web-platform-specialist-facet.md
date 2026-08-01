@@ -4,7 +4,7 @@ name: add-web-platform-specialist-facet
 created_at: 2026-08-01T06:25:10.183Z
 desc: "Add web-platform specialist role and optional preset for standards-aware web work."
 tags: []
-status: todo
+status: done
 scope: agreed
 ---
 
@@ -61,16 +61,19 @@ scope: agreed
 
 ## Implemented so far
 
-- Task refinement only; no implementation changes.
+- Added headingless, list-first `web-platform-specialist` role covering standards, accessibility, responsive behavior, compatibility, performance, SEO/GEO, verification, and material trade-offs.
+- Added `web-implementation` preset: `web-platform-specialist + recommend-and-proceed + concise`.
+- Updated facet grid, package resources, and focused composition coverage.
 
 ## Checks
 
-- Refinement confirmed by user on 2026-08-01.
+- Focused: `npm test -- --run test/package.test.ts` — 7 tests pass.
+- Full: `npm test` — 15 tests pass; `npm run check` and `git diff --check` pass.
 
 ## Review / next slice
 
-- Ready for review: no; ready to select for implementation.
-- Likely next slice/task: mark `doing`, then add role/preset and package coverage.
+- User approved web-platform specialist role and preset on 2026-08-02; task complete.
+- Next candidate: `add-web-implementation-delivery-workflow`.
 
 ## Notes
 

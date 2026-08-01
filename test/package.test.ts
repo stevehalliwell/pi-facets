@@ -39,11 +39,13 @@ describe("local Pi package setup", () => {
       ".pi/facets/roles/marketing-strategist.md",
       ".pi/facets/roles/researcher.md",
       ".pi/facets/roles/delivery-lead.md",
+      ".pi/facets/roles/web-platform-specialist.md",
       ".pi/facets/style/exploratory.md",
       ".pi/facets/style/explanatory.md",
       ".pi/facets/style/structured.md",
       ".pi/facets/presets/technical-review.md",
       ".pi/facets/presets/implementation-partner.md",
+      ".pi/facets/presets/web-implementation.md",
       ".pi/facets/presets/backlog-refinement.md",
       ".pi/facets/presets/messaging-strategy.md",
       ".pi/facets/presets/research-exploration.md",
@@ -65,6 +67,19 @@ describe("local Pi package setup", () => {
     expect(parsed.frontmatter).toMatchObject({
       name: "implementation-partner",
       role: "dev-peer",
+      authority: "recommend-and-proceed",
+      style: "concise",
+    });
+  });
+
+  it("defines web-implementation composition", async () => {
+    const parsed = parseFrontmatter<Record<string, unknown>>(
+      await readFile(resolve(".pi/facets/presets/web-implementation.md"), "utf8"),
+    );
+
+    expect(parsed.frontmatter).toMatchObject({
+      name: "web-implementation",
+      role: "web-platform-specialist",
       authority: "recommend-and-proceed",
       style: "concise",
     });
