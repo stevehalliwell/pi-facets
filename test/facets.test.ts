@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { composeFacetPrompt, discoverFacetPresets, discoverFacets, registerFacetExtension } from "../extensions/facets.js";
+import { composeFacetPrompt, discoverFacetPresets, discoverFacets, estimateTokens, facetWarnings, registerFacetExtension } from "../extensions/facets.js";
 
 const temporaryDirectories: string[] = [];
 afterEach(async () => Promise.all(temporaryDirectories.splice(0).map((path) => rm(path, { recursive: true, force: true }))));
@@ -52,11 +52,35 @@ describe("facet discovery", () => {
 		expect(result.presets.get("review")?.source).toBe("project");
 	});
 
-	it("composes selected facets", async () => {
+	it("composes selected facets in compact axis order", async () => {
 		const global = await root();
-		await facet(global, "roles", "dev-peer", "Trace paths.");
+		await facet(global, "roles", "dev-peer", "- Trace paths.");
+		await facet(global, "authority", "advisory", "- Ask first.");
+		await facet(global, "style", "concise", "- Lead with result.");
 		const discovery = discoverFacets(global);
-		expect(composeFacetPrompt("Base", { role: "dev-peer" }, discovery)).toContain("Trace paths.");
+		expect(composeFacetPrompt("Base", { style: "concise", role: "dev-peer", authority: "advisory" }, discovery)).toBe(
+			"Base\n\n## Active facets\n\n**role: dev-peer**\n- Trace paths.\n\n**authority: advisory**\n- Ask first.\n\n**style: concise**\n- Lead with result.",
+		);
+		expect(composeFacetPrompt("Base", {}, discovery)).toBe("Base");
+	});
+
+	it("warns about source format and active token budgets", async () => {
+		const global = await root();
+		await facet(global, "roles", "dev-peer", "# Heading\n\nText");
+		await facet(global, "authority", "advisory", "x".repeat(1001));
+		await facet(global, "style", "concise", "x".repeat(1001));
+		const discovery = discoverFacets(global);
+		expect(discovery.diagnostics.map((diagnostic) => diagnostic.message)).toContain(
+			"component format warning: body starts with a H1; use list-first Markdown to avoid a nested heading",
+		);
+		expect(estimateTokens("12345")).toBe(2);
+		expect(facetWarnings({ role: "dev-peer", authority: "advisory", style: "concise" }, discovery)).toEqual(
+			expect.arrayContaining([
+				expect.stringContaining("role/dev-peer: body starts with a H1"),
+				expect.stringContaining("authority/advisory: estimated 251 tokens exceeds 200-token component budget"),
+				expect.stringContaining("active facet composition: estimated"),
+			]),
+		);
 	});
 });
 

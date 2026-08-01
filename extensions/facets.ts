@@ -75,6 +75,13 @@ function isAxis(value: unknown): value is Axis {
 	return typeof value === "string" && AXES.includes(value as Axis);
 }
 
+function componentFormatWarnings(component: FacetComponent): string[] {
+	const warnings: string[] = [];
+	if (/^#\s+/.test(component.body)) warnings.push("body starts with a H1; use list-first Markdown to avoid a nested heading");
+	if (!/^[-*+]\s+/.test(component.body)) warnings.push("body is not list-first Markdown; use list items for compact active-facet context");
+	return warnings;
+}
+
 function readSource(root: string, source: FacetSource): { components: Map<string, FacetComponent>; diagnostics: FacetDiagnostic[] } {
 	const components = new Map<string, FacetComponent>();
 	const diagnostics: FacetDiagnostic[] = [];
@@ -117,6 +124,18 @@ function readSource(root: string, source: FacetSource): { components: Map<string
 				}
 				if (!parsed.body.trim()) throw new Error("Markdown body must be non-empty");
 
+				const component: FacetComponent = {
+					name,
+					axis,
+					description: description.trim(),
+					body: parsed.body.trim(),
+					source,
+					path,
+				};
+				for (const warning of componentFormatWarnings(component)) {
+					diagnostics.push({ path, message: `component format warning: ${warning}` });
+				}
+
 				const key = componentKey(axis, name);
 				if (components.has(key)) {
 					const previous = components.get(key)!;
@@ -128,14 +147,7 @@ function readSource(root: string, source: FacetSource): { components: Map<string
 					continue;
 				}
 
-				components.set(key, {
-					name,
-					axis,
-					description: description.trim(),
-					body: parsed.body.trim(),
-					source,
-					path,
-				});
+				components.set(key, component);
 			} catch (error) {
 				diagnostics.push({ path, message: `invalid component: ${errorMessage(error)}` });
 			}
@@ -313,15 +325,41 @@ export function resolveFacetState(
 	return { components, missing };
 }
 
-export function composeFacetPrompt(systemPrompt: string, state: FacetState, discovery: FacetDiscovery): string {
+function activeFacetComponents(state: FacetState, discovery: FacetDiscovery): FacetComponent[] {
 	const resolved = resolveFacetState(state, discovery);
-	const components = AXES.map((axis) => resolved.components[axis]).filter(
+	return AXES.map((axis) => resolved.components[axis]).filter(
 		(component): component is FacetComponent => component !== undefined,
 	);
-	if (components.length === 0) return systemPrompt;
+}
 
-	const sections = components.map((component) => `### ${component.axis}: ${component.name}\n\n${component.body}`);
-	return `${systemPrompt}\n\n## Active facets\n\n${sections.join("\n\n")}`;
+function activeFacetContext(components: FacetComponent[]): string {
+	return `## Active facets\n\n${components.map((component) => `**${component.axis}: ${component.name}**\n${component.body}`).join("\n\n")}`;
+}
+
+export function estimateTokens(text: string): number {
+	return Math.ceil(text.length / 4);
+}
+
+export function facetWarnings(state: FacetState, discovery: FacetDiscovery): string[] {
+	const components = activeFacetComponents(state, discovery);
+	const warnings = components.flatMap((component) => [
+		...discovery.diagnostics
+			.filter((diagnostic) => diagnostic.path === component.path && diagnostic.message.startsWith("component format warning:"))
+			.map((diagnostic) => `${component.axis}/${component.name}: ${diagnostic.message.replace("component format warning: ", "")}`),
+		...(estimateTokens(component.body) > 200
+			? [`${component.axis}/${component.name}: estimated ${estimateTokens(component.body)} tokens exceeds 200-token component budget`]
+			: []),
+	]);
+	if (components.length && estimateTokens(activeFacetContext(components)) > 500) {
+		warnings.push(`active facet composition: estimated ${estimateTokens(activeFacetContext(components))} tokens exceeds 500-token budget`);
+	}
+	return warnings;
+}
+
+export function composeFacetPrompt(systemPrompt: string, state: FacetState, discovery: FacetDiscovery): string {
+	const components = activeFacetComponents(state, discovery);
+	if (components.length === 0) return systemPrompt;
+	return `${systemPrompt}\n\n${activeFacetContext(components)}`;
 }
 
 function errorMessage(error: unknown): string {
@@ -491,6 +529,11 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		ctx.ui.notify(`Active facet reference unavailable: ${details}. Choose a replacement.`, "error");
 	}
 
+	function reportFacetWarnings(ctx: ExtensionContext): void {
+		const warnings = facetWarnings(state, discovery);
+		if (warnings.length) ctx.ui.notify(`Active facet warnings:\n${warnings.map((warning) => `- ${warning}`).join("\n")}`, "warning");
+	}
+
 	function ensureDiscovery(ctx: ExtensionContext): void {
 		if (discovery.components.size === 0 && discovery.diagnostics.length === 0) refresh(ctx);
 	}
@@ -531,6 +574,7 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		state = after;
 		recordChange("set-axis", before, after, { axis });
 		ctx.ui.notify(`Facet ${axis} set to ${name}.`, "info");
+		reportFacetWarnings(ctx);
 	}
 
 	function clearFacets(ctx: ExtensionContext): void {
@@ -615,6 +659,7 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		state = after;
 		recordChange("apply-preset", before, after, { preset: { name: preset.name, source: preset.source } });
 		ctx.ui.notify(`Facet preset ${name} applied.`, "info");
+		reportFacetWarnings(ctx);
 	}
 
 	function currentPreset(): FacetPreset | undefined {
@@ -655,12 +700,14 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		refresh(ctx);
 		state = restoreState(ctx);
 		reportMissing(ctx);
+		reportFacetWarnings(ctx);
 	});
 
 	pi.on("session_tree", async (_event, ctx) => {
 		refresh(ctx);
 		state = restoreState(ctx);
 		reportMissing(ctx);
+		reportFacetWarnings(ctx);
 	});
 
 	pi.on("before_agent_start", async (event) => {

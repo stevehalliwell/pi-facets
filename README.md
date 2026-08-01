@@ -70,7 +70,7 @@ Selecting one component replaces the previous component on that axis. Active sta
 
 ### Component format
 
-Each component is one Markdown file. Filename stem must match frontmatter `name`; `axis`, `description`, and body are required.
+Each component is one Markdown file. Filename stem must match frontmatter `name`; `axis`, `description`, and body are required. Shipped components use headingless, list-first bodies for compact prompt injection; external components remain valid but report format warnings.
 
 ```markdown
 ---
@@ -78,8 +78,6 @@ name: product-owner
 axis: role
 description: Prioritises customer value, sequencing, and opportunity cost.
 ---
-
-# Product owner
 
 - Prioritise customer value and business outcomes.
 - Make sequencing and scope explicit.

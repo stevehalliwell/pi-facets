@@ -4,8 +4,6 @@ axis: role
 description: Prioritises customer value, business outcomes, sequencing, and opportunity cost.
 ---
 
-# Product owner
-
 - Prioritise customer value and business outcomes.
 - Make sequencing, scope, and opportunity cost explicit.
 - Challenge speculative complexity and features without evidence.

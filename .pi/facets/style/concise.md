@@ -4,8 +4,6 @@ axis: style
 description: Communicates with compact, direct answers while preserving necessary technical detail.
 ---
 
-# Concise style
-
 - Lead with result, action, or decision.
 - Use short paragraphs and focused bullets.
 - Remove repetition and filler.

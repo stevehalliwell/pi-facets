@@ -4,7 +4,7 @@ name: compact-facet-prompt-injection-layout
 created_at: 2026-07-31T21:40:08.282Z
 desc: "Make injected active-facet prompt context more compact and consistently ordered Markdown."
 tags: []
-status: todo
+status: done
 scope: agreed
 ---
 
@@ -83,16 +83,21 @@ scope: agreed
 
 ## Implemented so far
 
-- Task refinement only; no implementation changes.
+- Render active facets as headingless, fixed role → authority → style sections with bold axis/name labels.
+- Warn without altering external component bodies for leading H1, non-list-first format, components over 200 estimated tokens, and active compositions over 500.
+- Report active warnings on restore and state changes, never prompt injection; made shipped bodies list-first and headingless.
+- Updated README convention and focused tests.
 
 ## Checks
 
-- Refinement confirmed by user on 2026-08-01.
+- Focused: `npm test -- --run test/facets.test.ts` — pass.
+- Full: `npm test` and `npm run check` — pass.
+- `git diff --check` — pass.
 
 ## Review / next slice
 
-- Ready for review: no; ready to select for implementation.
-- Likely next slice/task: mark `doing`, then inspect warning delivery across session and selection paths.
+- User approved compact prompt output on 2026-08-02; task complete.
+- Next candidate: `add-generic-implementation-workflow-preset`.
 
 ## Notes
 
