@@ -32,6 +32,7 @@ describe("local Pi package setup", () => {
     const resources = [
       ".pi/skills/backlog-refinement/SKILL.md",
       ".pi/skills/competitor-analysis/SKILL.md",
+      ".pi/skills/implementation/SKILL.md",
       ".pi/skills/technical-review/SKILL.md",
       ".pi/skills/website-messaging/SKILL.md",
       ".pi/facets/roles/marketing-strategist.md",
@@ -40,7 +41,8 @@ describe("local Pi package setup", () => {
       ".pi/facets/style/exploratory.md",
       ".pi/facets/style/explanatory.md",
       ".pi/facets/style/structured.md",
-      ".pi/facets/presets/implementation-review.md",
+      ".pi/facets/presets/technical-review.md",
+      ".pi/facets/presets/implementation-partner.md",
       ".pi/facets/presets/backlog-refinement.md",
       ".pi/facets/presets/messaging-strategy.md",
       ".pi/facets/presets/research-exploration.md",
@@ -51,6 +53,20 @@ describe("local Pi package setup", () => {
     for (const resource of resources) {
       await expect(access(resolve(resource))).resolves.toBeUndefined();
     }
+    await expect(access(resolve(".pi/facets/presets/implementation-review.md"))).rejects.toThrow();
+  });
+
+  it("defines implementation-partner composition", async () => {
+    const parsed = parseFrontmatter<Record<string, unknown>>(
+      await readFile(resolve(".pi/facets/presets/implementation-partner.md"), "utf8"),
+    );
+
+    expect(parsed.frontmatter).toMatchObject({
+      name: "implementation-partner",
+      role: "dev-peer",
+      authority: "recommend-and-proceed",
+      style: "concise",
+    });
   });
 
   it("defines argument-aware prompt templates", async () => {

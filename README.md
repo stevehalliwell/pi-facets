@@ -106,7 +106,7 @@ Presets compose one role, authority, and style component:
 
 ```markdown
 ---
-name: implementation-review
+name: technical-review
 description: Review implementation choices critically.
 role: dev-peer
 authority: advisory
@@ -120,7 +120,7 @@ Global presets live under `~/.pi/agent/facets/presets/`. Trusted project presets
 
 ### Project examples
 
-Project ships representative compositions for implementation review, backlog refinement, messaging strategy, research exploration, and delivery planning. See [`docs/facet-grid.md`](docs/facet-grid.md) for the resource grid.
+Project ships representative compositions for technical review, backlog refinement, messaging strategy, research exploration, and delivery planning. See [`docs/facet-grid.md`](docs/facet-grid.md) for the resource grid.
 
 Prompt templates are short, non-mutating request frames:
 
@@ -139,6 +139,7 @@ Skills are independently invokable workflows. Each skill is a directory containi
 .pi/skills/
 ├── backlog-refinement/SKILL.md
 ├── competitor-analysis/SKILL.md
+├── implementation/SKILL.md
 ├── website-messaging/SKILL.md
 └── technical-review/SKILL.md
 ```
@@ -159,7 +160,8 @@ Current skills:
 - `backlog-refinement` — turn vague backlog work into bounded, accepted task shape;
 - `competitor-analysis` — produce evidence-backed competitor comparisons;
 - `website-messaging` — review or rewrite positioning, page copy, proof, and calls to action;
-- `technical-review` — assess feasibility, trade-offs, risks, and validation before coding.
+- `technical-review` — assess feasibility, trade-offs, risks, and validation before coding;
+- `implementation` — deliver one agreed implementation slice with proportionate validation.
 
 Add a trusted project skill under `.pi/skills/<name>/SKILL.md`; extension code does not need changing.
 

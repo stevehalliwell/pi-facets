@@ -4,7 +4,7 @@ name: add-generic-implementation-workflow-preset
 created_at: 2026-08-01T06:34:57.246Z
 desc: "Add senior-dev-peer implementation workflow and matching preset."
 tags: []
-status: todo
+status: done
 scope: agreed
 ---
 
@@ -70,16 +70,23 @@ scope: agreed
 
 ## Implemented so far
 
-- Task refinement only; no implementation changes.
+- Hard-renamed shipped `implementation-review` preset to `technical-review`; no compatibility alias.
+- Added `implementation-partner`: `dev-peer + recommend-and-proceed + concise`.
+- Added model-invocable `implementation` skill for approved one-slice delivery, scoped cleanup, and proportionate validation.
+- Updated current README, facet grid, package resource check, composition assertion, and explicit old-path absence check.
+- Historical task and decision records retain their original names.
 
 ## Checks
 
-- Refinement confirmed by user on 2026-08-01.
+- Focused: `npm test -- --run test/package.test.ts` — pass.
+- Skill frontmatter: `node /Users/stevehalliwell/.pi/agent/skills/skill-craft/validate-frontmatter.mjs .pi/skills/implementation/SKILL.md` — pass; 327 body words.
+- Full: `npm test` (10 tests), `npm run check`, and `git diff --check` — pass.
+- Package smoke: `pi --approve --no-session --no-tools --mode json -p "Reply exactly: OK"` — returned `OK`.
 
 ## Review / next slice
 
-- Ready for review: no; ready to select for implementation.
-- Likely next slice/task: mark `doing`, then inspect affected presets, skill layout, docs, and tests.
+- User approved implementation workflow preset work on 2026-08-02; task complete.
+- Next candidate: `align-backlog-refinement-preset-authority`.
 
 ## Notes
 

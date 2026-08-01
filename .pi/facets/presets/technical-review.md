@@ -1,5 +1,5 @@
 ---
-name: implementation-review
+name: technical-review
 description: Review implementation choices critically.
 role: dev-peer
 authority: advisory
