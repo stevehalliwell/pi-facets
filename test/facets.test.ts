@@ -3,7 +3,16 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { composeFacetPrompt, discoverFacetPresets, discoverFacets, estimateTokens, facetWarnings, registerFacetExtension } from "../extensions/facets.js";
+import {
+	composeFacetPrompt,
+	discoverDefaultPreset,
+	discoverFacetPresets,
+	discoverFacets,
+	estimateTokens,
+	facetWarnings,
+	registerFacetExtension,
+	type FacetPreset,
+} from "../extensions/facets.js";
 
 const temporaryDirectories: string[] = [];
 afterEach(async () => Promise.all(temporaryDirectories.splice(0).map((path) => rm(path, { recursive: true, force: true }))));
@@ -22,6 +31,11 @@ async function facet(root: string, directory: "roles" | "authority" | "style", n
 async function preset(root: string, name: string): Promise<void> {
 	await mkdir(root, { recursive: true });
 	await writeFile(join(root, `${name}.md`), `---\nname: ${name}\ndescription: ${name}\nrole: dev-peer\nauthority: advisory\nstyle: concise\n---\n`);
+}
+
+async function defaultPreset(root: string, content: string): Promise<void> {
+	await mkdir(root, { recursive: true });
+	await writeFile(join(root, "default.md"), content);
 }
 
 describe("facet discovery", () => {
@@ -50,6 +64,23 @@ describe("facet discovery", () => {
 		const components = discoverFacets(global, project, true).components;
 		const result = discoverFacetPresets(join(global, "presets"), join(project, "presets"), components, true);
 		expect(result.presets.get("review")?.source).toBe("project");
+	});
+
+	it("resolves trusted project default preset before global fallback", async () => {
+		const global = await root();
+		const project = await root();
+		const presets = new Map<string, FacetPreset>([
+			["global", {} as FacetPreset],
+			["project", {} as FacetPreset],
+		]);
+		await defaultPreset(global, "---\npreset: global\n---\n");
+		await defaultPreset(project, "---\npreset: project\n---\n");
+		expect(discoverDefaultPreset(global, project, presets, true)).toBe("project");
+		await defaultPreset(project, "---\npreset: missing\n---\n");
+		expect(discoverDefaultPreset(global, project, presets, true)).toBe("global");
+		expect(discoverDefaultPreset(global, project, presets, false)).toBe("global");
+		await defaultPreset(global, "---\npreset: missing\n---\n");
+		expect(discoverDefaultPreset(global, project, presets, true)).toBeUndefined();
 	});
 
 	it("composes selected facets in compact axis order", async () => {
@@ -85,6 +116,45 @@ describe("facet discovery", () => {
 });
 
 describe("facet menu", () => {
+	it("applies defaults transiently without overriding explicit clear", async () => {
+		const global = await root();
+		const project = await root();
+		await facet(global, "roles", "dev-peer", "- Trace paths.");
+		await facet(global, "authority", "advisory", "- Ask first.");
+		await facet(global, "style", "concise", "- Lead with result.");
+		await preset(join(global, "presets"), "default");
+		await defaultPreset(global, "---\npreset: default\n---\n");
+		const handlers = new Map<string, (event: any, ctx: any) => Promise<any>>();
+		const entries: any[] = [];
+		const pi = {
+			on(name: string, handler: any) { handlers.set(name, handler); },
+			registerCommand() {},
+			registerEntryRenderer() {},
+			appendEntry(customType: string, data: unknown) { entries.push({ type: "custom", customType, data }); },
+		} as unknown as ExtensionAPI;
+		const ctx: any = {
+			mode: "tui", cwd: project, isProjectTrusted: () => true,
+			ui: { notify() {}, select: async () => undefined },
+			sessionManager: { getBranch: () => entries },
+		};
+		registerFacetExtension(pi, global);
+		await handlers.get("session_start")!({}, ctx);
+		expect(entries).toEqual([]);
+		expect((await handlers.get("before_agent_start")!({ systemPrompt: "Base" }, ctx))?.systemPrompt).toContain("**role: dev-peer**");
+		entries.push({
+			type: "custom",
+			customType: "pi-facets.facet-change",
+			data: {
+				version: 1,
+				action: "clear",
+				before: { role: null, authority: null, style: null },
+				after: { role: null, authority: null, style: null },
+			},
+		});
+		await handlers.get("session_tree")!({}, ctx);
+		expect(await handlers.get("before_agent_start")!({ systemPrompt: "Base" }, ctx)).toBeUndefined();
+	});
+
 	it("shows project selections and returns to menu after an axis selection", async () => {
 		const global = await root();
 		const project = await root();

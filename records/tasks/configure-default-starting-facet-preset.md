@@ -4,7 +4,7 @@ name: configure-default-starting-facet-preset
 created_at: 2026-07-31T19:12:26.222Z
 desc: "Configure project-scoped default starting facet preset with global fallback for new Pi sessions."
 tags: []
-status: todo
+status: done
 scope: agreed
 ---
 
@@ -72,16 +72,20 @@ scope: agreed
 
 ## Implemented so far
 
-- Task refinement only; no implementation changes.
+- Added silent `default.md` preset parser with trusted project → global precedence and resolved-preset validation.
+- Invalid, missing, unknown, or untrusted project config falls through to global; invalid global resolves none.
+- Applied default preset transiently on session start/tree restore only when no explicit facet history exists; valid explicit clear remains authoritative and no entry is appended.
 
 ## Checks
 
-- Refinement confirmed by user on 2026-08-01.
+- Focused: `npm test -- --run test/facets.test.ts` — 7 tests pass.
+- Full: `npm test` — 13 tests pass; `npm run check` and `git diff --check` pass.
+- Package smoke: `pi --approve --no-session --no-tools --mode json -p "Reply exactly: OK"` — returned `OK`.
 
 ## Review / next slice
 
-- Ready for review: no; ready to select for implementation.
-- Likely next slice/task: mark `doing`, then inspect session event paths and add config parser tests.
+- User approved default starting preset behavior on 2026-08-02; task complete.
+- Next candidate: `add-persistent-facet-status-indicator`.
 
 ## Notes
 

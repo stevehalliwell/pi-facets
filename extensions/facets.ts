@@ -297,6 +297,28 @@ export function discoverFacetPresets(
 	};
 }
 
+function readDefaultPreset(root: string, presets: Map<string, FacetPreset>): string | undefined {
+	const path = join(root, "default.md");
+	if (!existsSync(path)) return undefined;
+	try {
+		const parsed = parseFrontmatter<Record<string, unknown>>(readFileSync(path, "utf8"));
+		if (Object.keys(parsed.frontmatter).length !== 1 || typeof parsed.frontmatter.preset !== "string") return undefined;
+		const preset = parsed.frontmatter.preset.trim();
+		return presets.has(preset) ? preset : undefined;
+	} catch {
+		return undefined;
+	}
+}
+
+export function discoverDefaultPreset(
+	globalRoot: string,
+	projectRoot: string,
+	presets: Map<string, FacetPreset>,
+	projectTrusted: boolean,
+): string | undefined {
+	return (projectTrusted ? readDefaultPreset(projectRoot, presets) : undefined) ?? readDefaultPreset(globalRoot, presets);
+}
+
 export function sortedPresets(presets: Map<string, FacetPreset>): FacetPreset[] {
 	return [...presets.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -430,8 +452,8 @@ function isFacetState(value: unknown): value is FacetState {
 	return Object.entries(value).every(([axis, name]) => isAxis(axis) && typeof name === "string");
 }
 
-function restoreState(ctx: ExtensionContext): FacetState {
-	let state: FacetState = {};
+function restoreState(ctx: ExtensionContext): FacetState | undefined {
+	let state: FacetState | undefined;
 	for (const entry of ctx.sessionManager.getBranch()) {
 		if (entry.type !== "custom") continue;
 		if (entry.customType === FACET_STATE_ENTRY) {
@@ -520,6 +542,15 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		if (diagnostics.length) {
 			ctx.ui.notify(`Facet discovery diagnostics:\n${formatDiagnostics(diagnostics)}`, "warning");
 		}
+	}
+
+	function restoreOrDefault(ctx: ExtensionContext): FacetState {
+		const restored = restoreState(ctx);
+		if (restored) return restored;
+		const projectRoot = join(ctx.cwd, CONFIG_DIR_NAME, "facets");
+		const presetName = discoverDefaultPreset(globalRoot, projectRoot, presets, ctx.isProjectTrusted());
+		const preset = presetName ? presets.get(presetName) : undefined;
+		return preset ? { role: preset.role, authority: preset.authority, style: preset.style } : {};
 	}
 
 	function reportMissing(ctx: ExtensionContext): void {
@@ -700,14 +731,14 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 
 	pi.on("session_start", async (_event, ctx) => {
 		refresh(ctx);
-		state = restoreState(ctx);
+		state = restoreOrDefault(ctx);
 		reportMissing(ctx);
 		reportFacetWarnings(ctx);
 	});
 
 	pi.on("session_tree", async (_event, ctx) => {
 		refresh(ctx);
-		state = restoreState(ctx);
+		state = restoreOrDefault(ctx);
 		reportMissing(ctx);
 		reportFacetWarnings(ctx);
 	});

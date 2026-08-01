@@ -100,6 +100,21 @@ Sources resolve in this order:
 
 Project components shadow same-named global components. Files are never merged. Project discovery uses current `cwd` only. Untrusted projects skip local facet Markdown and retain global components. Invalid trusted components produce diagnostics.
 
+### Default preset
+
+An untouched session can apply one transient default preset. Pi checks trusted project config first, then global config:
+
+- `<cwd>/.pi/facets/default.md`
+- `~/.pi/agent/facets/default.md`
+
+```markdown
+---
+preset: implementation-partner
+---
+```
+
+`preset` is required; direct-axis defaults are unsupported. Config may reference any resolved preset, including a global preset. Missing or invalid config silently falls through to the next source, then no facets. Defaults do not create transcript entries and re-resolve on start, resume, reload, and fork while no explicit facet history exists. Any explicit selection or clear overrides defaults for that session.
+
 ## Named presets
 
 Presets compose one role, authority, and style component:
