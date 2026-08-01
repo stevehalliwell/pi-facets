@@ -69,6 +69,19 @@ describe("local Pi package setup", () => {
     });
   });
 
+  it("defines backlog-refinement composition", async () => {
+    const parsed = parseFrontmatter<Record<string, unknown>>(
+      await readFile(resolve(".pi/facets/presets/backlog-refinement.md"), "utf8"),
+    );
+
+    expect(parsed.frontmatter).toMatchObject({
+      name: "backlog-refinement",
+      role: "product-owner",
+      authority: "advisory",
+      style: "exploratory",
+    });
+  });
+
   it("defines argument-aware prompt templates", async () => {
     for (const name of ["explore-options", "decision-brief"]) {
       const parsed = parseFrontmatter<Record<string, unknown>>(

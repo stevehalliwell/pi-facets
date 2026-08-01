@@ -4,7 +4,7 @@ name: align-backlog-refinement-preset-authority
 created_at: 2026-08-01T06:34:57.263Z
 desc: "Align backlog-refinement preset authority with discussion-only workflow."
 tags: []
-status: todo
+status: done
 scope: agreed
 ---
 
@@ -58,16 +58,18 @@ scope: agreed
 
 ## Implemented so far
 
-- Task refinement only; no implementation changes.
+- Updated `backlog-refinement` to `product-owner + advisory + exploratory`.
+- Updated facet grid and added narrow shipped-preset composition assertion.
 
 ## Checks
 
-- Refinement confirmed by user on 2026-08-01.
+- Focused: `npm test -- --run test/package.test.ts` — 6 tests pass.
+- Full: `npm test` — 11 tests pass; `npm run check` and `git diff --check` pass.
 
 ## Review / next slice
 
-- Ready for review: no; ready to select for implementation.
-- Likely next slice/task: mark `doing`, then update preset and grid.
+- User approved backlog-refinement preset alignment on 2026-08-02; task complete.
+- Next candidate: `detect-facet-task-mismatch`.
 
 ## Notes
 

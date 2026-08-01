@@ -6,7 +6,7 @@ Project examples compose one role, one authority, and one style. Presets are nam
 | --- | --- | --- | --- | --- |
 | Technical review | `dev-peer` | `advisory` | `critical` | `technical-review` |
 | Implementation partner | `dev-peer` | `recommend-and-proceed` | `concise` | `implementation-partner` |
-| Backlog refinement | `product-owner` | `recommend-and-proceed` | `concise` | `backlog-refinement` |
+| Backlog refinement | `product-owner` | `advisory` | `exploratory` | `backlog-refinement` |
 | Messaging strategy | `marketing-strategist` | `recommend-and-proceed` | `explanatory` | `messaging-strategy` |
 | Research exploration | `researcher` | `advisory` | `exploratory` | `research-exploration` |
 | Delivery planning | `delivery-lead` | `decisive` | `structured` | `delivery-planning` |
