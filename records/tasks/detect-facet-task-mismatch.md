@@ -4,7 +4,7 @@ name: detect-facet-task-mismatch
 created_at: 2026-07-30T01:43:45.446Z
 desc: "Surface clear request/facet misalignment before substantive work."
 tags: []
-status: todo
+status: done
 scope: agreed
 depends_on:
   - tasks/implement-mode-extension
@@ -19,18 +19,16 @@ depends_on:
 
 ### In scope
 
-- Add one compact alignment instruction to injected facet context only when one or more facets are active.
-- On clear conflict with explicit new request, report concern and ask whether to ignore/continue under current facets or change them.
-- If no concrete target is identified, direct user to `/facets`.
-- If one smallest axis change is clear, use `ask_user_question` to propose it.
+- Add compact `Facet alignment` cue to injected context only when one or more facets are active: `Clear conflict → load \`facet-alignment\`.`
+- Add model-invocable `facet-alignment` skill. It handles clear explicit request/facet conflicts before substantive work.
+- Skill preserves active facets as user overrides, asks whether to continue or change facets, points no-target cases to `/facets`, and offers one clear smallest axis with `ask_user_question`.
 - Otherwise proceed silently; topic alone and ordinary task progression do not trigger a notice.
-- Rename record from `detect-mode-task-mismatch` to `detect-facet-task-mismatch` and update durable path reference.
 
 ### Out of scope
 
-- Extension classifier, facet metadata schema, external model call, or dedicated mismatch skill.
-- Automatic tool restrictions or silent facet switching.
-- Replacing skill routing or workflow-phase decisions.
+- Extension classifier, facet metadata schema, external model call, or automatic facet switching.
+- Automatic tool restrictions.
+- Replacing other skill routing or workflow-phase decisions.
 - Deterministic testing of model semantic judgment.
 
 ### Existing behavior to preserve
@@ -42,12 +40,11 @@ depends_on:
 
 ### Acceptance
 
-- Alignment instruction appears only when one or more active facets exist.
-- Instruction requires clear explicit-request conflict before warning; normal aligned work remains silent.
-- Warning occurs before substantive work and offers continue-under-current-facets or facet change.
-- Targeted change proposes one smallest axis; no target points to `/facets`.
+- Compact cue appears only when one or more active facets exist; no-active prompt remains unchanged.
+- `facet-alignment` skill has model-invocable conflict triggers and complete preserve/continue/change process.
+- Skill offers continue-under-current-facets or facet change; smallest targeted change uses `ask_user_question`; no target points to `/facets`.
 - No automatic state change, tool restriction, classifier, or metadata is added.
-- Focused tests cover prompt inclusion/absence and existing explicit override mechanics.
+- Focused tests cover prompt inclusion/absence, skill resource, and existing explicit override mechanics.
 - Manual scenarios cover backlog refinement → implementation, implementation → backlog refinement, clear mismatch, and aligned request.
 
 ## Open questions
@@ -56,31 +53,36 @@ depends_on:
 
 ## Decisions
 
-- Model judgment guided by compact active-facet instruction is sufficient first implementation.
-- Threshold stays deliberately conservative and fuzzy: agent says facets do not align “at all” with explicit new request.
-- Mismatch report asks whether user wants to ignore it and continue, giving chance to change facets.
+- Model judgment guided by compact active-facet cue and on-demand skill is sufficient first implementation.
+- Threshold stays deliberately conservative and fuzzy: trigger only when facets do not align “at all” with explicit new request.
+- Skill asks whether user wants to ignore conflict and continue, giving chance to change facets.
 - No target uses `/facets`; a clear smallest target may use `ask_user_question`.
 
 ## Plan
 
-1. Locate compact facet-prompt composition and focused tests.
-2. Add conditional alignment wording.
-3. Rename task record and update durable reference.
-4. Add prompt-state tests; document manual behavior scenarios.
-5. Run focused and full checks.
+1. Replace long prompt policy with compact conditional cue.
+2. Add `facet-alignment` skill with model-invocable triggers and conflict-resolution workflow.
+3. Add prompt-state and resource tests; document manual semantic scenarios.
+4. Run focused and full checks.
 
 ## Implemented so far
 
-- Task refinement only; no extension changes.
+- Task shape revised with user approval: long conflict policy moves from per-turn prompt into on-demand `facet-alignment` skill.
+- Replaced long prompt policy with `Clear conflict? Load \`facet-alignment\`.` cue.
+- Added model-invocable `facet-alignment` skill with conflict threshold, continue/change decision, smallest-axis targeting, and explicit override preservation.
+- Updated README and package resource checks; no automatic state, classifier, metadata, or tool behavior added.
 
 ## Checks
 
-- Refinement confirmed by user on 2026-08-01.
+- Skill frontmatter: `node /Users/stevehalliwell/.pi/agent/skills/skill-craft/validate-frontmatter.mjs .pi/skills/facet-alignment/SKILL.md` — pass; 216 body words.
+- Focused: `npm test -- --run test/facets.test.ts test/package.test.ts` — 11 tests pass.
+- Full: `npm test` — 11 tests pass; `npm run check` and `git diff --check` pass.
+- Package smoke: `pi --approve --no-session --no-tools --mode json -p "Reply exactly: OK"` — returned `OK`.
 
 ## Review / next slice
 
-- Ready for review: no; ready to select for implementation.
-- Likely next slice/task: mark `doing`, then implement compact conditional prompt guidance.
+- User approved facet-alignment skill workflow on 2026-08-02; task complete.
+- Next candidate: `configure-default-starting-facet-preset`.
 
 ## Notes
 

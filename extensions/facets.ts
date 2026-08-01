@@ -333,7 +333,9 @@ function activeFacetComponents(state: FacetState, discovery: FacetDiscovery): Fa
 }
 
 function activeFacetContext(components: FacetComponent[]): string {
-	return `## Active facets\n\n${components.map((component) => `**${component.axis}: ${component.name}**\n${component.body}`).join("\n\n")}`;
+	const sections = components.map((component) => `**${component.axis}: ${component.name}**\n${component.body}`);
+	sections.push("**Facet alignment**\n- Clear conflict? Load `facet-alignment`.");
+	return `## Active facets\n\n${sections.join("\n\n")}`;
 }
 
 export function estimateTokens(text: string): number {

@@ -59,7 +59,7 @@ describe("facet discovery", () => {
 		await facet(global, "style", "concise", "- Lead with result.");
 		const discovery = discoverFacets(global);
 		expect(composeFacetPrompt("Base", { style: "concise", role: "dev-peer", authority: "advisory" }, discovery)).toBe(
-			"Base\n\n## Active facets\n\n**role: dev-peer**\n- Trace paths.\n\n**authority: advisory**\n- Ask first.\n\n**style: concise**\n- Lead with result.",
+			"Base\n\n## Active facets\n\n**role: dev-peer**\n- Trace paths.\n\n**authority: advisory**\n- Ask first.\n\n**style: concise**\n- Lead with result.\n\n**Facet alignment**\n- Clear conflict? Load `facet-alignment`.",
 		);
 		expect(composeFacetPrompt("Base", {}, discovery)).toBe("Base");
 	});

@@ -139,6 +139,7 @@ Skills are independently invokable workflows. Each skill is a directory containi
 .pi/skills/
 ├── backlog-refinement/SKILL.md
 ├── competitor-analysis/SKILL.md
+├── facet-alignment/SKILL.md
 ├── implementation/SKILL.md
 ├── website-messaging/SKILL.md
 └── technical-review/SKILL.md
@@ -161,7 +162,8 @@ Current skills:
 - `competitor-analysis` — produce evidence-backed competitor comparisons;
 - `website-messaging` — review or rewrite positioning, page copy, proof, and calls to action;
 - `technical-review` — assess feasibility, trade-offs, risks, and validation before coding;
-- `implementation` — deliver one agreed implementation slice with proportionate validation.
+- `implementation` — deliver one agreed implementation slice with proportionate validation;
+- `facet-alignment` — resolve clear explicit request/facet conflicts without automatic switching.
 
 Add a trusted project skill under `.pi/skills/<name>/SKILL.md`; extension code does not need changing.
 

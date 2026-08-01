@@ -32,6 +32,7 @@ describe("local Pi package setup", () => {
     const resources = [
       ".pi/skills/backlog-refinement/SKILL.md",
       ".pi/skills/competitor-analysis/SKILL.md",
+      ".pi/skills/facet-alignment/SKILL.md",
       ".pi/skills/implementation/SKILL.md",
       ".pi/skills/technical-review/SKILL.md",
       ".pi/skills/website-messaging/SKILL.md",
