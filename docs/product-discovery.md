@@ -46,7 +46,7 @@ An invalid or missing project default silently falls through to a valid global d
 
 ### Presets and individual facets
 
-Presets are fast named starting points. When a user changes one axis after applying a preset, resulting state becomes an explicit custom composition; preset identity no longer applies.
+Presets are fast named compositions. A composition matching a known preset is shown by that preset name, regardless of whether axes were selected together or individually; non-matching axes are shown explicitly.
 
 Role, authority, and style are useful user-facing controls. Detection should identify which axis is misaligned, rather than only proposing a whole preset.
 

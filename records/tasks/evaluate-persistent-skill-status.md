@@ -4,7 +4,7 @@ name: evaluate-persistent-skill-status
 created_at: 2026-08-01T06:31:29.394Z
 desc: "Review whether active skills need persistent UI status."
 tags: []
-status: todo
+status: done
 scope: draft
 ---
 
@@ -41,7 +41,7 @@ scope: draft
 
 ## Decisions
 
-- No persistent skill status is currently required.
+- Superseded on 2026-08-01 by `add-persistent-facet-status-indicator`: persistent UI shows facets only; skills remain invisible workflow context.
 
 ## Plan
 
@@ -50,16 +50,16 @@ scope: draft
 
 ## Implemented so far
 
-- None.
+- Evaluation closed as superseded; no implementation authorized.
 
 ## Checks
 
-- Not started.
+- User confirmed task is defunct on 2026-08-01.
 
 ## Review / next slice
 
-- Ready for review: no; requires user evidence.
-- Likely next slice/task: revisit after status indicator use.
+- Ready for review: completed; superseded by facet-only status task.
+- Likely next slice/task: none.
 
 ## Notes
 

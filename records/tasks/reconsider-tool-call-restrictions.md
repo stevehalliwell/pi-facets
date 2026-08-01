@@ -4,7 +4,7 @@ name: reconsider-tool-call-restrictions
 created_at: 2026-08-01T06:31:29.414Z
 desc: "Review whether Facets should ever restrict or gate Pi tool calls."
 tags: []
-status: todo
+status: done
 scope: draft
 ---
 
@@ -41,7 +41,7 @@ scope: draft
 
 ## Decisions
 
-- Current accepted decision: do not limit tool calling.
+- Superseded/closed on 2026-08-01 by accepted `do-not-limit-tool-calling` decision and current facet boundary: tool permissions remain Pi/project configuration.
 
 ## Plan
 
@@ -50,16 +50,16 @@ scope: draft
 
 ## Implemented so far
 
-- None.
+- Review closed; no implementation authorized.
 
 ## Checks
 
-- Not started.
+- User confirmed task is defunct on 2026-08-01.
 
 ## Review / next slice
 
-- Ready for review: no; no contrary evidence captured.
-- Likely next slice/task: revisit only on concrete tool-policy pain.
+- Ready for review: completed; no facet tool-gating work remains.
+- Likely next slice/task: none.
 
 ## Notes
 

@@ -4,7 +4,7 @@ name: evaluate-facet-model-switching
 created_at: 2026-08-01T06:31:29.405Z
 desc: "Review whether facet selections should influence Pi model choice."
 tags: []
-status: todo
+status: done
 scope: draft
 ---
 
@@ -41,7 +41,7 @@ scope: draft
 
 ## Decisions
 
-- Model switching is deferred pending evidence or concrete need.
+- User skipped model-switching review on 2026-08-01. Model selection remains Pi-level configuration.
 
 ## Plan
 
@@ -50,16 +50,16 @@ scope: draft
 
 ## Implemented so far
 
-- None.
+- Review closed; no implementation authorized.
 
 ## Checks
 
-- Not started.
+- User skipped task on 2026-08-01.
 
 ## Review / next slice
 
-- Ready for review: no; no concrete use case captured.
-- Likely next slice/task: revisit when a workflow requires different model profile.
+- Ready for review: completed; user skipped this work.
+- Likely next slice/task: none.
 
 ## Notes
 

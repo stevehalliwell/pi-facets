@@ -33,7 +33,7 @@ Defer mode/task mismatch detection until observed usage provides concrete mismat
 
 ## Affected areas
 
-- `records/tasks/detect-mode-task-mismatch.md` remains draft work.
+- `records/tasks/detect-facet-task-mismatch.md` remains draft work.
 - Future mode routing, extension behavior, or skill workflow may be revisited after evidence appears.
 
 ## Guardrails

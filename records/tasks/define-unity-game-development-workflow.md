@@ -4,7 +4,7 @@ name: define-unity-game-development-workflow
 created_at: 2026-08-01T06:31:29.382Z
 desc: "Discover and define Pi workflow for Unity and game-development work."
 tags: []
-status: todo
+status: done
 scope: draft
 ---
 
@@ -41,7 +41,7 @@ scope: draft
 
 ## Decisions
 
-- None.
+- User skipped Unity/game workflow discovery on 2026-08-01; no implementation task follows.
 
 ## Plan
 
@@ -58,8 +58,8 @@ scope: draft
 
 ## Review / next slice
 
-- Ready for review: no; discovery not begun.
-- Likely next slice/task: discuss recent Unity/game agent interactions.
+- Ready for review: completed; user skipped this work on 2026-08-01.
+- Likely next slice/task: none.
 
 ## Notes
 

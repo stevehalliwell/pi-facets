@@ -4,7 +4,7 @@ name: evaluate-automatic-facet-switching
 created_at: 2026-08-01T06:31:29.423Z
 desc: "Review whether Pi should ever automatically switch persistent facets."
 tags: []
-status: todo
+status: done
 scope: draft
 ---
 
@@ -41,7 +41,7 @@ scope: draft
 
 ## Decisions
 
-- Automatic switching is currently out of scope; suggestion and explicit confirmation are preferred.
+- Superseded on 2026-08-01 by `detect-facet-task-mismatch`: mismatch behavior warns and asks; automatic switching remains excluded.
 
 ## Plan
 
@@ -50,16 +50,16 @@ scope: draft
 
 ## Implemented so far
 
-- None.
+- Evaluation closed as superseded; no implementation authorized.
 
 ## Checks
 
-- Not started.
+- User confirmed task is defunct on 2026-08-01.
 
 ## Review / next slice
 
-- Ready for review: no; requires observed usage.
-- Likely next slice/task: revisit after mismatch suggestions are tested.
+- Ready for review: completed; superseded by explicit mismatch flow.
+- Likely next slice/task: none.
 
 ## Notes
 

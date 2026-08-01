@@ -5,71 +5,86 @@ created_at: 2026-08-01T06:25:10.202Z
 desc: "Persist research and standards verification as OKF-compatible Markdown artifacts."
 tags: []
 status: todo
-scope: draft
+scope: agreed
 ---
 
 ## Scope
 
 ### Desired outcome
 
-- Online research and incidental implementation verification create organized, reusable OKF-compatible Markdown artifacts by default.
+- Research and incidental standards verification save reusable, OKF v0.2-compliant Markdown artifacts by default.
 
 ### In scope
 
-- Source notes containing metadata/URL, concise summary, supporting evidence or excerpts, relevance, confidence, and limits.
-- Synthesis notes connecting evidence to findings, uncertainty, and recommendations.
-- Capture for standalone research and incidental standards verification.
-- Explicit discussion-only opt-out.
+- Follow canonical Open Knowledge Format v0.2 specification.
+- When project bundle root is unknown, ask user for it; retain supplied root for current session.
+- Once root is supplied, initialize missing bundle structure automatically:
+  - `index.md` with `okf_version: "0.2"`;
+  - `references/` source concepts;
+  - `research/` synthesis concepts.
+- Create one `Reference` concept per source under `references/`.
+- Create one `Research Synthesis` concept per research question under `research/`.
+- Source notes include `type`, title, description, resource URL, tags, generated metadata, summary, evidence/excerpts, relevance, confidence, and limits.
+- Synthesis notes include `type`, title, description, tags, generated metadata, linked `sources`, question, findings with footnotes, recommendation, and uncertainty/limits.
+- Use standard Markdown links/footnotes for graph/provenance.
+- Capture standalone research and incidental standards verification; explicit discussion-only request opts out.
+- Update web-implementation dependency contract, research skills/docs, and focused checks.
 
 ### Out of scope
 
-- Inventing an OKF schema, storage location, or taxonomy without project convention.
-- Full archival of source pages by default.
-- Changing facet state or status UI.
+- Persistent project mapping/config file, automatic root discovery, or asking for source/synthesis subpaths.
+- Full source-page archival, invented storage beyond agreed bundle layout, facet state, or status UI changes.
+- Trust verification, attested computations, or custom OKF runtime tooling.
 
 ### Existing behavior to preserve
 
-- Evidence is distinguished from inference and recommendations.
+- Evidence stays distinct from inference and recommendations.
 - User retains control over material conclusions.
 - Existing web research tools remain usable.
 
 ### Acceptance
 
-- Workflow resolves configured project OKF location/schema or fails with actionable guidance when absent.
-- Each saved source note has agreed evidence fields.
-- Synthesis is linkable to its source notes.
+- Unknown root asks user before research artifacts are written.
+- Supplied root initializes valid minimal OKF v0.2 bundle when absent.
+- Every non-reserved created Markdown concept has parseable frontmatter with non-empty `type`.
+- One Reference concept is saved per source; one linked Research Synthesis is saved per question.
+- Notes contain agreed evidence/provenance and synthesis fields.
 - Discussion-only request creates no artifacts.
-- Tests/docs cover normal, incidental-verification, and missing-config paths.
+- Session remembers supplied root without writing project config.
+- Tests/docs cover unknown root, existing/absent bundle, normal research, incidental verification, and opt-out.
 
 ## Open questions
 
-- Where is OKF specification and storage convention configured for a project?
-- Does every incidental verification need separate source note or may a shared standards note group related sources?
+- None.
 
 ## Decisions
 
-- Research artifact capture is default for both standalone and incidental research.
-- Full extracted source text is not default; summary plus evidence is sufficient.
+- Use canonical OKF v0.2 spec: `https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md`.
+- Ask only for bundle root per project/session; do not require project config or subpath mapping.
+- Initialize `index.md`, `references/`, and `research/` automatically once root is supplied.
+- Save one Reference per source and one Research Synthesis per question.
 
 ## Plan
 
-- Locate or define project-facing OKF configuration contract.
-- Review existing research/competitor-analysis skill behavior.
-- Draft capture workflow and safe file-creation rules.
+1. Read current research/competitor skill patterns and define reusable OKF helper boundary.
+2. Implement session-scoped root acquisition and safe bundle initialization.
+3. Implement reference/synthesis Markdown generation with links and provenance.
+4. Update affected skills and dependent web workflow wording.
+5. Add focused file/output checks and run full validation.
 
 ## Implemented so far
 
-- None.
+- Task refinement only; no implementation changes.
 
 ## Checks
 
-- Not started.
+- Canonical OKF v0.2 spec researched and refinement confirmed by user on 2026-08-01.
 
 ## Review / next slice
 
-- Ready for review: no; scope remains draft.
-- Likely next slice/task: establish OKF configuration contract.
+- Ready for review: no; ready to select for implementation.
+- Likely next slice/task: mark `doing`, then inspect research-skill integration and safe session root state.
 
 ## Notes
 
-- Missing configuration must not scatter arbitrary Markdown across project.
+- Missing root asks user; supplied root enables automatic compliant saving.

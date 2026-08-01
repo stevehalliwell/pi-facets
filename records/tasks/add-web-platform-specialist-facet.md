@@ -5,68 +5,73 @@ created_at: 2026-08-01T06:25:10.183Z
 desc: "Add web-platform specialist role and optional preset for standards-aware web work."
 tags: []
 status: todo
-scope: draft
+scope: agreed
 ---
 
 ## Scope
 
 ### Desired outcome
 
-- User can select or receive a suggestion for a web-platform specialist stance during web implementation or quality review.
+- User can select web-platform specialist stance through a reusable `web-implementation` preset or individual role selection.
 
 ### In scope
 
-- Add single-axis role component for current browser standards, accessibility, responsive behavior, compatibility, SEO/GEO, and performance.
-- Add matching preset if existing authority/style components express agreed behavior.
-- Define role-selection examples for web implementation/review versus website messaging.
+- Add headingless, list-first `web-platform-specialist` role component.
+- Role covers current native standards, semantics/accessibility, responsive behavior, compatibility, performance, SEO/GEO, browser capability, authoritative-source verification, and material trade-off alternatives.
+- Add `web-implementation` preset: `web-platform-specialist + recommend-and-proceed + concise`.
+- Update package-resource test, facet grid, and relevant README/resource docs.
+- Document role-selection examples: web implementation/review uses web-platform specialist; copy/messaging uses marketing strategist first.
 
 ### Out of scope
 
-- Web implementation workflow or delivery audit procedure.
-- Automatic facet switching.
-- New `initiative` axis.
+- Web implementation workflow, delivery audit procedure, Lighthouse target, browser matrix, or research-artifact capture.
+- Automatic facet switching/routing, `initiative` axis, component metadata, or authority/style component changes.
 
 ### Existing behavior to preserve
 
 - Marketing strategist remains first suggestion for website messaging/copy requests, including SEO/GEO concerns.
-- Project/global component shadowing and explicit user overrides remain unchanged.
+- Project/global component shadowing, explicit user overrides, and existing component discovery remain unchanged.
+- Role stays single-axis; workflow and authority rules remain elsewhere.
 
 ### Acceptance
 
-- Valid role Markdown loads through existing discovery and `/facets` controls.
-- Role instructions distinguish platform expertise from generic dev-peer behavior.
-- Web implementation/review can suggest this role; copy/messaging does not displace marketing strategist by topic alone.
-- Focused discovery/preset tests pass.
+- Valid headingless `web-platform-specialist` role loads through discovery and `/facets`.
+- `web-implementation` resolves agreed three-axis composition.
+- Role wording distinguishes web-platform expertise from generic dev-peer and marketing-strategist boundaries.
+- Facet grid and package-resource coverage include new role/preset.
+- Focused discovery/preset tests pass; project/global shadowing remains intact.
 
 ## Open questions
 
-- Is a preset needed now, and which existing style best fits it?
-- Does role suggestion belong to mismatch detection task or skill routing guidance?
+- None.
 
 ## Decisions
 
-- For routine standards-compliant web details, agent may act confidently from high-level direction.
+- Web-platform specialist role is for implementation/review; marketing strategist remains first for messaging/copy.
+- Routine standards-compliant web details may proceed from high-level direction.
 - Material quality or compatibility conflict requires flag-and-propose behavior.
+- Preset composition: web-platform-specialist, recommend-and-proceed, concise.
 
 ## Plan
 
-- Draft role component and candidate preset.
-- Review against existing dev-peer and marketing-strategist boundaries.
-- Add focused tests/docs after scope agreement.
+1. Add role and preset Markdown using compact source convention.
+2. Update facet grid and package resource expectations.
+3. Add focused composition/discovery coverage.
+4. Run full checks.
 
 ## Implemented so far
 
-- None.
+- Task refinement only; no implementation changes.
 
 ## Checks
 
-- Not started.
+- Refinement confirmed by user on 2026-08-01.
 
 ## Review / next slice
 
-- Ready for review: no; scope remains draft.
-- Likely next slice/task: decide preset composition and role-routing boundary.
+- Ready for review: no; ready to select for implementation.
+- Likely next slice/task: mark `doing`, then add role/preset and package coverage.
 
 ## Notes
 
-- Role provides perspective; delivery procedure belongs in separate workflow task.
+- Delivery/audit behavior belongs in `add-web-implementation-delivery-workflow`.

@@ -5,7 +5,7 @@ created_at: 2026-08-01T06:34:57.263Z
 desc: "Align backlog-refinement preset authority with discussion-only workflow."
 tags: []
 status: todo
-scope: draft
+scope: agreed
 ---
 
 ## Scope
@@ -16,53 +16,58 @@ scope: draft
 
 ### In scope
 
-- Review current `recommend-and-proceed` authority against desired advisory behavior.
-- Update preset component references and documentation if agreement confirms mismatch.
-- Confirm role/style remain appropriate.
+- Change preset authority from `recommend-and-proceed` to `advisory`.
+- Change preset style from `concise` to `exploratory`.
+- Retain `product-owner` role.
+- Update `docs/facet-grid.md` to match.
+- Add focused composition assertion only if current package tests do not cover shipped preset contents.
 
 ### Out of scope
 
 - Rewriting backlog-refinement skill procedure.
 - Changing task lifecycle or implementation authorization.
-- Adding automatic routing.
+- Component wording changes, preset rename, automatic routing, or facet-model changes.
 
 ### Existing behavior to preserve
 
 - Backlog refinement does not modify implementation files.
 - Recommendations do not authorize product or implementation decisions.
+- Historical records remain historical; do not rewrite them to match current composition.
 
 ### Acceptance
 
-- Selected authority matches agreed backlog discussion behavior.
-- Preset and skill documentation do not imply implementation authorization.
-- Focused preset/discovery tests pass.
+- `/facets preset backlog-refinement` resolves `product-owner + advisory + exploratory`.
+- `docs/facet-grid.md` matches preset composition.
+- Focused package/preset checks pass.
 
 ## Open questions
 
-- Is `advisory` sufficient, or should authority components be refined first?
+- None.
 
 ## Decisions
 
-- Discovery preference: product-owner, advisory, exploratory.
+- Backlog refinement uses product-owner, advisory, exploratory composition.
+- This is a minimal preset/documentation correction; skill procedure remains unchanged.
 
 ## Plan
 
-- Compare current preset and authority component wording.
-- Make smallest agreed reference/content update.
-- Run focused checks.
+1. Update preset frontmatter.
+2. Update facet grid.
+3. Inspect existing package tests; add narrow composition assertion only if needed.
+4. Run focused and full checks.
 
 ## Implemented so far
 
-- None.
+- Task refinement only; no implementation changes.
 
 ## Checks
 
-- Not started.
+- Refinement confirmed by user on 2026-08-01.
 
 ## Review / next slice
 
-- Ready for review: no; scope remains draft.
-- Likely next slice/task: confirm authority component selection.
+- Ready for review: no; ready to select for implementation.
+- Likely next slice/task: mark `doing`, then update preset and grid.
 
 ## Notes
 

@@ -4,7 +4,7 @@ name: separate-user-and-generated-communication-facets
 created_at: 2026-07-30T03:41:40.557Z
 desc: ""
 tags: []
-status: todo
+status: done
 scope: draft
 ---
 
@@ -50,7 +50,7 @@ Define whether pi-facets should distinguish communication addressed to the user 
 
 - Capture as future work; keep `status: todo` and `scope: draft` until refined.
 - Treat independent control as a possibility to evaluate, not an implementation commitment.
-- Defer target-specific facets until concrete communication-target pain or artifact-style conflict appears; see `records/decisions/defer-communication-target-facets.md`.
+- Defer target-specific facets until concrete communication-target pain or artifact-style conflict appears; user reconfirmed on 2026-08-01. See `records/decisions/defer-communication-target-facets.md`.
 
 ## Plan
 
@@ -68,8 +68,8 @@ Define whether pi-facets should distinguish communication addressed to the user 
 
 ## Review / next slice
 
-- Ready for review: no; task is intentionally deferred.
-- Revisit when `communication-target-pain` or `artifact-style-conflict` occurs.
+- Ready for review: completed; user kept this work deferred on 2026-08-01.
+- Revisit only when `communication-target-pain` or `artifact-style-conflict` occurs.
 
 ## Notes
 

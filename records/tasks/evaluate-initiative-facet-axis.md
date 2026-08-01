@@ -4,7 +4,7 @@ name: evaluate-initiative-facet-axis
 created_at: 2026-08-01T06:31:29.367Z
 desc: "Review whether action breadth needs persistent initiative facet axis."
 tags: []
-status: todo
+status: done
 scope: draft
 ---
 
@@ -42,7 +42,8 @@ scope: draft
 
 ## Decisions
 
-- Current decision keeps initiative as candidate. See `records/decisions/keep-initiative-axis-as-candidate.md`.
+- Current accepted decision keeps initiative as candidate. See `records/decisions/keep-initiative-axis-as-candidate.md`.
+- Review closed on 2026-08-01: current examples map to workflow/domain rules; no manual persistent knob need observed.
 
 ## Plan
 
@@ -51,16 +52,16 @@ scope: draft
 
 ## Implemented so far
 
-- None.
+- Reviewed backlog, generic implementation, visual iteration, web-platform, and Three.js examples; no axis implementation authorized.
 
 ## Checks
 
-- Not started.
+- Trade-off review completed; user chose defer and close on 2026-08-01.
 
 ## Review / next slice
 
-- Ready for review: no; evidence gathering required.
-- Likely next slice/task: assess Unity/game workflow evidence.
+- Ready for review: completed; deferred by user on 2026-08-01.
+- Likely next slice/task: reopen only on `initiative-axis-evidence` or `cross-domain-action-scope-friction`.
 
 ## Notes
 

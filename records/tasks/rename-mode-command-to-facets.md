@@ -4,7 +4,7 @@ name: rename-mode-command-to-facets
 created_at: 2026-07-31T03:02:05.215Z
 desc: ""
 tags: []
-status: review
+status: done
 scope: agreed
 depends_on: []
 ---
@@ -88,8 +88,8 @@ Make `/facets` canonical pi-facets slash command for selecting and inspecting ro
 
 ## Review / next slice
 
-- Ready for review: yes; full internal rename and checks complete.
-- Likely next slice/task: user review; then mark done if approved.
+- Ready for review: completed; user approved on 2026-08-01.
+- Likely next slice/task: none.
 
 ## Notes
 

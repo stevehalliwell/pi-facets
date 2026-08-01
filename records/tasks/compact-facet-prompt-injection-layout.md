@@ -5,64 +5,95 @@ created_at: 2026-07-31T21:40:08.282Z
 desc: "Make injected active-facet prompt context more compact and consistently ordered Markdown."
 tags: []
 status: todo
-scope: draft
+scope: agreed
 ---
 
 ## Scope
 
 ### Desired outcome
 
-- Active-facet instructions inject in compact, consistently ordered Markdown while preserving their meaning.
+- Active facets inject compact, consistently ordered Markdown with visible source-format and estimated-token warnings.
 
 ### In scope
 
-- Review current composed active-facet injection layout.
-- Define compact representation and Markdown ordering.
-- Update prompt composition and focused tests after scope agreement.
+- Compose fixed layout:
+
+  ```md
+  ## Active facets
+
+  **role: <name>**
+  - ...
+
+  **authority: <name>**
+  - ...
+
+  **style: <name>**
+  - ...
+  ```
+
+- Keep role → authority → style order; omit unset axes and preset alias.
+- Remove leading H1 from shipped package facet components; bodies start directly with list items.
+- Update README component example/convention.
+- Preserve external component content/injection, but warn for leading H1 or body not in compact list form.
+- Estimate tokens as `ceil(character count / 4)`.
+- Warn when active component exceeds 200 estimated tokens or active composition exceeds 500.
+- Report format/size warnings on discovery, restore, selection, or state change; never per agent turn.
+- Add focused tests for layout, warnings, and estimates.
 
 ### Out of scope
 
-- Changing facet semantics, component content, selection behavior, skills, or automatic routing.
+- Changing facet semantics, component instructions, selection behavior, skills, automatic routing, or token enforcement.
+- Rewriting, stripping, or rejecting external component content.
+- Subjective warnings for semantic overlap or instruction quality.
 
 ### Existing behavior to preserve
 
-- All selected role, authority, and style instructions remain present.
-- Existing session selection, persistence, and explicit `/facets` controls remain unchanged.
+- All selected role, authority, and style instructions remain present exactly once.
+- Existing session selection, persistence, explicit `/facets` controls, component discovery, and precedence remain unchanged.
+- Existing malformed frontmatter, duplicates, and missing references remain errors.
 
 ### Acceptance
 
-- [TBD: exact compact layout and ordering]
-- Composed prompt contains each active component exactly once in agreed order.
-- Focused tests cover rendered prompt shape.
+- Composed prompt uses agreed heading, bold labels, and fixed axis order with no duplicated package H1.
+- Unset axes are omitted; no preset alias is injected.
+- All shipped facet bodies are headingless list-first Markdown; README matches convention.
+- External leading H1/non-list components remain usable and inject unchanged, with actionable warning.
+- Estimated-token warnings fire above 200 per active component or 500 active total and do not fire per agent turn.
+- Existing instructions, selection, persistence, and discovery behavior remain intact.
+- Focused tests cover layout, source warnings, size warnings, and no-active-facet behavior.
 
 ## Open questions
 
-- What exact headings, hierarchy, and axis order should the injected Markdown use?
-- Is compactness measured by token count, visual scanability, or both?
+- None.
 
 ## Decisions
 
-- Capture only. User requested future consideration; implementation not authorized.
+- Use bold axis/name labels under `## Active facets`.
+- Source convention applies to shipped package components; external content is warned then preserved.
+- Token estimate is approximate `ceil(character count / 4)` with 200 per-component and 500 active-total warning budgets.
+- Warning timing is selection/restoration/state change, not each agent turn.
 
 ## Plan
 
-- Refine target prompt shape from real injection examples.
-- Locate composition code and tests.
-- Implement agreed layout; run focused and full checks.
+1. Locate composition, discovery diagnostics, and state-change paths.
+2. Update shipped component bodies and README convention.
+3. Implement compact renderer and warning helpers.
+4. Add focused layout/warning tests.
+5. Run full checks and inspect representative prompt output.
 
 ## Implemented so far
 
-- None.
+- Task refinement only; no implementation changes.
 
 ## Checks
 
-- Attendant validation passed before capture.
+- Refinement confirmed by user on 2026-08-01.
 
 ## Review / next slice
 
-- Ready for review: no; draft capture only.
-- Likely next slice/task: refine desired injection layout when prioritized.
+- Ready for review: no; ready to select for implementation.
+- Likely next slice/task: mark `doing`, then inspect warning delivery across session and selection paths.
 
 ## Notes
 
-- Keep component Markdown source-of-truth; layout change must not duplicate or omit instructions.
+- Warnings inform user; they never alter active state or external component instructions.
