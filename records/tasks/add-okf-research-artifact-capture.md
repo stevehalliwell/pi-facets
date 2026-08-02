@@ -4,7 +4,7 @@ name: add-okf-research-artifact-capture
 created_at: 2026-08-01T06:25:10.202Z
 desc: "Persist research and standards verification as OKF-compatible Markdown artifacts."
 tags: []
-status: todo
+status: done
 scope: agreed
 ---
 
@@ -17,7 +17,7 @@ scope: agreed
 ### In scope
 
 - Follow canonical Open Knowledge Format v0.2 specification.
-- When project bundle root is unknown, ask user for it; retain supplied root for current session.
+- When project bundle root is unknown, ask user for it; retain supplied root in agent session context only.
 - Once root is supplied, initialize missing bundle structure automatically:
   - `index.md` with `okf_version: "0.2"`;
   - `references/` source concepts;
@@ -32,7 +32,7 @@ scope: agreed
 
 ### Out of scope
 
-- Persistent project mapping/config file, automatic root discovery, or asking for source/synthesis subpaths.
+- Persistent project mapping/config file, extension/runtime state, automatic root discovery, or asking for source/synthesis subpaths.
 - Full source-page archival, invented storage beyond agreed bundle layout, facet state, or status UI changes.
 - Trust verification, attested computations, or custom OKF runtime tooling.
 
@@ -60,30 +60,32 @@ scope: agreed
 ## Decisions
 
 - Use canonical OKF v0.2 spec: `https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md`.
-- Ask only for bundle root per project/session; do not require project config or subpath mapping.
+- Ask only for bundle root in current agent session; do not require project config, runtime state, or subpath mapping.
 - Initialize `index.md`, `references/`, and `research/` automatically once root is supplied.
 - Save one Reference per source and one Research Synthesis per question.
 
 ## Plan
 
-1. Read current research/competitor skill patterns and define reusable OKF helper boundary.
-2. Implement session-scoped root acquisition and safe bundle initialization.
-3. Implement reference/synthesis Markdown generation with links and provenance.
-4. Update affected skills and dependent web workflow wording.
-5. Add focused file/output checks and run full validation.
+1. Add reusable OKF capture reference with root acquisition, safe bundle initialization, and Markdown templates.
+2. Update research and technical-review workflows to retain root in agent session context and capture artifacts unless discussion-only.
+3. Update dependent web workflow wording and docs.
+4. Add focused resource/workflow checks and run full validation.
 
 ## Implemented so far
 
-- Task refinement only; no implementation changes.
+- Confirmed bundle root remains in current agent session context; no extension/runtime state or project config.
+- Added reusable OKF artifact reference with bundle initialization plus Reference and Research Synthesis fields.
+- Wired competitor analysis and technical review to capture artifacts unless discussion-only.
 
 ## Checks
 
-- Canonical OKF v0.2 spec researched and refinement confirmed by user on 2026-08-01.
+- Both changed skill frontmatters validate.
+- Full: `npm test` — 16 tests pass; `npm run check` and `git diff --check` pass.
 
 ## Review / next slice
 
-- Ready for review: no; ready to select for implementation.
-- Likely next slice/task: mark `doing`, then inspect research-skill integration and safe session root state.
+- User approved OKF artifact capture workflow on 2026-08-02; task complete.
+- Next candidate: `add-web-implementation-delivery-workflow`.
 
 ## Notes
 

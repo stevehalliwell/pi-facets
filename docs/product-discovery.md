@@ -122,7 +122,7 @@ Expected behavior branches by request:
 
 ### Online research
 
-Research should create durable OKF-compatible Markdown artifacts by default, not only chat answers. This includes incidental standards verification during implementation.
+Research should create durable OKF-compatible Markdown artifacts by default, not only chat answers. This includes incidental standards verification during implementation. Ask for bundle root once when unknown, retain it in current agent session context, then initialize the minimal OKF v0.2 bundle; discussion-only requests opt out.
 
 Each source note should include:
 

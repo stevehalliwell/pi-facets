@@ -33,6 +33,7 @@ describe("local Pi package setup", () => {
       ".pi/skills/backlog-refinement/SKILL.md",
       ".pi/skills/competitor-analysis/SKILL.md",
       ".pi/skills/facet-alignment/SKILL.md",
+      ".pi/skills/references/okf-artifacts.md",
       ".pi/skills/implementation/SKILL.md",
       ".pi/skills/technical-review/SKILL.md",
       ".pi/skills/website-messaging/SKILL.md",
@@ -57,6 +58,15 @@ describe("local Pi package setup", () => {
       await expect(access(resolve(resource))).resolves.toBeUndefined();
     }
     await expect(access(resolve(".pi/facets/presets/implementation-review.md"))).rejects.toThrow();
+  });
+
+  it("defines OKF capture reference and research workflow links", async () => {
+    const reference = await readFile(resolve(".pi/skills/references/okf-artifacts.md"), "utf8");
+    expect(reference).toContain("type: Reference");
+    expect(reference).toContain("type: Research Synthesis");
+    for (const skill of ["competitor-analysis", "technical-review"]) {
+      await expect(readFile(resolve(".pi/skills", skill, "SKILL.md"), "utf8")).resolves.toContain("../references/okf-artifacts.md");
+    }
   });
 
   it("defines implementation-partner composition", async () => {
