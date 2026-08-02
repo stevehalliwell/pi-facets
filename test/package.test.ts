@@ -35,6 +35,7 @@ describe("local Pi package setup", () => {
       ".pi/skills/facet-alignment/SKILL.md",
       ".pi/skills/references/okf-artifacts.md",
       ".pi/skills/implementation/SKILL.md",
+      ".pi/skills/web-implementation/SKILL.md",
       ".pi/skills/technical-review/SKILL.md",
       ".pi/skills/website-messaging/SKILL.md",
       ".pi/facets/roles/marketing-strategist.md",
@@ -80,6 +81,13 @@ describe("local Pi package setup", () => {
       authority: "recommend-and-proceed",
       style: "concise",
     });
+  });
+
+  it("defines web implementation delivery workflow", async () => {
+    const skill = await readFile(resolve(".pi/skills/web-implementation/SKILL.md"), "utf8");
+    expect(skill).toContain("Run only after explicit delivery language");
+    expect(skill).toContain("Target 100 in every applicable category");
+    expect(skill).toContain("OKF research artifacts");
   });
 
   it("defines web-implementation composition", async () => {

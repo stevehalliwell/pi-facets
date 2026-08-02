@@ -4,7 +4,7 @@ name: add-web-implementation-delivery-workflow
 created_at: 2026-08-01T06:25:10.212Z
 desc: "Add standards-aware web implementation and pre-delivery quality workflow."
 tags: []
-status: todo
+status: done
 scope: agreed
 depends_on:
   - tasks/add-okf-research-artifact-capture
@@ -76,16 +76,21 @@ depends_on:
 
 ## Implemented so far
 
-- Task refinement only; no implementation changes.
+- Added model-invocable `web-implementation` skill layered on generic implementation workflow.
+- Build covers browser support, accessibility, responsiveness, SEO/GEO, performance, material conflicts, and OKF-backed uncertain guidance.
+- Delivery review triggers only from explicit delivery language; requires 100 in every applicable Lighthouse category, safe audit-tool setup, remediation, and explicit trade-off pauses.
+- Updated README and package workflow coverage.
 
 ## Checks
 
-- Refinement confirmed by user on 2026-08-01.
+- Skill frontmatter validator passes.
+- Focused: `npm test -- --run test/package.test.ts` — 9 tests pass.
+- Full: `npm test` — 17 tests pass; `npm run check` and `git diff --check` pass.
 
 ## Review / next slice
 
-- Ready for review: no; blocked by `add-okf-research-artifact-capture` refinement/implementation.
-- Likely next slice/task: refine OKF artifact capture configuration contract.
+- User approved web implementation delivery workflow on 2026-08-02; task complete.
+- Next candidate: `add-threejs-performance-workflow`.
 
 ## Notes
 
