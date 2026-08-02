@@ -4,7 +4,7 @@ name: add-website-messaging-intent-branches
 created_at: 2026-08-01T06:34:57.280Z
 desc: "Add intent-specific branches to website messaging workflow."
 tags: []
-status: todo
+status: done
 scope: agreed
 ---
 
@@ -62,16 +62,17 @@ scope: agreed
 
 ## Implemented so far
 
-- Task refinement only; no implementation changes.
+- Added explicit review, copy-direction, and ambiguous-intent branches with branch-specific outputs.
+- Review stops at diagnosis/options; copy direction presents 2–3 candidates and waits for choice.
 
 ## Checks
 
-- Refinement confirmed by user on 2026-08-01.
+- Website-messaging frontmatter validates.
+- Full: `npm test` — 18 tests pass; `npm run check` and `git diff --check` pass.
 
 ## Review / next slice
 
-- Ready for review: no; ready to select for implementation.
-- Likely next slice/task: mark `doing`, then edit skill branch triggers and outputs.
+- User approved intent branches on 2026-08-02; task complete.
 
 ## Notes
 

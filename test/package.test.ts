@@ -84,6 +84,13 @@ describe("local Pi package setup", () => {
     });
   });
 
+  it("defines website messaging intent branches", async () => {
+    const skill = await readFile(resolve(".pi/skills/website-messaging/SKILL.md"), "utf8");
+    expect(skill).toContain("Review branch");
+    expect(skill).toContain("Copy-direction branch");
+    expect(skill).toContain("ask whether user wants diagnosis or copy direction");
+  });
+
   it("defines web implementation delivery workflow", async () => {
     const skill = await readFile(resolve(".pi/skills/web-implementation/SKILL.md"), "utf8");
     expect(skill).toContain("Run only after explicit delivery language");
