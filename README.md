@@ -21,7 +21,7 @@ Core implementation is complete for:
 - role, authority, and style components;
 - trusted project-local and global facet discovery;
 - named facet presets;
-- four trusted project-local workflow skills;
+- trusted project-local workflow skills for planning, research, implementation, web delivery, and release readiness;
 - focused extension and package tests.
 
 Deferred until evidence or a concrete need appears:
@@ -135,7 +135,7 @@ Global presets live under `~/.pi/agent/facets/presets/`. Trusted project presets
 
 ### Project examples
 
-Project ships representative compositions for technical review, backlog refinement, messaging strategy, research exploration, and delivery planning. See [`docs/facet-grid.md`](docs/facet-grid.md) for the resource grid.
+Project ships representative compositions for technical review, backlog refinement, messaging strategy, research exploration, delivery planning, and release readiness. See [`docs/facet-grid.md`](docs/facet-grid.md) for the resource grid.
 
 Prompt templates are short, non-mutating request frames:
 
@@ -156,6 +156,8 @@ Skills are independently invokable workflows. Each skill is a directory containi
 ├── competitor-analysis/SKILL.md
 ├── facet-alignment/SKILL.md
 ├── implementation/SKILL.md
+├── release-readiness/SKILL.md
+├── threejs-performance/SKILL.md
 ├── web-implementation/SKILL.md
 ├── website-messaging/SKILL.md
 └── technical-review/SKILL.md
@@ -180,9 +182,15 @@ Current skills:
 - `technical-review` — assess feasibility, trade-offs, risks, and validation before coding;
 - `implementation` — deliver one agreed implementation slice with proportionate validation;
 - `facet-alignment` — resolve clear explicit request/facet conflicts without automatic switching;
-- `web-implementation` — deliver standards-aware web implementation and explicit delivery review.
+- `web-implementation` — deliver standards-aware web implementation and explicit delivery review;
+- `threejs-performance` — protect an explicit Three.js rendering budget during performance work;
+- `release-readiness` — reconcile release changes with README and CHANGELOG, then prepare docs for user review.
 
 Add a trusted project skill under `.pi/skills/<name>/SKILL.md`; extension code does not need changing.
+
+### Release preparation
+
+Use `/facets` to select `release-readiness`, then ask Pi to prepare a named release. The paired skill derives a Git baseline from tags, released CHANGELOG headings, or version-file history; reconciles user-facing and developer-facing docs; and drafts README and CHANGELOG updates. It stops for release-target ambiguity and waits for review before any commit. It never publishes, tags, version-bumps, deploys, or commits unless explicitly asked.
 
 ## Project context and references
 

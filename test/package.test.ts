@@ -37,12 +37,14 @@ describe("local Pi package setup", () => {
       ".pi/skills/implementation/SKILL.md",
       ".pi/skills/web-implementation/SKILL.md",
       ".pi/skills/threejs-performance/SKILL.md",
+      ".pi/skills/release-readiness/SKILL.md",
       ".pi/skills/technical-review/SKILL.md",
       ".pi/skills/website-messaging/SKILL.md",
       ".pi/facets/roles/marketing-strategist.md",
       ".pi/facets/roles/researcher.md",
       ".pi/facets/roles/delivery-lead.md",
       ".pi/facets/roles/web-platform-specialist.md",
+      ".pi/facets/roles/release-steward.md",
       ".pi/facets/style/exploratory.md",
       ".pi/facets/style/explanatory.md",
       ".pi/facets/style/structured.md",
@@ -53,6 +55,7 @@ describe("local Pi package setup", () => {
       ".pi/facets/presets/messaging-strategy.md",
       ".pi/facets/presets/research-exploration.md",
       ".pi/facets/presets/delivery-planning.md",
+      ".pi/facets/presets/release-readiness.md",
       "docs/facet-grid.md",
     ];
 
@@ -96,6 +99,23 @@ describe("local Pi package setup", () => {
     expect(skill).toContain("Run only after explicit delivery language");
     expect(skill).toContain("Target 100 in every applicable category");
     expect(skill).toContain("OKF research artifacts");
+  });
+
+  it("defines release-readiness workflow and composition", async () => {
+    const skill = await readFile(resolve(".pi/skills/release-readiness/SKILL.md"), "utf8");
+    expect(skill).toContain("latest reachable Git tag");
+    expect(skill).toContain("released version heading in CHANGELOG");
+    expect(skill).toContain("commit only after explicit request");
+
+    const parsed = parseFrontmatter<Record<string, unknown>>(
+      await readFile(resolve(".pi/facets/presets/release-readiness.md"), "utf8"),
+    );
+    expect(parsed.frontmatter).toMatchObject({
+      name: "release-readiness",
+      role: "release-steward",
+      authority: "recommend-and-proceed",
+      style: "structured",
+    });
   });
 
   it("defines web-implementation composition", async () => {
