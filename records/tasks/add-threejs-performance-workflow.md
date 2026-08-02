@@ -4,7 +4,7 @@ name: add-threejs-performance-workflow
 created_at: 2026-08-01T06:25:10.193Z
 desc: "Add performance-aware Three.js visual iteration workflow."
 tags: []
-status: todo
+status: done
 scope: agreed
 depends_on:
   - tasks/add-okf-research-artifact-capture
@@ -69,16 +69,15 @@ depends_on:
 
 ## Implemented so far
 
-- Task refinement only; no implementation changes.
+- Added `threejs-performance` skill with full-budget, render-cost, material-risk, reversible-iteration, tooling, and OKF guidance.
 
 ## Checks
 
-- Refinement confirmed by user on 2026-08-01.
+- Skill frontmatter validates; full suite (17 tests), typecheck, and diff check pass.
 
 ## Review / next slice
 
-- Ready for review: no; blocked by `add-okf-research-artifact-capture` implementation.
-- Likely next slice/task: implement/review OKF capture, then draft skill.
+- User approved Three.js performance workflow on 2026-08-02; task complete.
 
 ## Notes
 

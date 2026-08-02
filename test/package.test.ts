@@ -36,6 +36,7 @@ describe("local Pi package setup", () => {
       ".pi/skills/references/okf-artifacts.md",
       ".pi/skills/implementation/SKILL.md",
       ".pi/skills/web-implementation/SKILL.md",
+      ".pi/skills/threejs-performance/SKILL.md",
       ".pi/skills/technical-review/SKILL.md",
       ".pi/skills/website-messaging/SKILL.md",
       ".pi/facets/roles/marketing-strategist.md",
