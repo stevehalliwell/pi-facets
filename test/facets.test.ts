@@ -29,6 +29,11 @@ async function facet(root: string, directory: "roles" | "authority" | "style", n
 	await writeFile(join(root, directory, `${name}.md`), `---\nname: ${name}\naxis: ${directory === "roles" ? "role" : directory}\ndescription: ${name}\n---\n\n${body}\n`);
 }
 
+async function activation(root: string, directory: "roles" | "authority" | "style", name: string, body: string): Promise<void> {
+	await mkdir(join(root, directory), { recursive: true });
+	await writeFile(join(root, directory, `${name}.activation.md`), body);
+}
+
 async function preset(root: string, name: string, skill?: string): Promise<void> {
 	await mkdir(root, { recursive: true });
 	await writeFile(join(root, `${name}.md`), `---\nname: ${name}\ndescription: ${name}\nrole: dev-peer\nauthority: advisory\nstyle: concise${skill ? `\nskill: ${skill}` : ""}\n---\n`);
@@ -52,6 +57,21 @@ describe("facet discovery", () => {
 		expect(trusted.components.get("role:global-only")?.source).toBe("global");
 		const untrusted = discoverFacets(global, project, false);
 		expect(untrusted.components.get("role:dev-peer")?.body).toBe("Global body");
+	});
+
+	it("reads valid sibling activation files and reports invalid ones", async () => {
+		const global = await root();
+		await facet(global, "roles", "dev-peer");
+		await activation(global, "roles", "dev-peer", "Set up once.");
+		await activation(global, "roles", "orphan", "Orphan.");
+		await facet(global, "authority", "empty");
+		await activation(global, "authority", "empty", " \n");
+		const discovery = discoverFacets(global);
+		expect(discovery.components.get("role:dev-peer")?.activation).toBe("Set up once.");
+		expect(discovery.diagnostics).toEqual(expect.arrayContaining([
+			expect.objectContaining({ path: join(global, "roles", "orphan.activation.md"), message: expect.stringContaining('no valid role facet named "orphan"') }),
+			expect.objectContaining({ path: join(global, "authority", "empty.activation.md"), message: expect.stringContaining("Markdown body must be non-empty") }),
+		]));
 	});
 
 	it("discovers project presets before global presets", async () => {
@@ -183,6 +203,71 @@ describe("facet menu", () => {
 		expect(await handlers.get("before_agent_start")!({ systemPrompt: "Base" }, ctx)).toBeUndefined();
 		await handlers.get("session_shutdown")!({}, ctx);
 		expect(statuses.at(-1)).toEqual(["pi-facets", undefined]);
+	});
+
+	it("injects activation content once for restoration and changed facets", async () => {
+		const global = await root();
+		const project = await root();
+		await facet(global, "roles", "dev-peer", "- Persistent role.");
+		await facet(global, "roles", "maintainer", "- Persistent maintainer.");
+		await facet(global, "authority", "advisory", "- Persistent advisory.");
+		await facet(global, "authority", "decide", "- Persistent decide.");
+		await facet(global, "style", "concise", "- Persistent style.");
+		await activation(global, "roles", "dev-peer", "ROLE DEV-PEER");
+		await activation(global, "roles", "maintainer", "ROLE MAINTAINER");
+		await activation(global, "authority", "advisory", "AUTH ADVISORY");
+		await activation(global, "authority", "decide", "AUTH DECIDE");
+		await activation(global, "style", "concise", "STYLE CONCISE");
+		await preset(join(global, "presets"), "default");
+		await preset(join(global, "presets"), "partial");
+		await writeFile(join(global, "presets", "partial.md"), "---\nname: partial\ndescription: partial\nrole: maintainer\nauthority: decide\nstyle: concise\n---\n");
+		await defaultPreset(global, "---\npreset: default\n---\n");
+		const handlers = new Map<string, (event: any, ctx: any) => Promise<any>>();
+		const commands = new Map<string, { handler: (args: string, ctx: any) => Promise<void> }>();
+		const entries: any[] = [];
+		let choices: Array<string | undefined> = [];
+		const pi = {
+			on(name: string, handler: any) { handlers.set(name, handler); },
+			registerCommand(name: string, command: any) { commands.set(name, command); },
+			registerEntryRenderer() {},
+			appendEntry(customType: string, data: unknown) { entries.push({ type: "custom", customType, data }); },
+		} as unknown as ExtensionAPI;
+		const ctx: any = {
+			mode: "tui", cwd: project, isProjectTrusted: () => true,
+			ui: { notify() {}, select: async () => choices.shift(), setStatus() {}, theme: { fg: (_: string, text: string) => text } },
+			sessionManager: { getBranch: () => entries },
+		};
+		registerFacetExtension(pi, global);
+		await handlers.get("session_start")!({}, ctx);
+		let prompt = (await handlers.get("before_agent_start")!({ systemPrompt: "Base" }, ctx))?.systemPrompt;
+		expect(prompt).toContain("ROLE DEV-PEER");
+		expect(prompt).toContain("AUTH ADVISORY");
+		expect(prompt).toContain("STYLE CONCISE");
+		expect((await handlers.get("before_agent_start")!({ systemPrompt: "Base" }, ctx))?.systemPrompt).not.toContain("ROLE DEV-PEER");
+
+		choices = ["Role — dev-peer [global]", "maintainer — maintainer [global]", undefined];
+		await commands.get("facets")!.handler("", ctx);
+		prompt = (await handlers.get("before_agent_start")!({ systemPrompt: "Base" }, ctx))?.systemPrompt;
+		expect(prompt).toContain("ROLE MAINTAINER");
+		expect(prompt).not.toContain("AUTH ADVISORY");
+
+		choices = ["Presets — (none)", "partial — partial [global]"];
+		await commands.get("facets")!.handler("", ctx);
+		prompt = (await handlers.get("before_agent_start")!({ systemPrompt: "Base" }, ctx))?.systemPrompt;
+		expect(prompt).toContain("AUTH DECIDE");
+		expect(prompt).not.toContain("ROLE MAINTAINER");
+
+		choices = ["Clear all facets"];
+		await commands.get("facets")!.handler("", ctx);
+		choices = ["Role — (none)", "maintainer — maintainer [global]", undefined];
+		await commands.get("facets")!.handler("", ctx);
+		expect((await handlers.get("before_agent_start")!({ systemPrompt: "Base" }, ctx))?.systemPrompt).toContain("ROLE MAINTAINER");
+		choices = ["Role — maintainer [global]", "maintainer — maintainer [global]", undefined];
+		await commands.get("facets")!.handler("", ctx);
+		expect((await handlers.get("before_agent_start")!({ systemPrompt: "Base" }, ctx))?.systemPrompt).not.toContain("ROLE MAINTAINER");
+
+		await handlers.get("session_tree")!({}, ctx);
+		expect((await handlers.get("before_agent_start")!({ systemPrompt: "Base" }, ctx))?.systemPrompt).toContain("ROLE MAINTAINER");
 	});
 
 	it("applies a preset when its associated skill is unavailable", async () => {

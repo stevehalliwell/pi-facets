@@ -10,8 +10,8 @@ Audit resource ownership against [resource boundaries](../../../docs/resource-bo
 ## Workflow
 
 1. Anchor audit. State current work resumes after report. Ask user whether to audit all project facets, presets, skills, and prompts (default), or name narrower targets. State report-only boundary. Done when target scope and non-mutation constraint are explicit.
-2. Load contract and inventory. Read `docs/resource-boundaries.md`; enumerate selected resources and their source paths. State inaccessible inputs and resulting limits. Done when audit input is reproducible.
-3. Inspect ownership. Compare each directive against canonical resource home and, for facets, hard role/authority/style boundaries. Require preset/skill association in `skill` frontmatter, not preset body text. Collect exact excerpt or location for each possible finding. Done when findings have evidence.
+2. Load contract and inventory. Read `docs/resource-boundaries.md`; enumerate selected resources and their source paths. For each selected facet, include its optional `<facet-name>.activation.md` sibling. State inaccessible inputs and resulting limits. Done when audit input is reproducible.
+3. Inspect ownership. Compare each directive against canonical resource home and, for facets, hard role/authority/style boundaries. Evaluate activation content as one-time context: it may hold broader facet-specific goals, rules, or planning/execution context, but not ongoing per-turn instructions, repeatable workflow, or catch-all project context. Require preset/skill association in `skill` frontmatter, not preset body text. Collect exact excerpt or location for each possible finding. Done when findings have evidence.
 4. Classify overlap. Mark **hard violation** only for wrong ownership/axis or conflicting duplicate; **warning** for redundant same-purpose directive; **advisory** for non-duplicating similarity or compactness improvement. Do not treat shared phrases alone as overlap. Done when severity matches contract.
 5. Report. Separate observed evidence from recommendations. Include supported non-findings where they clarify audit result. Prioritise follow-up options, each as separate approved work; do not edit or prescribe unsupported changes. Done when user can choose next action.
 
@@ -45,7 +45,7 @@ Next:
 
 ## Rules
 
-- Default scope: all project facet, preset, skill, and prompt resources; user may narrow before inspection.
+- Default scope: all project facets (including activation siblings), presets, skills, and prompt resources; user may narrow before inspection.
 - `docs/resource-boundaries.md` is canonical; recorded decisions supersede it when conflict is evidenced.
 - Cite file path plus exact excerpt or location for every finding.
 - Report only: never edit resources, mutate facets, launch skills, or gate tool calls.

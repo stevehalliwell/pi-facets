@@ -47,6 +47,8 @@ description: Prioritises customer value and business outcomes.
 - Make scope and sequencing explicit.
 ```
 
+Use optional sibling `product-owner.activation.md` for one-time Markdown context. It injects once when that facet becomes active or is restored, not on every agent turn. Put broad facet-specific goals, rules, or planning/execution context there when they would be noisy per turn; keep compact ongoing stance in the facet body and repeatable procedure in a skill. For example, Ponytail-style planning and execution guidance can live in an activation file while its persistent facet body stays short.
+
 A preset combines one role, authority, and style. It can point to a skill:
 
 ```markdown

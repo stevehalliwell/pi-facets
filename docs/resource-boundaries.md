@@ -14,7 +14,7 @@ Each directive has one canonical home. Preset/skill association belongs in prese
 
 | Resource | Holds | Does not hold |
 | --- | --- | --- |
-| Facet | Persistent role, authority, or style stance; compact expert heuristics | Repeatable task sequence, gates, required inputs, tool/source rules, deliverables, completion checks, repo facts |
+| Facet | Persistent role, authority, or style stance; compact expert heuristics; optional one-time activation context in a sibling file | Repeatable task sequence, gates, required inputs, tool/source rules, deliverables, completion checks, repo facts |
 | Preset | Named facet composition and approved association metadata | Component bodies or workflow |
 | Skill | Temporary process, gates, checks, and output contract | Persistent stance or repo facts |
 | Prompt | Short user-request frame | State mutation, workflow, persistent behavior |
@@ -38,6 +38,12 @@ A facet may mention another axis only to prevent conflict. Do not encode “ask 
 A role may use action-oriented language for a compact, persistent expert heuristic. For example, “Treat untraced dependencies as delivery risk” expresses an engineering lens. It becomes skill workflow when it prescribes a repeatable sequence, required input, gate, tool/source rule, deliverable, or completion check: “Trace dependencies before editing; run affected tests.”
 
 Use semantic compactness, not a numeric line cap: every instruction must earn repeated prompt-context cost. Prefer concise, non-sequenced bullets. Do not move needed guardrails only to satisfy a count.
+
+### Activation files
+
+An optional `<facet-name>.activation.md` sibling holds Markdown injected once when its matching facet becomes active or is restored. It has no frontmatter; absence is valid. Use it for broader facet-specific goals, rules, or planning/execution context that should shape initial work but would be noisy on every turn. A Ponytail activation file, for example, may establish planning and execution priorities while its facet body retains only compact ongoing heuristics.
+
+Keep instructions needed on every turn in the facet body. Keep repeatable task procedure, gates, required inputs, tool/source rules, deliverables, and completion checks in skills. Activation content remains owned by its matching single-axis facet; it must not become a catch-all project context or duplicate persistent body instructions.
 
 ## Presets
 
@@ -65,7 +71,7 @@ Project context holds repository/product facts. References hold detailed reusabl
 
 ## Audit guidance
 
-A later report-only `facet-craft` skill should inspect facets, presets, skills, and prompts by default; users may narrow scope. It reports evidence without changing resources.
+A later report-only `facet-craft` skill should inspect facets and their activation siblings, presets, skills, and prompts by default; users may narrow scope. It reports evidence without changing resources.
 
 | Finding | Meaning |
 | --- | --- |

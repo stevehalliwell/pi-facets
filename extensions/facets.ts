@@ -17,6 +17,7 @@ export interface FacetComponent {
 	axis: Axis;
 	description: string;
 	body: string;
+	activation?: string;
 	source: FacetSource;
 	path: string;
 }
@@ -100,7 +101,7 @@ function readSource(root: string, source: FacetSource): { components: Map<string
 		}
 
 		for (const entry of entries) {
-			if (!entry.isFile() || extname(entry.name) !== ".md") continue;
+			if (!entry.isFile() || extname(entry.name) !== ".md" || entry.name.endsWith(".activation.md")) continue;
 			const path = join(directory, entry.name);
 			let content: string;
 			try {
@@ -151,6 +152,24 @@ function readSource(root: string, source: FacetSource): { components: Map<string
 				components.set(key, component);
 			} catch (error) {
 				diagnostics.push({ path, message: `invalid component: ${errorMessage(error)}` });
+			}
+		}
+
+		for (const entry of entries) {
+			if (!entry.isFile() || !entry.name.endsWith(".activation.md")) continue;
+			const path = join(directory, entry.name);
+			const name = entry.name.slice(0, -".activation.md".length);
+			const component = components.get(componentKey(axis, name));
+			if (!component) {
+				diagnostics.push({ path, message: `invalid activation file: no valid ${axis} facet named "${name}"` });
+				continue;
+			}
+			try {
+				const activation = readFileSync(path, "utf8").trim();
+				if (!activation) throw new Error("Markdown body must be non-empty");
+				component.activation = activation;
+			} catch (error) {
+				diagnostics.push({ path, message: `invalid activation file: ${errorMessage(error)}` });
 			}
 		}
 	}
@@ -380,6 +399,13 @@ function activeFacetContext(components: FacetComponent[]): string {
 	return `## Active facets\n\n${sections.join("\n\n")}`;
 }
 
+function activationFacetContext(components: FacetComponent[]): string | undefined {
+	const sections = components.flatMap((component) =>
+		component.activation ? [`**${component.axis}: ${component.name}**\n${component.activation}`] : [],
+	);
+	return sections.length ? `## Facet activation\n\n${sections.join("\n\n")}` : undefined;
+}
+
 export function estimateTokens(text: string): number {
 	return Math.ceil(text.length / 4);
 }
@@ -404,6 +430,11 @@ export function composeFacetPrompt(systemPrompt: string, state: FacetState, disc
 	const components = activeFacetComponents(state, discovery);
 	if (components.length === 0) return systemPrompt;
 	return `${systemPrompt}\n\n${activeFacetContext(components)}`;
+}
+
+export function composeActivationPrompt(systemPrompt: string, state: FacetState, discovery: FacetDiscovery): string {
+	const activation = activationFacetContext(activeFacetComponents(state, discovery));
+	return activation ? `${systemPrompt}\n\n${activation}` : systemPrompt;
 }
 
 function errorMessage(error: unknown): string {
@@ -545,6 +576,7 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 	let discovery: FacetDiscovery = { components: new Map(), diagnostics: [] };
 	let presets: Map<string, FacetPreset> = new Map();
 	let state: FacetState = {};
+	let pendingActivation: FacetState = {};
 
 	function refresh(ctx: ExtensionContext): void {
 		const projectFacetsRoot = join(ctx.cwd, CONFIG_DIR_NAME, "facets");
@@ -597,6 +629,14 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		if (discovery.components.size === 0 && discovery.diagnostics.length === 0) refresh(ctx);
 	}
 
+	function scheduleActivation(before: FacetState, after: FacetState): void {
+		for (const axis of AXES) {
+			if (before[axis] === after[axis]) continue;
+			if (after[axis]) pendingActivation[axis] = after[axis];
+			else delete pendingActivation[axis];
+		}
+	}
+
 	function recordChange(
 		action: FacetAction,
 		before: FacetState,
@@ -631,6 +671,7 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		const before = { ...state };
 		const after = { ...state, [axis]: name };
 		state = after;
+		scheduleActivation(before, after);
 		recordChange("set-axis", before, after, { axis });
 		ctx.ui.notify(`Facet ${axis} set to ${name}.`, "info");
 		updateStatus(ctx);
@@ -641,6 +682,7 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		const before = { ...state };
 		const after: FacetState = {};
 		state = after;
+		scheduleActivation(before, after);
 		recordChange("clear", before, after);
 		ctx.ui.notify("Active facets cleared.", "info");
 		updateStatus(ctx);
@@ -651,6 +693,7 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		const after = { ...state };
 		delete after[axis];
 		state = after;
+		scheduleActivation(before, after);
 		recordChange("set-axis", before, after, { axis });
 		ctx.ui.notify(`Facet ${axis} cleared.`, "info");
 		updateStatus(ctx);
@@ -719,6 +762,7 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		const before = { ...state };
 		const after = { role: preset.role, authority: preset.authority, style: preset.style };
 		state = after;
+		scheduleActivation(before, after);
 		recordChange("apply-preset", before, after, { preset: { name: preset.name, source: preset.source } });
 		ctx.ui.notify(`Facet preset ${name} applied.`, "info");
 		updateStatus(ctx);
@@ -774,6 +818,7 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 	pi.on("session_start", async (_event, ctx) => {
 		refresh(ctx);
 		state = restoreOrDefault(ctx);
+		pendingActivation = { ...state };
 		updateStatus(ctx);
 		reportMissing(ctx);
 		reportFacetWarnings(ctx);
@@ -782,6 +827,7 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 	pi.on("session_tree", async (_event, ctx) => {
 		refresh(ctx);
 		state = restoreOrDefault(ctx);
+		pendingActivation = { ...state };
 		updateStatus(ctx);
 		reportMissing(ctx);
 		reportFacetWarnings(ctx);
@@ -792,7 +838,9 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 	});
 
 	pi.on("before_agent_start", async (event) => {
-		const prompt = composeFacetPrompt(event.systemPrompt, state, discovery);
+		const persistentPrompt = composeFacetPrompt(event.systemPrompt, state, discovery);
+		const prompt = composeActivationPrompt(persistentPrompt, pendingActivation, discovery);
+		pendingActivation = {};
 		return prompt === event.systemPrompt ? undefined : { systemPrompt: prompt };
 	});
 }
