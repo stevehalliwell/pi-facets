@@ -7,7 +7,7 @@ tags:
   - facets
   - design
   - presets
-status: todo
+status: done
 scope: agreed
 ---
 
@@ -63,25 +63,31 @@ scope: agreed
 - 2026-08-02: Surface conflicts between visual preference and strategy evidence; user decides.
 - 2026-08-02: Benchmark proven competitor patterns when they fit audience needs.
 - 2026-08-02: Ask for live and staging sites plus inspiration and other evidence; proceed with missing inputs only after stating limits.
+- 2026-08-02: Do not add static tests for facet Markdown. pi-facets validates components and presets during facet discovery; Pi validates skill and prompt discovery.
 
 ## Plan
 
-- Add art-director role and visual-direction preset Markdown.
-- Add or update focused tests if component discovery/validation coverage needs it.
-- Run project checks.
+1. Add `art-director` role and `visual-direction` preset Markdown; review prompt boundaries against acceptance.
+2. Add focused tests only if existing discovery/validation coverage does not cover static project resources.
+3. Run `npm run check` and relevant tests.
 
 ## Implemented so far
 
-- Task record created; no implementation changes.
+- Added `art-director` role with evidence inputs, alternatives, recommendation boundaries, competitor benchmarking, preference trade-offs, and website-only scope.
+- Added `visual-direction` preset: `art-director + advisory + exploratory`.
+- User reviewed facet Markdown diff; no static-resource test coverage added by request.
 
 ## Checks
 
 - `attendant validate --no-correct`: passed before record creation.
+- `npm run check`: passed.
+- `npm test -- test/facets.test.ts`: passed (8 tests).
+- `git diff --check`: passed.
 
 ## Review / next slice
 
-- Ready for review: no; implementation has not started.
-- Likely next slice/task: run website art-direction discovery.
+- Ready for review: no; approved 2026-08-02.
+- Next task: run website art-direction discovery.
 
 ## Notes
 

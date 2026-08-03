@@ -7,7 +7,7 @@ tags:
   - facets
   - editorial
   - presets
-status: todo
+status: review
 scope: agreed
 ---
 
@@ -69,16 +69,21 @@ scope: agreed
 
 ## Implemented so far
 
-- Task record created; no implementation changes.
+- Added `editorial-reviewer` role for full revision of supplied long-form drafts, channel adaptation, source-bounded factual correction, and material-change rationale.
+- Added `editorial-review` preset: `editorial-reviewer + recommend-and-proceed + critical`.
+- No static Markdown coverage added; pi-facets validates components and presets during discovery.
 
 ## Checks
 
 - `attendant validate --no-correct`: passed before record creation.
+- `npm run check`: passed.
+- `npm test -- test/facets.test.ts`: passed (8 tests).
+- `git diff --check`: passed.
 
 ## Review / next slice
 
-- Ready for review: no; implementation has not started.
-- Likely next slice/task: implement editorial role and preset.
+- Ready for review: yes; role and preset implementation complete.
+- After approval: choose next agreed task.
 
 ## Notes
 

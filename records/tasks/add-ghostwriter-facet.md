@@ -7,7 +7,7 @@ tags:
   - facets
   - ghostwriting
   - presets
-status: todo
+status: review
 scope: agreed
 ---
 
@@ -77,16 +77,22 @@ scope: agreed
 
 ## Implemented so far
 
-- Task record created; no implementation changes.
+- Added `ghostwriter` role for source-bounded original drafts, substantial rewrites, and research-bundle essays.
+- Added reusable `prose-craft` style for artifact voice, flow, and long-form reader impact.
+- Added `ghostwriter` preset: `ghostwriter + recommend-and-proceed + prose-craft`.
+- No static Markdown coverage added; pi-facets validates components and presets during discovery.
 
 ## Checks
 
 - `attendant validate --no-correct`: passed before record creation.
+- `npm run check`: passed.
+- `npm test -- test/facets.test.ts`: passed (8 tests).
+- `git diff --check`: passed.
 
 ## Review / next slice
 
-- Ready for review: no; implementation has not started.
-- Likely next slice/task: implement ghostwriter role and preset.
+- Ready for review: yes; role, style, and preset implementation complete.
+- After approval: choose next agreed task.
 
 ## Notes
 
