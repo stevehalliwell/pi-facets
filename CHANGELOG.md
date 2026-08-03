@@ -7,6 +7,19 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.2.0]
+
+### Added
+
+- Preset-to-skill associations: explicit interactive preset selection shows its associated skill in the TUI and asks before running it; unavailable skills leave selected facets active and show an actionable error.
+- Workflow skills and paired presets for editorial review, ghostwriting, Five Whys, and website art direction.
+- Standalone workflow skills for Six Thinking Hats and report-only facet-resource audits.
+- Resource-boundary guidance for facets, presets, skills, prompts, project context, and references.
+
+### Changed
+
+- Facet components now focus on compact single-axis expertise, decision authority, or response style; workflow steps remain in skills.
+
 ## [0.1.0]
 
 ### Added

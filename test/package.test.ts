@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { parseFrontmatter } from "@earendil-works/pi-coding-agent";
 
 type PackageManifest = {
-  pi: { extensions: string[] };
+  pi: { extensions: string[]; skills: string[] };
 };
 
 type PiSettings = { packages: string[] };
@@ -18,7 +18,7 @@ describe("local Pi package setup", () => {
     const manifest = await readJson<PackageManifest>(resolve("package.json"));
 
     expect(manifest.pi.extensions).toEqual(["./extensions"]);
-    expect(manifest.pi).not.toHaveProperty("skills");
+    expect(manifest.pi.skills).toEqual(["./.pi/skills"]);
     expect(manifest.pi).not.toHaveProperty("prompts");
   });
 

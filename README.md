@@ -1,227 +1,81 @@
 # pi-facets
 
-Composable facets, skills, and extensions for Pi agent.
+Give pi repeatable collaboration stances and task workflows without turning every request into one giant prompt.
 
-## Overview
+- **Facets** shape persistent role, decision authority, and response style.
+- **Presets** combine facets for common work.
+- **Skills** provide temporary, focused workflows.
 
-pi-facets separates persistent agent behavior from task workflows, project context, and references:
+## Use it
 
-- **Facets** provide role, decision authority, and conversation style.
-- **Skills** provide repeatable task workflows and output contracts.
-- **Project context** provides repository and product facts outside facets and skills.
-- **References** provide framework or standards material loaded only when needed.
-
-A thin Pi extension composes selected facet components into each agent run. Facets stay compact because this prompt context repeats every turn. Skills are larger, on-demand workflows; Pi loads their instructions only when relevant or explicitly invoked, not as part of per-turn facet injection. pi-facets does not limit or gate tool calls.
-
-## Status
-
-Core implementation is complete for:
-
-- `/facets` selection, inspection, clearing, and session restoration;
-- role, authority, and style components;
-- trusted project-local and global facet discovery;
-- named facet presets;
-- trusted project-local workflow skills for planning, research, implementation, web delivery, and release readiness;
-- focused extension and package tests.
-
-Deferred until evidence or a concrete need appears:
-
-- automatic facet inference or task/facet mismatch detection;
-- model switching;
-- separate persistent facets for user interaction versus generated artifacts;
-- project-local tool restrictions;
-- persistent UI indicators.
-
-## Requirements
-
-- Node.js `>=22.19.0`.
-- Pi coding agent `>=0.83.0`.
-- npm.
-
-Pi loads TypeScript extensions through jiti. No extension build step is required.
-
-## Quick start
+Install dependencies, then start Pi in this repository:
 
 ```sh
 npm install
-npm run check
-npm test
+pi
 ```
 
-Project `.pi/settings.json` loads the repository root as a local Pi package. For non-interactive checks, approve project resources explicitly:
+This repository’s `.pi/settings.json` loads pi-facets as a local package.
 
-```sh
-pi --approve --no-session --no-tools --mode json -p "Reply exactly: OK"
-```
-
-`package.json` declares extension resources. Pi discovers trusted project skills and prompts from `.pi/skills/` and `.pi/prompts/`.
-
-## Facets
-
-### Commands
+Open facet selection:
 
 ```text
 /facets
 ```
 
-`/facets` opens the interactive facet menu. Each Presets, Role, Authority, and Style item shows its current selection; choose one to drill in. Role, Authority, and Style selections return to menu for another change. Their `(none)` option clears that axis; Presets `(none)` clears all facets. Back returns to menu. Choose Clear all facets to reset selection. Outside TUI, it prints current facet state.
+Choose a preset such as **technical review**, **implementation partner**, **editorial review**, or **release readiness**. If it has an associated skill, Pi shows its name and asks before running it. You can also run a workflow directly:
 
-Selecting one component replaces the previous component on that axis. Active state is stored in compact transcript entries and restored when the session or branch is resumed. If a persisted component is no longer available, Pi reports an actionable missing-reference warning.
+```text
+/skill:implementation
+/skill:five-whys
+/skill:release-readiness
+```
 
-### Component format
+Facet choices persist in a session. Explicit choices override any configured default preset.
 
-Each component is one Markdown file. Filename stem must match frontmatter `name`; `axis`, `description`, and body are required. Shipped components use headingless, list-first bodies for compact prompt injection; external components remain valid but report format warnings.
+## Configure it
+
+Add project facets under `.pi/facets/`, or personal facets under `~/.pi/agent/facets/`. Project files override same-named personal files.
 
 ```markdown
 ---
 name: product-owner
 axis: role
-description: Prioritises customer value, sequencing, and opportunity cost.
+description: Prioritises customer value and business outcomes.
 ---
 
-- Prioritise customer value and business outcomes.
-- Make sequencing and scope explicit.
+- Make scope and sequencing explicit.
 ```
 
-Supported axes:
-
-- `role` — perspective used for decisions;
-- `authority` — default decision authority;
-- `style` — conversation style.
-
-Add a project component under `.pi/facets/{roles,authority,style}/`. No extension-code change is required.
-
-### Discovery and precedence
-
-Sources resolve in this order:
-
-1. trusted project: `<cwd>/.pi/facets/{roles,authority,style}/`;
-2. global: `~/.pi/agent/facets/{roles,authority,style}/`.
-
-Project components shadow same-named global components. Files are never merged. Project discovery uses current `cwd` only. Untrusted projects skip local facet Markdown and retain global components. Invalid trusted components produce diagnostics.
-
-### Default preset
-
-An untouched session can apply one transient default preset. Pi checks trusted project config first, then global config:
-
-- `<cwd>/.pi/facets/default.md`
-- `~/.pi/agent/facets/default.md`
+A preset combines one role, authority, and style. It can point to a skill:
 
 ```markdown
 ---
-preset: implementation-partner
----
-```
-
-`preset` is required; direct-axis defaults are unsupported. Config may reference any resolved preset, including a global preset. Missing or invalid config silently falls through to the next source, then no facets. Defaults do not create transcript entries and re-resolve on start, resume, reload, and fork while no explicit facet history exists. Any explicit selection or clear overrides defaults for that session.
-
-## Named presets
-
-Presets compose one role, authority, and style component:
-
-```markdown
----
-name: technical-review
-description: Review implementation choices critically.
+name: implementation-partner
 role: dev-peer
-authority: advisory
-style: critical
----
-
-Optional notes may document intended use.
-```
-
-Global presets live under `~/.pi/agent/facets/presets/`. Trusted project presets live under `<cwd>/.pi/facets/presets/`. Sources resolve project → global; a project definition shadows a global one, including invalid definitions. Preset references must resolve to available components.
-
-### Project examples
-
-Project ships representative compositions for technical review, backlog refinement, messaging strategy, research exploration, delivery planning, and release readiness. See [`docs/facet-grid.md`](docs/facet-grid.md) for the resource grid.
-
-Prompt templates are short, non-mutating request frames:
-
-```text
-/explore-options <topic>
-/decision-brief <topic>
-```
-
-They do not select or mutate facets. Skills remain workflow source of truth.
-
-## Skills
-
-Skills are independently invokable workflows. Each skill is a directory containing `SKILL.md`:
-
-```text
-.pi/skills/
-├── backlog-refinement/SKILL.md
-├── competitor-analysis/SKILL.md
-├── editorial-review/SKILL.md
-├── facet-alignment/SKILL.md
-├── ghostwriting/SKILL.md
-├── implementation/SKILL.md
-├── release-readiness/SKILL.md
-├── threejs-performance/SKILL.md
-├── web-implementation/SKILL.md
-├── website-messaging/SKILL.md
-└── technical-review/SKILL.md
-```
-
-Required frontmatter:
-
-```yaml
----
-name: skill-name
-description: Trigger-rich description of when to use the skill and its goal.
+authority: recommend-and-proceed
+style: concise
+skill: implementation
 ---
 ```
 
-Pi exposes skill descriptions for automatic routing and registers `/skill:<name>` commands for explicit invocation. Keep workflows, output contracts, and workflow-specific references in skills. Skills may contain substantial procedures and references because they load on demand; do not copy them into compact facet components injected each turn. Do not duplicate persistent facet behavior, project facts, or tool policy. Add references or helper files only when they reduce context or repetition.
+See [facet grid](docs/facet-grid.md) for shipped examples. See [resource boundaries](docs/resource-boundaries.md) when authoring facets, presets, skills, prompts, or references.
 
-Current skills:
+## Develop
 
-- `backlog-refinement` — turn vague backlog work into bounded, accepted task shape;
-- `competitor-analysis` — produce evidence-backed competitor comparisons;
-- `editorial-review` — revise supplied long-form drafts while preserving author intent;
-- `ghostwriting` — create source-bounded long-form drafts and substantial rewrites;
-- `website-messaging` — review or rewrite positioning, page copy, proof, and calls to action;
-- `technical-review` — assess feasibility, trade-offs, risks, and validation before coding;
-- `implementation` — deliver one agreed implementation slice with proportionate validation;
-- `facet-alignment` — resolve clear explicit request/facet conflicts without automatic switching;
-- `web-implementation` — deliver standards-aware web implementation and explicit delivery review;
-- `threejs-performance` — protect an explicit Three.js rendering budget during performance work;
-- `release-readiness` — reconcile release changes with README and CHANGELOG, then prepare docs for user review.
-
-Add a trusted project skill under `.pi/skills/<name>/SKILL.md`; extension code does not need changing.
-
-### Release preparation
-
-Use `/facets` to select `release-readiness`, then ask Pi to prepare a named release. The paired skill derives a Git baseline from tags, released CHANGELOG headings, or version-file history; reconciles user-facing and developer-facing docs; and drafts README and CHANGELOG updates. It stops for release-target ambiguity and waits for review before any commit. It never publishes, tags, version-bumps, deploys, or commits unless explicitly asked.
-
-## Project context and references
-
-Project facts belong in `AGENTS.md`, product docs, architecture docs, or other project context files. Frameworks, standards, and detailed supporting material belong in skill references. Facets and skills should point to these sources rather than duplicate them.
-
-## Tool policy
-
-pi-facets does not restrict, gate, or enforce tool calls. Execution permissions remain Pi and project configuration concerns.
-
-## Test
+Requirements: Node.js `>=22.19.0`, Pi `>=0.83.0`, npm.
 
 ```sh
-npm test
 npm run check
-npm test -- test/package.test.ts
+npm test
 ```
 
-## Documentation and layout
+Pi loads TypeScript extensions through jiti. No build step.
 
-- `extensions/` — thin stateful Pi extensions;
-- `.pi/facets/` — project facet components and presets;
-- `.pi/prompts/` — project prompt templates;
-- `.pi/skills/` — project-local workflows and references;
-- `docs/facet-grid.md` — project facet resource examples;
-- `docs/resource-boundaries.md` — canonical author guidance for facets, presets, skills, prompts, and references;
-- `records/tasks/` — Attendant-backed task records;
-- `records/decisions/` — Attendant-backed durable decisions;
-- `pi-modes-and-skills-implementation-brief.md` — indicative design context, not binding specification.
+## Project layout
 
-For Pi extension and skill API details, use the installed Pi documentation. Recorded decisions supersede the indicative brief.
+- `extensions/` — Pi extension code.
+- `.pi/facets/` — project facets and presets.
+- `.pi/skills/` — task workflows.
+- `.pi/prompts/` — short request frames.
+- `docs/` — authoring and example references.
