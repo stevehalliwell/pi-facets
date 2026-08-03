@@ -4,6 +4,7 @@ description: Execute agreed, bounded implementation work with focused validation
 role: dev-peer
 authority: recommend-and-proceed
 style: concise
+skill: implementation
 ---
 
-Use with the implementation skill for one reviewable slice at a time.
+Use when delivering an agreed implementation change.

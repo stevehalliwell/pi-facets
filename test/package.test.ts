@@ -32,7 +32,9 @@ describe("local Pi package setup", () => {
     const resources = [
       ".pi/skills/backlog-refinement/SKILL.md",
       ".pi/skills/competitor-analysis/SKILL.md",
+      ".pi/skills/editorial-review/SKILL.md",
       ".pi/skills/facet-alignment/SKILL.md",
+      ".pi/skills/ghostwriting/SKILL.md",
       ".pi/skills/facet-craft/SKILL.md",
       ".pi/skills/five-whys/SKILL.md",
       ".pi/skills/five-whys/references/five-whys.md",
@@ -107,6 +109,30 @@ describe("local Pi package setup", () => {
       style: "inquisitive",
       skill: "five-whys",
     });
+  });
+
+  it("associates every paired preset with its project skill", async () => {
+    const pairs = {
+      "backlog-refinement": "backlog-refinement",
+      "editorial-review": "editorial-review",
+      "five-whys": "five-whys",
+      ghostwriter: "ghostwriting",
+      "implementation-partner": "implementation",
+      "messaging-strategy": "website-messaging",
+      "release-readiness": "release-readiness",
+      "technical-review": "technical-review",
+      "visual-direction": "website-art-direction",
+      "web-implementation": "web-implementation",
+    };
+
+    for (const [preset, skill] of Object.entries(pairs)) {
+      const parsed = parseFrontmatter<Record<string, unknown>>(
+        await readFile(resolve(".pi/facets/presets", `${preset}.md`), "utf8"),
+      );
+      expect(parsed.frontmatter.skill).toBe(skill);
+      expect(parsed.body.trim()).toBeTruthy();
+      expect(parsed.body).not.toMatch(/use with .*skill/i);
+    }
   });
 
   it("defines website messaging intent branches", async () => {

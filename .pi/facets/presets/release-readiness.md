@@ -4,6 +4,7 @@ description: Prepare evidence-backed README and CHANGELOG updates before a relea
 role: release-steward
 authority: recommend-and-proceed
 style: structured
+skill: release-readiness
 ---
 
-Use with the release-readiness skill to reconcile release changes and prepare documentation for review.
+Use when release documentation needs reconciling with shipped changes.

@@ -195,7 +195,7 @@ describe("facet menu", () => {
 		const commands = new Map<string, { handler: (args: string, ctx: any) => Promise<void> }>();
 		const entries: any[] = [];
 		const notifications: string[] = [];
-		const choices = ["Presets — (none)", "paired — paired [global]"];
+		const choices = ["Presets — (none)", "paired — paired [skill: five-whys] [global]"];
 		const pi = {
 			on() {},
 			getCommands: () => [],
@@ -224,7 +224,7 @@ describe("facet menu", () => {
 		const commands = new Map<string, { handler: (args: string, ctx: any) => Promise<void> }>();
 		const entries: any[] = [];
 		const messages: string[] = [];
-		const choices = ["Presets — (none)", "paired — paired [global]"];
+		const choices = ["Presets — (none)", "paired — paired [skill: five-whys] [global]"];
 		const pi = {
 			on() {},
 			getCommands: () => [{ name: "skill:five-whys", source: "skill" }],
@@ -253,7 +253,7 @@ describe("facet menu", () => {
 		const commands = new Map<string, { handler: (args: string, ctx: any) => Promise<void> }>();
 		const entries: any[] = [];
 		const messages: string[] = [];
-		const choices = ["Presets — (none)", "paired — paired [global]"];
+		const choices = ["Presets — (none)", "paired — paired [skill: five-whys] [global]"];
 		const pi = {
 			on() {},
 			getCommands: () => [{ name: "skill:five-whys", source: "skill" }],
@@ -264,7 +264,7 @@ describe("facet menu", () => {
 		} as unknown as ExtensionAPI;
 		const ctx: any = {
 			mode: "tui", cwd: project, isProjectTrusted: () => true,
-			ui: { notify() {}, select: async () => choices.shift(), confirm: async () => false, setStatus() {}, theme: { fg: (_: string, text: string) => text } },
+			ui: { notify() {}, select: async () => choices.shift(), confirm: async () => false, setStatus() {}, theme: { fg: (_: string, text: string) => text} },
 			sessionManager: { getBranch: () => entries },
 		};
 		registerFacetExtension(pi, global);

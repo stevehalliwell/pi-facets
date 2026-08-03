@@ -10,11 +10,11 @@ This contract derives from [README](../README.md), [project guidance](../AGENTS.
 
 ## Canonical homes
 
-Each directive has one canonical home. Short named cross-references are allowed; copying behavior is not.
+Each directive has one canonical home. Preset/skill association belongs in preset `skill` frontmatter; copying behavior is not.
 
 | Resource | Holds | Does not hold |
 | --- | --- | --- |
-| Facet | Persistent role, authority, or style stance | Process, gates, task steps, repo facts |
+| Facet | Persistent role, authority, or style stance; compact expert heuristics | Repeatable task sequence, gates, required inputs, tool/source rules, deliverables, completion checks, repo facts |
 | Preset | Named facet composition and approved association metadata | Component bodies or workflow |
 | Skill | Temporary process, gates, checks, and output contract | Persistent stance or repo facts |
 | Prompt | Short user-request frame | State mutation, workflow, persistent behavior |
@@ -29,23 +29,25 @@ Facets are persistent, compact collaboration context. They must be single-axis a
 
 | Axis | Owns | Does not own |
 | --- | --- | --- |
-| Role | Expertise, perspective, domain priorities | Decision rights, reply form, workflow |
+| Role | Expertise lens, domain perspective, working attitude, domain interests and priorities, standards of judgment, risks noticed | Decision rights, reply form, repeatable task workflow |
 | Authority | Decision and approval default | Domain expertise, scope priorities, tone |
 | Style | Response form, tone, density | Scope decisions, domain expertise, workflow |
 
 A facet may mention another axis only to prevent conflict. Do not encode “ask before changing public behavior” in a role or style, domain expertise in authority, or scope decisions in style.
 
+A role may use action-oriented language for a compact, persistent expert heuristic. For example, “Treat untraced dependencies as delivery risk” expresses an engineering lens. It becomes skill workflow when it prescribes a repeatable sequence, required input, gate, tool/source rule, deliverable, or completion check: “Trace dependencies before editing; run affected tests.”
+
 Use semantic compactness, not a numeric line cap: every instruction must earn repeated prompt-context cost. Prefer concise, non-sequenced bullets. Do not move needed guardrails only to satisfy a count.
 
 ## Presets
 
-A preset is a named composition of one role, authority, and style. It may carry approved entry-point metadata, but must not repeat component bodies or skill workflow.
+A preset is a named composition of one role, authority, and style. It may carry approved entry-point metadata or a short use-case note, but must not repeat component bodies or skill workflow.
 
-An optional `skill` association may name one valid Pi skill. On **explicit interactive** preset selection, apply facets first, then ask whether to run it. On confirmation, send `/skill:<name>` through `pi.sendUserMessage`. Declining leaves preset active.
+An optional `skill` association names one valid Pi skill through preset frontmatter. Do not repeat it in preset body text. On **explicit interactive** preset selection, apply facets first, then ask whether to run it. On confirmation, send `/skill:<name>` through `pi.sendUserMessage`. Declining leaves preset active.
 
 Default presets, restored state, and RPC, JSON, print, or other non-interactive paths must never prompt or launch a skill. A missing associated skill must not prevent facet application: report actionable error and skip prompt/launch. Presets do not associate prompts in this version.
 
-Allowed: “Use with `implementation` skill.” Not allowed: copied implementation steps in preset Markdown.
+Use `skill: implementation` frontmatter for a preset/skill association. Preset body text must not repeat that association or copy skill workflow.
 
 ## Skills
 

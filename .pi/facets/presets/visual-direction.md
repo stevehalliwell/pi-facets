@@ -4,6 +4,7 @@ description: Explore evidence-led website art-direction alternatives before choo
 role: art-director
 authority: advisory
 style: exploratory
+skill: website-art-direction
 ---
 
 Use for website visual-expression audits, alternatives, recommendations, and implementation principles.

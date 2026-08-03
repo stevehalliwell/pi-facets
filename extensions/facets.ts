@@ -733,7 +733,8 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 	}
 
 	function presetLabel(preset: FacetPreset): string {
-		return `${preset.name} — ${preset.description} [${preset.source}]${currentPreset() === preset ? " [current]" : ""}`;
+		const skill = preset.skill ? ` [skill: ${preset.skill}]` : "";
+		return `${preset.name} — ${preset.description}${skill} [${preset.source}]${currentPreset() === preset ? " [current]" : ""}`;
 	}
 
 	function hasAssociatedSkill(preset: FacetPreset): boolean {

@@ -154,7 +154,9 @@ Skills are independently invokable workflows. Each skill is a directory containi
 .pi/skills/
 ├── backlog-refinement/SKILL.md
 ├── competitor-analysis/SKILL.md
+├── editorial-review/SKILL.md
 ├── facet-alignment/SKILL.md
+├── ghostwriting/SKILL.md
 ├── implementation/SKILL.md
 ├── release-readiness/SKILL.md
 ├── threejs-performance/SKILL.md
@@ -178,6 +180,8 @@ Current skills:
 
 - `backlog-refinement` — turn vague backlog work into bounded, accepted task shape;
 - `competitor-analysis` — produce evidence-backed competitor comparisons;
+- `editorial-review` — revise supplied long-form drafts while preserving author intent;
+- `ghostwriting` — create source-bounded long-form drafts and substantial rewrites;
 - `website-messaging` — review or rewrite positioning, page copy, proof, and calls to action;
 - `technical-review` — assess feasibility, trade-offs, risks, and validation before coding;
 - `implementation` — deliver one agreed implementation slice with proportionate validation;

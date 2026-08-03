@@ -4,6 +4,7 @@ description: Turn backlog ideas into bounded, actionable work.
 role: product-owner
 authority: advisory
 style: exploratory
+skill: backlog-refinement
 ---
 
-Use with the backlog-refinement skill; keep outcome, scope, acceptance, and sequencing explicit.
+Use when turning a backlog idea into bounded, reviewable work.
