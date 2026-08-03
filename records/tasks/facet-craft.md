@@ -9,7 +9,7 @@ tags:
   - prompts
   - presets
   - architecture
-status: todo
+status: done
 scope: agreed
 ---
 
@@ -161,15 +161,20 @@ scope: agreed
 
 ## Implemented so far
 
-- Original audit-skill task reframed around prerequisite boundary contract; no implementation files added.
+- Original audit-skill task reframed around prerequisite boundary contract.
+- Added `docs/resource-boundaries.md` with canonical ownership, axis, compactness, association, and audit-severity guidance.
+- Linked contract from `README.md`.
+- Created agreed follow-up `add-report-only-facet-craft-skill` task.
 
 ## Checks
 
 - `attendant validate --no-correct --strict`: passed after task update.
+- `git diff --check`: passed.
+- Confirmed `README.md` and `docs/resource-boundaries.md` paths exist.
 
 ## Review / next slice
 
-- Ready for implementation: yes; write canonical guidance only. `facet-craft` implementation remains follow-up work.
+- Approved 2026-08-03. Follow-up audit-skill task is separately tracked.
 
 ## Notes
 

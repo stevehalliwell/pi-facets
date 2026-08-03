@@ -29,6 +29,7 @@ export interface FacetPreset {
 	role: string;
 	authority: string;
 	style: string;
+	skill?: string;
 	notes: string;
 	source: PresetSource;
 	path: string;
@@ -176,7 +177,11 @@ export function discoverFacets(globalRoot: string, projectRoot?: string, project
 	};
 }
 
-const PRESET_FIELDS = new Set(["name", "description", "role", "authority", "style"]);
+const PRESET_FIELDS = new Set(["name", "description", "role", "authority", "style", "skill"]);
+
+function isSkillName(value: string): boolean {
+	return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) && value.length <= 64;
+}
 
 function availableComponentNames(components: Map<string, FacetComponent>, axis: Axis): string {
 	const names = [...components.values()]
@@ -227,6 +232,11 @@ function readPresetSource(
 				throw new Error("frontmatter `description` must be non-empty");
 			}
 
+			const skill = parsed.frontmatter.skill;
+			if (skill !== undefined && (typeof skill !== "string" || !isSkillName(skill))) {
+				throw new Error("frontmatter `skill` must be a valid Pi skill name");
+			}
+
 			const refs = {} as Record<Axis, string>;
 			for (const axis of AXES) {
 				const value = parsed.frontmatter[axis];
@@ -253,6 +263,7 @@ function readPresetSource(
 				role: refs.role,
 				authority: refs.authority,
 				style: refs.style,
+				skill,
 				notes: parsed.body.trim(),
 				source,
 				path,
@@ -725,6 +736,10 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		return `${preset.name} — ${preset.description} [${preset.source}]${currentPreset() === preset ? " [current]" : ""}`;
 	}
 
+	function hasAssociatedSkill(preset: FacetPreset): boolean {
+		return preset.skill !== undefined && pi.getCommands().some((command) => command.source === "skill" && command.name === `skill:${preset.skill}`);
+	}
+
 	async function selectPreset(ctx: ExtensionContext): Promise<"back" | "done"> {
 		const values = sortedPresets(presets);
 		const labels = values.map(presetLabel);
@@ -732,7 +747,14 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		if (selected === "Back") return "back";
 		if (selected === "(none)") clearFacets(ctx);
 		const preset = values[labels.indexOf(selected ?? "")];
-		if (preset) applyPreset(preset.name, ctx);
+		if (preset) {
+			applyPreset(preset.name, ctx);
+			if (preset.skill && !hasAssociatedSkill(preset)) {
+				ctx.ui.notify(`Associated skill "${preset.skill}" is unavailable. Add or enable it, then select this preset again.`, "error");
+			} else if (preset.skill && await ctx.ui.confirm("Run associated skill?", `Run /skill:${preset.skill} now?`)) {
+				pi.sendUserMessage(`/skill:${preset.skill}`);
+			}
+		}
 		return "done";
 	}
 

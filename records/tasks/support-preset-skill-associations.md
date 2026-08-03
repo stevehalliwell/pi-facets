@@ -8,7 +8,7 @@ tags:
   - presets
   - skills
   - extension
-status: todo
+status: done
 scope: agreed
 ---
 
@@ -71,15 +71,20 @@ scope: agreed
 
 ## Implemented so far
 
-- Task record created; no extension changes.
+- Added optional `skill` to preset model/parser with Pi skill-name syntax validation.
+- Added focused parser coverage for valid and invalid associated skill names.
+- Explicit TUI selection now resolves associated skill command availability after applying preset; missing targets show actionable error without undoing facet state.
+- Available associated skills now use TUI confirmation; approval sends `/skill:<name>` through `pi.sendUserMessage`, declining leaves preset active.
 
 ## Checks
 
 - `attendant validate --no-correct --strict`: passed after record creation.
+- `npm test -- test/facets.test.ts`: passed (12 tests).
+- `npm run check`: passed.
 
 ## Review / next slice
 
-- Ready for implementation: yes.
+- Approved 2026-08-03. Next dependent task: `add-five-whys-inquisitive-stance-and-skill`.
 
 ## Notes
 

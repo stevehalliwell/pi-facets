@@ -33,6 +33,10 @@ describe("local Pi package setup", () => {
       ".pi/skills/backlog-refinement/SKILL.md",
       ".pi/skills/competitor-analysis/SKILL.md",
       ".pi/skills/facet-alignment/SKILL.md",
+      ".pi/skills/facet-craft/SKILL.md",
+      ".pi/skills/five-whys/SKILL.md",
+      ".pi/skills/five-whys/references/five-whys.md",
+      ".pi/skills/six-thinking-hats/SKILL.md",
       ".pi/skills/references/okf-artifacts.md",
       ".pi/skills/implementation/SKILL.md",
       ".pi/skills/web-implementation/SKILL.md",
@@ -40,15 +44,19 @@ describe("local Pi package setup", () => {
       ".pi/skills/release-readiness/SKILL.md",
       ".pi/skills/technical-review/SKILL.md",
       ".pi/skills/website-messaging/SKILL.md",
+      ".pi/skills/website-art-direction/SKILL.md",
       ".pi/facets/roles/marketing-strategist.md",
       ".pi/facets/roles/researcher.md",
+      ".pi/facets/roles/inquiry-guide.md",
       ".pi/facets/roles/delivery-lead.md",
       ".pi/facets/roles/web-platform-specialist.md",
       ".pi/facets/roles/release-steward.md",
       ".pi/facets/style/exploratory.md",
       ".pi/facets/style/explanatory.md",
       ".pi/facets/style/structured.md",
+      ".pi/facets/style/inquisitive.md",
       ".pi/facets/presets/technical-review.md",
+      ".pi/facets/presets/five-whys.md",
       ".pi/facets/presets/implementation-partner.md",
       ".pi/facets/presets/web-implementation.md",
       ".pi/facets/presets/backlog-refinement.md",
@@ -84,6 +92,20 @@ describe("local Pi package setup", () => {
       role: "dev-peer",
       authority: "recommend-and-proceed",
       style: "concise",
+    });
+  });
+
+  it("defines Five Whys composition and associated skill", async () => {
+    const parsed = parseFrontmatter<Record<string, unknown>>(
+      await readFile(resolve(".pi/facets/presets/five-whys.md"), "utf8"),
+    );
+
+    expect(parsed.frontmatter).toMatchObject({
+      name: "five-whys",
+      role: "inquiry-guide",
+      authority: "advisory",
+      style: "inquisitive",
+      skill: "five-whys",
     });
   });
 

@@ -7,7 +7,7 @@ tags:
   - website
   - design
   - skills
-status: todo
+status: done
 scope: agreed
 ---
 
@@ -70,15 +70,20 @@ scope: agreed
 
 ## Implemented so far
 
-- Task repurposed; no workflow files added.
+- Added reusable `website-art-direction` skill with evidence inventory, audit, alternatives, comparison, recommendation, approval gate, and implementation principles.
+- Added package-resource coverage.
 
 ## Checks
 
 - `attendant validate --no-correct --strict`: passed after task update.
+- `node /Users/stevehalliwell/.pi/agent/skills/skill-craft/validate-frontmatter.mjs .pi/skills/website-art-direction/SKILL.md`: passed.
+- `node /Users/stevehalliwell/.pi/agent/skills/skill-craft/md-words.mjs .pi/skills/website-art-direction/SKILL.md`: 411 words.
+- `npm test`: passed (24 tests).
+- `npm run check`: passed.
 
 ## Review / next slice
 
-- Ready for implementation: yes.
+- Approved 2026-08-03.
 
 ## Notes
 

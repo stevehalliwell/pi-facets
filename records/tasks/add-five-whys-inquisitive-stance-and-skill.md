@@ -8,7 +8,7 @@ tags:
   - skills
   - five-whys
   - inquiry
-status: todo
+status: done
 scope: agreed
 depends_on:
   - support-preset-skill-associations
@@ -73,15 +73,24 @@ depends_on:
 
 ## Implemented so far
 
-- Task record created; no implementation changes.
+- Added compact `inquiry-guide` role and `inquisitive` style within axis boundaries.
+- Added package-resource coverage for both facet files.
+- Added `five-whys` skill with adaptive, evidence-aware one-question-at-a-time workflow.
+- Added concise method reference covering use, evidence discipline, branches, and safe stopping.
+- Added `five-whys` preset: `inquiry-guide + advisory + inquisitive`, associated with Five Whys skill.
 
 ## Checks
 
 - `attendant validate --no-correct`: passed before record creation.
+- `npm test -- test/package.test.ts`: passed (11 tests) during earlier slice.
+- `npm test`: passed (24 tests) after final preset.
+- `npm run check`: passed.
+- `node /Users/stevehalliwell/.pi/agent/skills/skill-craft/validate-frontmatter.mjs .pi/skills/five-whys/SKILL.md`: passed.
+- `node /Users/stevehalliwell/.pi/agent/skills/skill-craft/md-words.mjs .pi/skills/five-whys/SKILL.md`: 387 words.
 
 ## Review / next slice
 
-- Ready for implementation: yes; final preset association depends on `support-preset-skill-associations`.
+- Approved 2026-08-03.
 
 ## Notes
 

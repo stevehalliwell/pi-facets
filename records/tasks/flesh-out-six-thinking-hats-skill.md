@@ -8,7 +8,7 @@ tags:
   - facets
   - brainstorming
   - decision-making
-status: todo
+status: done
 scope: agreed
 ---
 
@@ -70,15 +70,20 @@ scope: agreed
 
 ## Implemented so far
 
-- Task record created; no implementation changes.
+- Added `six-thinking-hats` skill with user lens selection, default sequencing, distinct lens outputs, and process/synthesis close.
+- Added package-resource coverage.
 
 ## Checks
 
 - `attendant validate --no-correct`: passed before record creation.
+- `node /Users/stevehalliwell/.pi/agent/skills/skill-craft/validate-frontmatter.mjs .pi/skills/six-thinking-hats/SKILL.md`: passed.
+- `node /Users/stevehalliwell/.pi/agent/skills/skill-craft/md-words.mjs .pi/skills/six-thinking-hats/SKILL.md`: 369 words.
+- `npm test`: passed (24 tests).
+- `npm run check`: passed.
 
 ## Review / next slice
 
-- Ready for implementation: yes.
+- Approved 2026-08-03.
 
 ## Notes
 

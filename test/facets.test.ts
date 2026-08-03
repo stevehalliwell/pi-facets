@@ -29,9 +29,9 @@ async function facet(root: string, directory: "roles" | "authority" | "style", n
 	await writeFile(join(root, directory, `${name}.md`), `---\nname: ${name}\naxis: ${directory === "roles" ? "role" : directory}\ndescription: ${name}\n---\n\n${body}\n`);
 }
 
-async function preset(root: string, name: string): Promise<void> {
+async function preset(root: string, name: string, skill?: string): Promise<void> {
 	await mkdir(root, { recursive: true });
-	await writeFile(join(root, `${name}.md`), `---\nname: ${name}\ndescription: ${name}\nrole: dev-peer\nauthority: advisory\nstyle: concise\n---\n`);
+	await writeFile(join(root, `${name}.md`), `---\nname: ${name}\ndescription: ${name}\nrole: dev-peer\nauthority: advisory\nstyle: concise${skill ? `\nskill: ${skill}` : ""}\n---\n`);
 }
 
 async function defaultPreset(root: string, content: string): Promise<void> {
@@ -65,6 +65,23 @@ describe("facet discovery", () => {
 		const components = discoverFacets(global, project, true).components;
 		const result = discoverFacetPresets(join(global, "presets"), join(project, "presets"), components, true);
 		expect(result.presets.get("review")?.source).toBe("project");
+	});
+
+	it("parses optional valid skill associations and rejects invalid names", async () => {
+		const global = await root();
+		const project = await root();
+		for (const directory of ["roles", "authority", "style"] as const) {
+			await facet(global, directory, directory === "roles" ? "dev-peer" : directory === "authority" ? "advisory" : "concise");
+		}
+		await preset(join(global, "presets"), "with-skill", "five-whys");
+		await preset(join(project, "presets"), "invalid-skill", "Five Whys");
+		const components = discoverFacets(global).components;
+		const result = discoverFacetPresets(join(global, "presets"), join(project, "presets"), components, true);
+		expect(result.presets.get("with-skill")?.skill).toBe("five-whys");
+		expect(result.presets.has("invalid-skill")).toBe(false);
+		expect(result.diagnostics).toEqual(expect.arrayContaining([
+			expect.objectContaining({ message: expect.stringContaining("frontmatter `skill` must be a valid Pi skill name") }),
+		]));
 	});
 
 	it("resolves trusted project default preset before global fallback", async () => {
@@ -166,6 +183,94 @@ describe("facet menu", () => {
 		expect(await handlers.get("before_agent_start")!({ systemPrompt: "Base" }, ctx)).toBeUndefined();
 		await handlers.get("session_shutdown")!({}, ctx);
 		expect(statuses.at(-1)).toEqual(["pi-facets", undefined]);
+	});
+
+	it("applies a preset when its associated skill is unavailable", async () => {
+		const global = await root();
+		const project = await root();
+		for (const directory of ["roles", "authority", "style"] as const) {
+			await facet(global, directory, directory === "roles" ? "dev-peer" : directory === "authority" ? "advisory" : "concise");
+		}
+		await preset(join(global, "presets"), "paired", "five-whys");
+		const commands = new Map<string, { handler: (args: string, ctx: any) => Promise<void> }>();
+		const entries: any[] = [];
+		const notifications: string[] = [];
+		const choices = ["Presets — (none)", "paired — paired [global]"];
+		const pi = {
+			on() {},
+			getCommands: () => [],
+			registerCommand(name: string, command: any) { commands.set(name, command); },
+			registerEntryRenderer() {},
+			appendEntry(customType: string, data: unknown) { entries.push({ type: "custom", customType, data }); },
+		} as unknown as ExtensionAPI;
+		const ctx: any = {
+			mode: "tui", cwd: project, isProjectTrusted: () => true,
+			ui: { notify: (message: string) => notifications.push(message), select: async () => choices.shift(), setStatus() {}, theme: { fg: (_: string, text: string) => text } },
+			sessionManager: { getBranch: () => entries },
+		};
+		registerFacetExtension(pi, global);
+		await commands.get("facets")!.handler("", ctx);
+		expect(entries.at(-1).data.action).toBe("apply-preset");
+		expect(notifications).toContain('Associated skill "five-whys" is unavailable. Add or enable it, then select this preset again.');
+	});
+
+	it("launches an available associated skill only after confirmation", async () => {
+		const global = await root();
+		const project = await root();
+		for (const directory of ["roles", "authority", "style"] as const) {
+			await facet(global, directory, directory === "roles" ? "dev-peer" : directory === "authority" ? "advisory" : "concise");
+		}
+		await preset(join(global, "presets"), "paired", "five-whys");
+		const commands = new Map<string, { handler: (args: string, ctx: any) => Promise<void> }>();
+		const entries: any[] = [];
+		const messages: string[] = [];
+		const choices = ["Presets — (none)", "paired — paired [global]"];
+		const pi = {
+			on() {},
+			getCommands: () => [{ name: "skill:five-whys", source: "skill" }],
+			registerCommand(name: string, command: any) { commands.set(name, command); },
+			registerEntryRenderer() {},
+			appendEntry(customType: string, data: unknown) { entries.push({ type: "custom", customType, data }); },
+			sendUserMessage(message: string) { messages.push(message); },
+		} as unknown as ExtensionAPI;
+		const ctx: any = {
+			mode: "tui", cwd: project, isProjectTrusted: () => true,
+			ui: { notify() {}, select: async () => choices.shift(), confirm: async () => true, setStatus() {}, theme: { fg: (_: string, text: string) => text } },
+			sessionManager: { getBranch: () => entries },
+		};
+		registerFacetExtension(pi, global);
+		await commands.get("facets")!.handler("", ctx);
+		expect(messages).toEqual(["/skill:five-whys"]);
+	});
+
+	it("keeps an available associated skill idle when confirmation is declined", async () => {
+		const global = await root();
+		const project = await root();
+		for (const directory of ["roles", "authority", "style"] as const) {
+			await facet(global, directory, directory === "roles" ? "dev-peer" : directory === "authority" ? "advisory" : "concise");
+		}
+		await preset(join(global, "presets"), "paired", "five-whys");
+		const commands = new Map<string, { handler: (args: string, ctx: any) => Promise<void> }>();
+		const entries: any[] = [];
+		const messages: string[] = [];
+		const choices = ["Presets — (none)", "paired — paired [global]"];
+		const pi = {
+			on() {},
+			getCommands: () => [{ name: "skill:five-whys", source: "skill" }],
+			registerCommand(name: string, command: any) { commands.set(name, command); },
+			registerEntryRenderer() {},
+			appendEntry(customType: string, data: unknown) { entries.push({ type: "custom", customType, data }); },
+			sendUserMessage(message: string) { messages.push(message); },
+		} as unknown as ExtensionAPI;
+		const ctx: any = {
+			mode: "tui", cwd: project, isProjectTrusted: () => true,
+			ui: { notify() {}, select: async () => choices.shift(), confirm: async () => false, setStatus() {}, theme: { fg: (_: string, text: string) => text } },
+			sessionManager: { getBranch: () => entries },
+		};
+		registerFacetExtension(pi, global);
+		await commands.get("facets")!.handler("", ctx);
+		expect(entries.at(-1).data.action).toBe("apply-preset");
+		expect(messages).toEqual([]);
 	});
 
 	it("shows project selections and returns to menu after an axis selection", async () => {

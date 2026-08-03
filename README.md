@@ -215,6 +215,7 @@ npm test -- test/package.test.ts
 - `.pi/prompts/` — project prompt templates;
 - `.pi/skills/` — project-local workflows and references;
 - `docs/facet-grid.md` — project facet resource examples;
+- `docs/resource-boundaries.md` — canonical author guidance for facets, presets, skills, prompts, and references;
 - `records/tasks/` — Attendant-backed task records;
 - `records/decisions/` — Attendant-backed durable decisions;
 - `pi-modes-and-skills-implementation-brief.md` — indicative design context, not binding specification.
