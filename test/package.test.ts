@@ -30,6 +30,7 @@ describe("local Pi package setup", () => {
 
   it("ships agreed facet, preset, prompt, and grid resources", async () => {
     const resources = [
+      ".pi/skills/backlog-capture/SKILL.md",
       ".pi/skills/backlog-refinement/SKILL.md",
       ".pi/skills/competitor-analysis/SKILL.md",
       ".pi/skills/editorial-review/SKILL.md",
@@ -61,6 +62,7 @@ describe("local Pi package setup", () => {
       ".pi/facets/presets/five-whys.md",
       ".pi/facets/presets/implementation-partner.md",
       ".pi/facets/presets/web-implementation.md",
+      ".pi/facets/presets/backlog-capture.md",
       ".pi/facets/presets/backlog-refinement.md",
       ".pi/facets/presets/messaging-strategy.md",
       ".pi/facets/presets/research-exploration.md",
@@ -113,6 +115,7 @@ describe("local Pi package setup", () => {
 
   it("associates every paired preset with its project skill", async () => {
     const pairs = {
+      "backlog-capture": "backlog-capture",
       "backlog-refinement": "backlog-refinement",
       "editorial-review": "editorial-review",
       "five-whys": "five-whys",
@@ -176,6 +179,20 @@ describe("local Pi package setup", () => {
       role: "web-platform-specialist",
       authority: "recommend-and-proceed",
       style: "concise",
+    });
+  });
+
+  it("defines backlog-capture composition", async () => {
+    const parsed = parseFrontmatter<Record<string, unknown>>(
+      await readFile(resolve(".pi/facets/presets/backlog-capture.md"), "utf8"),
+    );
+
+    expect(parsed.frontmatter).toMatchObject({
+      name: "backlog-capture",
+      role: "product-owner",
+      authority: "recommend-and-proceed",
+      style: "concise",
+      skill: "backlog-capture",
     });
   });
 
