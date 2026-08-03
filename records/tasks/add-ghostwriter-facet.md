@@ -7,7 +7,7 @@ tags:
   - facets
   - ghostwriting
   - presets
-status: review
+status: done
 scope: agreed
 ---
 
@@ -91,8 +91,7 @@ scope: agreed
 
 ## Review / next slice
 
-- Ready for review: yes; role, style, and preset implementation complete.
-- After approval: choose next agreed task.
+- Approved: 2026-08-02. Task complete.
 
 ## Notes
 

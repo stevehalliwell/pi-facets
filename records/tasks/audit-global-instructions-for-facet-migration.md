@@ -7,7 +7,7 @@ tags:
   - facets
   - global-config
   - audit
-status: review
+status: done
 scope: agreed
 ---
 
@@ -118,8 +118,8 @@ scope: agreed
 
 ## Review / next slice
 
-- Ready for review: yes; migration map complete, no configuration changes made.
-- After approval: create one scoped implementation task for approved global migration.
+- Approved: 2026-08-02. Migration map complete; no configuration changes made.
+- Follow-up implementation needs separate scoped task.
 
 ## Notes
 
