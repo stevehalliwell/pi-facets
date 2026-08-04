@@ -7,6 +7,18 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.3.0]
+
+### Added
+
+- `pi-facets install --scope project|global` CLI for copying bundled facets, activation siblings, and presets into project or personal Pi scope; existing files remain unchanged unless `--force` is passed.
+- Optional `<facet-name>.activation.md` siblings for one-time facet context when a facet becomes active or is restored.
+- Backlog-capture preset and skill for recording draft backlog items without inferring scope or implementation.
+
+### Changed
+
+- README documents bundled-facet installation, activation-file use, and backlog capture.
+
 ## [0.2.0]
 
 ### Added

@@ -37,7 +37,7 @@ Open facet selection:
 /facets
 ```
 
-Choose a preset such as **technical review**, **implementation partner**, **editorial review**, or **release readiness**. If it has an associated skill, Pi shows its name and asks before running it. You can also run a workflow directly:
+Choose a preset such as **technical review**, **implementation partner**, **backlog capture**, **editorial review**, or **release readiness**. If it has an associated skill, Pi shows its name and asks before running it. You can also run a workflow directly:
 
 ```text
 /skill:implementation
