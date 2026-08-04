@@ -8,14 +8,13 @@ Give pi repeatable collaboration stances and task workflows without turning ever
 
 ## Use it
 
-Install dependencies, then start Pi in this repository:
+Install pi-facets from GitHub:
 
 ```sh
-npm install
-pi
+pi install git:github.com/stevehalliwell/pi-facets
 ```
 
-This repository’s `.pi/settings.json` loads pi-facets as a local package.
+This installs it in personal Pi scope. Add `-l` to install it for current project instead.
 
 ### Install bundled facets
 
