@@ -4,7 +4,7 @@ name: review-facets-and-presets-for-activation-files
 created_at: 2026-08-04T00:06:00.358Z
 desc: "Review every existing facet and preset for need for optional one-time activation Markdown; identify needed additions or alterations. Concise/Caveman and implementation/Ponytail known candidates."
 tags: []
-status: todo
+status: done
 scope: agreed
 ---
 
@@ -25,7 +25,7 @@ scope: agreed
 
 ### In scope
 
-- Add `.pi/facets/style/concise.activation.md`: terse phrasing, fragments/abbreviations, technical substance, arrows, and exceptions for security, irreversible actions, or user confusion.
+- Add `.pi/facets/style/concise.activation.md`: source-derived full Caveman guidance for terse phrasing, fragments, technical fidelity, standard acronyms only, no causal arrows, and clarity exceptions.
 - Add `.pi/facets/roles/dev-peer.activation.md`: YAGNI ladder, trace real flow/root cause, small diffs, avoid speculative abstractions, preserve security/accessibility/validation, and proportionate checks.
 - Add focused tests for valid discovery and one-time activation behavior.
 
@@ -46,6 +46,29 @@ scope: agreed
 1. Add two activation Markdown siblings without frontmatter.
 2. Add focused discovery/lifecycle tests.
 3. Run project validation.
+
+## Implemented so far
+
+- Added reduced full-mode Caveman activation guidance in `style/concise.activation.md`.
+- Added reduced full-mode Ponytail activation guidance in `roles/dev-peer.activation.md`.
+- Added bundled-resource discovery coverage; existing lifecycle coverage exercises one-time injection and persistent body injection.
+
+## Decisions
+
+- Source reviewed from `JuliusBrussee/caveman` commit `7066cc8` and `DietrichGebert/ponytail` commit `16f2980`.
+- Caveman source rejects invented abbreviations and causal arrows. User approved the source-derived full-mode activation text 2026-08-04; global instructions remain out of scope.
+- User requested full source bodies in both activation files before task-specific reduction or reconciliation, then approved reduced full-mode text.
+
+## Checks
+
+- `npm test -- --run test/facets.test.ts` — 15 pass.
+- `npm test -- --run test/package.test.ts -t "ships agreed facet"` — pass.
+- `npm run check` — pass.
+- `git diff --check` — pass.
+
+## Review / next slice
+
+- Approved complete by user 2026-08-04.
 
 ### Acceptance
 

@@ -56,6 +56,8 @@ describe("local Pi package setup", () => {
       ".pi/facets/roles/delivery-lead.md",
       ".pi/facets/roles/web-platform-specialist.md",
       ".pi/facets/roles/release-steward.md",
+      ".pi/facets/roles/dev-peer.activation.md",
+      ".pi/facets/style/concise.activation.md",
       ".pi/facets/style/exploratory.md",
       ".pi/facets/style/explanatory.md",
       ".pi/facets/style/structured.md",

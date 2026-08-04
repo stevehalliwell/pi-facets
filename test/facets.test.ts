@@ -1,6 +1,6 @@
 import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import {
@@ -72,6 +72,13 @@ describe("facet discovery", () => {
 			expect.objectContaining({ path: join(global, "roles", "orphan.activation.md"), message: expect.stringContaining('no valid role facet named "orphan"') }),
 			expect.objectContaining({ path: join(global, "authority", "empty.activation.md"), message: expect.stringContaining("Markdown body must be non-empty") }),
 		]));
+	});
+
+	it("loads bundled activation files without diagnostics", () => {
+		const discovery = discoverFacets(resolve(".pi", "facets"));
+		expect(discovery.diagnostics).toEqual([]);
+		expect(discovery.components.get("role:dev-peer")?.activation).toContain("Full mode: enforce ladder.");
+		expect(discovery.components.get("style:concise")?.activation).toContain("Respond terse like smart caveman.");
 	});
 
 	it("discovers project presets before global presets", async () => {
