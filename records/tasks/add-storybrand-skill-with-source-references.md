@@ -2,9 +2,9 @@
 id: 019fca1e-4c3c-7bfb-b03e-d498e9133f37
 name: add-storybrand-skill-with-source-references
 created_at: 2026-08-04T00:13:31.068Z
-desc: "Add StoryBrand skill backed by curated reference media, potentially including YouTube transcripts and PDFs."
+desc: "Move StoryBrand workshop and content-alignment skills to global Pi scope because they are unrelated to pi-facets."
 tags: []
-status: todo
+status: done
 scope: agreed
 ---
 
@@ -12,7 +12,7 @@ scope: agreed
 
 ### Desired outcome
 
-- Add standalone `storybrand` brand-script workshop skill. It creates a source-aware structured StoryBrand draft, assumptions, and source references; finished website copy remains `website-messaging` work.
+- Move StoryBrand workshop and content-alignment skills from pi-facets into global Pi scope.
 
 ### Confirmed behavior
 
@@ -20,33 +20,39 @@ scope: agreed
 - Do not copy third-party PDFs or transcripts into repo without explicit reuse permission.
 - Ask for output path before artifact creation; user may choose chat-only output.
 - User-provided local sources must record source path, origin or permission note, and claim boundaries.
+- StoryBrand supports any user-requested content type; it is one method usable alongside `website-messaging`, not a website-only handoff.
 
 ### In scope
 
-- Add `.pi/skills/storybrand/SKILL.md`.
-- Gather offer, audience, desired action, evidence, and constraints; label absent inputs as assumptions or questions.
-- Produce seven-part BrandScript: character; external, internal, philosophical problem; guide empathy and authority; plan; direct and transitional CTA; failure stakes; success outcome.
-- Include sources, confirmed facts, assumptions, unresolved choices, and `website-messaging` handoff in requested artifacts.
-- Curated URL references:
-  - https://storybrand.com/learn-the-framework/
-  - https://storybrand.com/storybrand-clarify-your-message-new/
-  - https://storybrand.com/downloads/intro-to-sb/Introduction-to-StoryBrand.pdf
+- Global skills: `~/.pi/agent/skills/storybrand/SKILL.md` and `~/.pi/agent/skills/storybrand-review/SKILL.md`.
+- Shared global reference: `~/.pi/agent/skills/storybrand-references/references/storybrand-framework.md`.
+- Preserve workshop, content-alignment, source/claim, and artifact-output behavior already implemented.
 
 ### Out of scope
 
-- Finished page copy, visual design, campaign build, automatic file creation, profile or artifact registry, local copies of third-party media, and claims of StoryBrand certification or endorsement.
+- pi-facets package skills, facets, presets, extension, tests, and documentation.
 
 ### Plan
 
-1. Add source-aware workshop instructions and BrandScript output shape.
-2. Add source/claim-boundary handling and path-confirmation behavior.
-3. Add focused fixture/check; run project validation.
+1. Move skills and shared reference to global Pi scope.
+2. Update relative references.
+3. Confirm project no longer contains StoryBrand skill resources. **Next slice.**
+
+## Implemented so far
+
+- Moved `storybrand` and `storybrand-review` to `~/.pi/agent/skills/`.
+- Moved shared reference to `~/.pi/agent/skills/storybrand-references/references/`.
+- Updated both global skills to resolve shared reference at new location.
+
+## Review / next slice
+
+- Approved complete by user 2026-08-04. Global skills are outside pi-facets; project StoryBrand resources removed.
 
 ### Acceptance
 
-- Workshop produces all seven sections from supplied inputs.
-- Missing evidence becomes explicit assumptions or questions; claims are never invented.
+- Workshop produces/refines all seven BrandScript sections from supplied inputs.
+- Review skill identifies script/content gaps; it can steer, rewrite, or generate requested content against a supplied script.
+- Missing script directs user to workshop; missing evidence becomes explicit assumptions or questions; claims are never invented.
 - Output path is requested before writing; no file for chat-only output.
-- Public refs remain URLs; local material is used only when user supplies it.
-- Handoff identifies `website-messaging` when page copy is next.
-- `npm run check` and tests pass.
+- Public refs remain URLs; local material is used only when user supplies it with provenance and claim boundaries.
+- `npm run check` and focused tests pass.

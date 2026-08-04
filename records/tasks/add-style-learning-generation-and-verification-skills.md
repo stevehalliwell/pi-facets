@@ -2,9 +2,9 @@
 id: 019fca31-ac20-7691-8f59-2e8bc449a3d6
 name: add-style-learning-generation-and-verification-skills
 created_at: 2026-08-04T00:34:40.800Z
-desc: "Add one task covering style-learner, style-verifier, and style-doc-generator skills, informed by Claude Night Market Scribe."
+desc: "Move generic style-learning, generation, and verification skills to global Pi scope because they are unrelated to pi-facets."
 tags: []
-status: todo
+status: done
 scope: agreed
 ---
 
@@ -12,7 +12,7 @@ scope: agreed
 
 ### Desired outcome
 
-- Add project-native `style-learner`, `style-verifier`, and `style-doc-generator` skills. They learn reusable writing profiles, generate or rewrite Markdown docs with one, and verify profile conformance.
+- Move generic `style-learner`, `style-verifier`, and `style-doc-generator` skills into global Pi scope.
 
 ### Confirmed behavior
 
@@ -23,16 +23,13 @@ scope: agreed
 
 ### In scope
 
-- One `SKILL.md` workflow for each named skill.
-- Versionable Markdown profile format: voice, vocabulary, sentence and structural preferences, punctuation, anti-patterns, metrics, quoted excerpts, and sources.
-- Generator request frame: target, audience, thesis, and selected profile.
-- Verifier findings with target location or verbatim anchor, violated profile rule, evidence, severity, and suggested correction.
-- Small fixture/profile validation checks per skill.
+- Global skill paths: `~/.pi/agent/skills/style-learner/`, `style-doc-generator/`, and `style-verifier/`.
+- Shared global reference: `~/.pi/agent/skills/style-profile-references/references/style-profiles.md`.
+- Preserve existing profile, generation, verification, provenance, and heuristic-metric behavior.
 
 ### Out of scope
 
-- Profile registry, selection UI, automatic invocation, non-Markdown generation, and imported Night Market Scribe dependencies or metrics tooling.
-- Long-form source-bounded drafting (`ghostwriting`) and editorial-only work (`editorial-review`).
+- pi-facets package skills, facets, presets, extension, tests, and documentation.
 
 ### Reference
 
@@ -41,9 +38,19 @@ scope: agreed
 
 ### Plan
 
-1. Define shared profile resolution and format in skill instructions.
-2. Add learner, generator, and verifier workflows with boundaries above.
-3. Add focused fixtures/checks; run project validation.
+1. Move skills and shared reference to global Pi scope.
+2. Update relative references.
+3. Confirm pi-facets has no style skill resources. **Next slice.**
+
+## Implemented so far
+
+- Moved all three skills to `~/.pi/agent/skills/`.
+- Moved shared reference to `~/.pi/agent/skills/style-profile-references/references/`.
+- Updated global skill links to shared reference.
+
+## Review / next slice
+
+- Approved complete by user 2026-08-04. Global skills are outside pi-facets; project style skill resources removed.
 
 ### Acceptance
 
