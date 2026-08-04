@@ -5,6 +5,9 @@
   "description": "Composable facets, skills, and extensions for Pi agent.",
   "keywords": ["pi-package"],
   "type": "module",
+  "bin": {
+    "pi-facets": "./scripts/install.mjs"
+  },
   "scripts": {
     "check": "tsc --noEmit",
     "test": "vitest run",

@@ -17,6 +17,20 @@ pi
 
 This repository’s `.pi/settings.json` loads pi-facets as a local package.
 
+### Install bundled facets
+
+After installing pi-facets, copy its supplied roles, authority, style facets, activation siblings, and presets into desired Pi scope:
+
+```sh
+# Current project: <cwd>/.pi/facets
+pi-facets install --scope project
+
+# Personal Pi scope: ~/.pi/agent/facets
+pi-facets install --scope global
+```
+
+Existing bundled paths are reported and left unchanged. Pass `--force` to replace those paths; unrelated destination files remain untouched. Skills and extension stay package-provided.
+
 Open facet selection:
 
 ```text

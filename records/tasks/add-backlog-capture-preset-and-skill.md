@@ -4,7 +4,7 @@ name: add-backlog-capture-preset-and-skill
 created_at: 2026-08-04T00:00:00.000Z
 desc: "Add brief draft-only backlog capture preset and workflow."
 tags: []
-status: review
+status: done
 scope: agreed
 ---
 
@@ -63,8 +63,8 @@ scope: agreed
 
 ## Review / next slice
 
-- Ready for review: yes.
-- Likely next slice/task: restore valid `.pi/settings.json` only if user wants package loading re-enabled, then rerun full tests.
+- Approved complete by user 2026-08-04.
+- `.pi/settings.json` remains user-modified and out of scope.
 
 ## Notes
 
