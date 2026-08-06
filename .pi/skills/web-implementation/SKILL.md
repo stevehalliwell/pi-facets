@@ -1,6 +1,6 @@
 ---
 name: web-implementation
-description: "Use when implementing or reviewing web code, browser behavior, accessibility, responsive layouts, SEO/GEO, performance, or explicit web delivery requests. Layer standards-aware web constraints on agreed implementation work; use website-messaging for copy and technical-review for pre-code trade-offs. Delivery audit runs only when user explicitly asks to deliver, ship, or audit."
+description: "Use when implementing or reviewing web code, browser behavior, accessibility, responsive layouts, SEO/GEO, performance, or explicit web delivery requests. Layer standards-aware web constraints on agreed implementation work; use messaging-strategy for copy and technical-review for pre-code trade-offs. Delivery audit runs only when user explicitly asks to deliver, ship, or audit."
 ---
 
 # Web implementation

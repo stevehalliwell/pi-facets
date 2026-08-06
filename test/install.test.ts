@@ -20,7 +20,7 @@ async function temporaryDirectory(): Promise<string> {
 function install(args: string[], cwd: string, home?: string) {
 	return execute(process.execPath, [script, "install", ...args], {
 		cwd,
-		env: { ...process.env, ...(home ? { HOME: home } : {}) },
+		env: { ...process.env, ...(home ? { HOME: home, USERPROFILE: home } : {}) },
 	});
 }
 
@@ -52,7 +52,7 @@ describe("pi-facets install", () => {
 
 		await expect(install(["--scope", "project"], project)).rejects.toMatchObject({
 			code: 1,
-			stderr: expect.stringContaining("roles/dev-peer.md"),
+			stderr: expect.stringContaining(join("roles", "dev-peer.md")),
 		});
 		expect(await readFile(conflict, "utf8")).toBe("custom");
 		await expect(access(join(facets, "style", "concise.md"))).rejects.toThrow();

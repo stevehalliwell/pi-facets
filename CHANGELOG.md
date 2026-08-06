@@ -7,6 +7,22 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.4.0]
+
+### Added
+
+- Brainstorming, note-taker, and tweaking presets with paired workflows for exploratory ideation, concise note capture, and rapid small changes.
+
+### Changed
+
+- Messaging strategy now covers customer-facing messaging beyond websites.
+- Backlog refinement continues through eligible draft items one at a time after each agreed scope.
+- README lists current example presets.
+
+### Removed
+
+- Five Whys, ghostwriter, and delivery-planning project presets and their project-local workflow resources.
+
 ## [0.3.0]
 
 ### Added

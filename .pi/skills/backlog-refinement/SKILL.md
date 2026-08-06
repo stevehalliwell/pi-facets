@@ -1,25 +1,25 @@
 ---
 name: backlog-refinement
-description: "Use when clarifying, fleshing out, scoping, splitting, prioritizing, sequencing, or removing a backlog item before implementation. Use when requirements are vague, acceptance is missing, a task may be oversized, or dependencies are unclear. Produce an implementation-ready task shape; do not implement the task."
+description: "Refine backlog items, clarify draft tasks, flesh out a todo, scope work, define acceptance, split an oversized item, or make backlog work implementation-ready. Process oldest draft backlog items one at a time, retain user approval before agreement, then continue to the next item; do not implement work or automatically change facets."
 ---
 
 # Backlog refinement
 
-Turn one backlog item into an independently reviewable, implementation-ready task without silently inventing product decisions.
+Turn the oldest eligible backlog item into independently reviewable work, then continue until the backlog is exhausted or paused.
 
 ## Workflow
 
-1. Anchor the item. Read the current task and state its desired outcome, user or business value, and current status. Done when the item has one clear outcome.
-2. Inspect context. Check related records, existing behavior, dependencies, and adjacent work. Separate confirmed facts from assumptions. Done when relevant constraints and preserved behavior are listed.
-3. Shape the boundary. Define in scope, out of scope, affected flows, likely implementation path, and split points. Keep one independently reviewable outcome per task. Done when an implementer can identify what changes and what does not.
-4. Define acceptance. Write observable behavior checks, edge cases, and required validation. Prefer examples over vague quality words. Done when completion can be judged without reconstructing this discussion.
-5. Resolve decisions. Label recommendations and open questions. Ask for decisions that change behavior, scope, compatibility, or acceptance. Done when unresolved choices are explicit and no TBD is treated as permission to choose.
-6. Summarize the refined task. Provide outcome, boundaries, technical shape, ruled-out alternatives, acceptance, risks, and next slice. Done when the user can confirm or correct the shape.
+1. Enter and find eligible backlog. State: `Backlog refinement start. Current work resumes after backlog refinement.` In configured task storage, identify tasks with `status: todo` and `scope: draft`; select the oldest by creation date. If none exist, state: `Backlog refinement complete. Use /facets to choose a different facet or workflow.` Done when one oldest eligible item is selected or the empty-backlog exit is clear.
+2. Anchor the item. Read its current record and state desired outcome, user or business value, and current status. Inspect related records, existing behavior, dependencies, and adjacent work; separate confirmed facts from assumptions. Done when the item's constraints and preserved behavior are known.
+3. Shape the boundary. Define in scope, out of scope, affected flows, likely implementation path, split points, observable acceptance, edge cases, and proportionate validation. Keep one independently reviewable outcome per task. Done when an implementer can identify what changes and what does not.
+4. Resolve decisions. Label recommendations and open questions. Stop for a material decision, blocked item, or explicit user pause; do not treat `TBD` as permission to choose. Done when agreement is possible or a stop condition is explicit.
+5. Seek agreement. Summarize the refined item and ask the user to confirm or correct it. On approval, update only that item to `scope: agreed` and retain `status: todo`; never implement it or set it `doing`. Done when the item is agreed, corrected for another pass, or paused.
+6. Continue or exit. After agreement, return to step 1 and select the next oldest eligible item. Exit only for an empty eligible backlog, a material decision, a blocked item, or explicit user pause. On empty backlog, direct the user to `/facets`; do not change facets automatically. Done when the next item or exit condition is explicit.
 
 ## Output shape
 
 ```text
-Task refinement: <name>
+Backlog refinement: <task>
 
 Confirmed:
 - <facts and preserved behavior>
@@ -36,13 +36,10 @@ Acceptance:
 Need from you: confirm, correct, or choose <decision>.
 ```
 
-After agreement, state whether the task is ready for implementation, blocked on a decision, or needs a separate trade-off review.
-
 ## Rules
 
-- Refine one task at a time.
-- Preserve unresolved product behavior as an open question.
-- Split work when acceptance, ownership, or implementation path would otherwise be ambiguous.
-- Keep prioritization recommendations separate from implementation authorization.
+- Eligible backlog contains only `todo` tasks with `draft` scope; process it oldest first.
+- Refine one item at a time and preserve user approval before setting `scope: agreed`.
+- Keep agreed items at `status: todo` for a separate implementation workflow.
+- Do not implement, prioritize, change facets, or modify task-lifecycle status definitions.
 - Use a broader trade-off review for cross-feature architecture, public API, migration, security, or cost decisions.
-- Do not edit implementation files during refinement.

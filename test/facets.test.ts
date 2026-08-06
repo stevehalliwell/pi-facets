@@ -100,11 +100,11 @@ describe("facet discovery", () => {
 		for (const directory of ["roles", "authority", "style"] as const) {
 			await facet(global, directory, directory === "roles" ? "dev-peer" : directory === "authority" ? "advisory" : "concise");
 		}
-		await preset(join(global, "presets"), "with-skill", "five-whys");
-		await preset(join(project, "presets"), "invalid-skill", "Five Whys");
+		await preset(join(global, "presets"), "with-skill", "paired-skill");
+		await preset(join(project, "presets"), "invalid-skill", "Paired Skill");
 		const components = discoverFacets(global).components;
 		const result = discoverFacetPresets(join(global, "presets"), join(project, "presets"), components, true);
-		expect(result.presets.get("with-skill")?.skill).toBe("five-whys");
+		expect(result.presets.get("with-skill")?.skill).toBe("paired-skill");
 		expect(result.presets.has("invalid-skill")).toBe(false);
 		expect(result.diagnostics).toEqual(expect.arrayContaining([
 			expect.objectContaining({ message: expect.stringContaining("frontmatter `skill` must be a valid Pi skill name") }),
@@ -283,11 +283,11 @@ describe("facet menu", () => {
 		for (const directory of ["roles", "authority", "style"] as const) {
 			await facet(global, directory, directory === "roles" ? "dev-peer" : directory === "authority" ? "advisory" : "concise");
 		}
-		await preset(join(global, "presets"), "paired", "five-whys");
+		await preset(join(global, "presets"), "paired", "paired-skill");
 		const commands = new Map<string, { handler: (args: string, ctx: any) => Promise<void> }>();
 		const entries: any[] = [];
 		const notifications: string[] = [];
-		const choices = ["Presets — (none)", "paired — paired [skill: five-whys] [global]"];
+		const choices = ["Presets — (none)", "paired — paired [skill: paired-skill] [global]"];
 		const pi = {
 			on() {},
 			getCommands: () => [],
@@ -303,7 +303,7 @@ describe("facet menu", () => {
 		registerFacetExtension(pi, global);
 		await commands.get("facets")!.handler("", ctx);
 		expect(entries.at(-1).data.action).toBe("apply-preset");
-		expect(notifications).toContain('Associated skill "five-whys" is unavailable. Add or enable it, then select this preset again.');
+		expect(notifications).toContain('Associated skill "paired-skill" is unavailable. Add or enable it, then select this preset again.');
 	});
 
 	it("launches an available associated skill only after confirmation", async () => {
@@ -312,14 +312,14 @@ describe("facet menu", () => {
 		for (const directory of ["roles", "authority", "style"] as const) {
 			await facet(global, directory, directory === "roles" ? "dev-peer" : directory === "authority" ? "advisory" : "concise");
 		}
-		await preset(join(global, "presets"), "paired", "five-whys");
+		await preset(join(global, "presets"), "paired", "paired-skill");
 		const commands = new Map<string, { handler: (args: string, ctx: any) => Promise<void> }>();
 		const entries: any[] = [];
 		const messages: string[] = [];
-		const choices = ["Presets — (none)", "paired — paired [skill: five-whys] [global]"];
+		const choices = ["Presets — (none)", "paired — paired [skill: paired-skill] [global]"];
 		const pi = {
 			on() {},
-			getCommands: () => [{ name: "skill:five-whys", source: "skill" }],
+			getCommands: () => [{ name: "skill:paired-skill", source: "skill" }],
 			registerCommand(name: string, command: any) { commands.set(name, command); },
 			registerEntryRenderer() {},
 			appendEntry(customType: string, data: unknown) { entries.push({ type: "custom", customType, data }); },
@@ -332,7 +332,7 @@ describe("facet menu", () => {
 		};
 		registerFacetExtension(pi, global);
 		await commands.get("facets")!.handler("", ctx);
-		expect(messages).toEqual(["/skill:five-whys"]);
+		expect(messages).toEqual(["/skill:paired-skill"]);
 	});
 
 	it("keeps an available associated skill idle when confirmation is declined", async () => {
@@ -341,14 +341,14 @@ describe("facet menu", () => {
 		for (const directory of ["roles", "authority", "style"] as const) {
 			await facet(global, directory, directory === "roles" ? "dev-peer" : directory === "authority" ? "advisory" : "concise");
 		}
-		await preset(join(global, "presets"), "paired", "five-whys");
+		await preset(join(global, "presets"), "paired", "paired-skill");
 		const commands = new Map<string, { handler: (args: string, ctx: any) => Promise<void> }>();
 		const entries: any[] = [];
 		const messages: string[] = [];
-		const choices = ["Presets — (none)", "paired — paired [skill: five-whys] [global]"];
+		const choices = ["Presets — (none)", "paired — paired [skill: paired-skill] [global]"];
 		const pi = {
 			on() {},
-			getCommands: () => [{ name: "skill:five-whys", source: "skill" }],
+			getCommands: () => [{ name: "skill:paired-skill", source: "skill" }],
 			registerCommand(name: string, command: any) { commands.set(name, command); },
 			registerEntryRenderer() {},
 			appendEntry(customType: string, data: unknown) { entries.push({ type: "custom", customType, data }); },

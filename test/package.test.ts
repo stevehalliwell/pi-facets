@@ -34,25 +34,26 @@ describe("local Pi package setup", () => {
     const resources = [
       ".pi/skills/backlog-capture/SKILL.md",
       ".pi/skills/backlog-refinement/SKILL.md",
+      ".pi/skills/brainstorming/SKILL.md",
       ".pi/skills/competitor-analysis/SKILL.md",
       ".pi/skills/editorial-review/SKILL.md",
       ".pi/skills/facet-alignment/SKILL.md",
-      ".pi/skills/ghostwriting/SKILL.md",
       ".pi/skills/facet-craft/SKILL.md",
-      ".pi/skills/five-whys/SKILL.md",
-      ".pi/skills/five-whys/references/five-whys.md",
       ".pi/skills/six-thinking-hats/SKILL.md",
       ".pi/skills/references/okf-artifacts.md",
       ".pi/skills/implementation/SKILL.md",
+      ".pi/skills/iteration/SKILL.md",
+      ".pi/skills/note-taking/SKILL.md",
       ".pi/skills/web-implementation/SKILL.md",
       ".pi/skills/threejs-performance/SKILL.md",
       ".pi/skills/release-readiness/SKILL.md",
       ".pi/skills/technical-review/SKILL.md",
-      ".pi/skills/website-messaging/SKILL.md",
+      ".pi/skills/messaging-strategy/SKILL.md",
       ".pi/skills/website-art-direction/SKILL.md",
       ".pi/facets/roles/marketing-strategist.md",
       ".pi/facets/roles/researcher.md",
       ".pi/facets/roles/inquiry-guide.md",
+      ".pi/facets/roles/note-taker.md",
       ".pi/facets/roles/delivery-lead.md",
       ".pi/facets/roles/web-platform-specialist.md",
       ".pi/facets/roles/release-steward.md",
@@ -62,15 +63,17 @@ describe("local Pi package setup", () => {
       ".pi/facets/style/explanatory.md",
       ".pi/facets/style/structured.md",
       ".pi/facets/style/inquisitive.md",
+      ".pi/facets/style/iterative.md",
       ".pi/facets/presets/technical-review.md",
-      ".pi/facets/presets/five-whys.md",
       ".pi/facets/presets/implementation-partner.md",
+      ".pi/facets/presets/tweaking.md",
       ".pi/facets/presets/web-implementation.md",
       ".pi/facets/presets/backlog-capture.md",
       ".pi/facets/presets/backlog-refinement.md",
+      ".pi/facets/presets/brainstorming.md",
+      ".pi/facets/presets/note-taker.md",
       ".pi/facets/presets/messaging-strategy.md",
       ".pi/facets/presets/research-exploration.md",
-      ".pi/facets/presets/delivery-planning.md",
       ".pi/facets/presets/release-readiness.md",
       "docs/facet-grid.md",
     ];
@@ -103,17 +106,45 @@ describe("local Pi package setup", () => {
     });
   });
 
-  it("defines Five Whys composition and associated skill", async () => {
+  it("defines brainstorming composition and associated skill", async () => {
     const parsed = parseFrontmatter<Record<string, unknown>>(
-      await readFile(resolve(".pi/facets/presets/five-whys.md"), "utf8"),
+      await readFile(resolve(".pi/facets/presets/brainstorming.md"), "utf8"),
     );
 
     expect(parsed.frontmatter).toMatchObject({
-      name: "five-whys",
-      role: "inquiry-guide",
+      name: "brainstorming",
+      role: "pragmatic-collaborator",
       authority: "advisory",
-      style: "inquisitive",
-      skill: "five-whys",
+      style: "exploratory",
+      skill: "brainstorming",
+    });
+  });
+
+  it("defines note-taker composition and associated skill", async () => {
+    const parsed = parseFrontmatter<Record<string, unknown>>(
+      await readFile(resolve(".pi/facets/presets/note-taker.md"), "utf8"),
+    );
+
+    expect(parsed.frontmatter).toMatchObject({
+      name: "note-taker",
+      role: "note-taker",
+      authority: "recommend-and-proceed",
+      style: "concise",
+      skill: "note-taking",
+    });
+  });
+
+  it("defines tweaking composition and associated skill", async () => {
+    const parsed = parseFrontmatter<Record<string, unknown>>(
+      await readFile(resolve(".pi/facets/presets/tweaking.md"), "utf8"),
+    );
+
+    expect(parsed.frontmatter).toMatchObject({
+      name: "tweaking",
+      role: "dev-peer",
+      authority: "recommend-and-proceed",
+      style: "iterative",
+      skill: "iteration",
     });
   });
 
@@ -121,11 +152,12 @@ describe("local Pi package setup", () => {
     const pairs = {
       "backlog-capture": "backlog-capture",
       "backlog-refinement": "backlog-refinement",
+      brainstorming: "brainstorming",
+      "note-taker": "note-taking",
       "editorial-review": "editorial-review",
-      "five-whys": "five-whys",
-      ghostwriter: "ghostwriting",
       "implementation-partner": "implementation",
-      "messaging-strategy": "website-messaging",
+      tweaking: "iteration",
+      "messaging-strategy": "messaging-strategy",
       "release-readiness": "release-readiness",
       "technical-review": "technical-review",
       "visual-direction": "website-art-direction",
@@ -142,11 +174,13 @@ describe("local Pi package setup", () => {
     }
   });
 
-  it("defines website messaging intent branches", async () => {
-    const skill = await readFile(resolve(".pi/skills/website-messaging/SKILL.md"), "utf8");
+  it("defines messaging-strategy intent branches", async () => {
+    const skill = await readFile(resolve(".pi/skills/messaging-strategy/SKILL.md"), "utf8");
     expect(skill).toContain("Review branch");
     expect(skill).toContain("Copy-direction branch");
     expect(skill).toContain("ask whether user wants diagnosis or copy direction");
+    expect(skill).toContain("customer-facing messaging");
+    expect(skill).toContain("website messaging");
   });
 
   it("defines web implementation delivery workflow", async () => {
@@ -211,6 +245,17 @@ describe("local Pi package setup", () => {
       authority: "advisory",
       style: "exploratory",
     });
+  });
+
+  it("defines continuous backlog-refinement guidance", async () => {
+    const skill = await readFile(resolve(".pi/skills/backlog-refinement/SKILL.md"), "utf8");
+
+    expect(skill).toContain("`status: todo` and `scope: draft`");
+    expect(skill).toContain("select the oldest by creation date");
+    expect(skill).toContain("update only that item to `scope: agreed` and retain `status: todo`");
+    expect(skill).toContain("return to step 1 and select the next oldest eligible item");
+    expect(skill).toContain("Use /facets to choose a different facet or workflow.");
+    expect(skill).toContain("never implement it or set it `doing`");
   });
 
   it("defines argument-aware prompt templates", async () => {

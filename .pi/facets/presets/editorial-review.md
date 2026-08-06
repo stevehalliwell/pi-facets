@@ -7,4 +7,4 @@ style: critical
 skill: editorial-review
 ---
 
-Use for long-form article editing, channel adaptation, factual-source checks, and material-change rationale.
+Use for long-form article editing, channel adaptation, supplied-source claim handling, and material-change rationale.
