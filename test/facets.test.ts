@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import {
 	composeFacetPrompt,
-	discoverDefaultPreset,
+	discoverDefaultFacets,
 	discoverFacetPresets,
 	discoverFacets,
 	estimateTokens,
@@ -111,21 +111,41 @@ describe("facet discovery", () => {
 		]));
 	});
 
-	it("resolves trusted project default preset before global fallback", async () => {
+	it("resolves trusted partial defaults with preset-axis overrides before global fallback", async () => {
 		const global = await root();
 		const project = await root();
+		for (const directory of ["roles", "authority", "style"] as const) {
+			await facet(global, directory, directory === "roles" ? "dev-peer" : directory === "authority" ? "advisory" : "concise");
+		}
+		const components = discoverFacets(global).components;
 		const presets = new Map<string, FacetPreset>([
-			["global", {} as FacetPreset],
-			["project", {} as FacetPreset],
+			["global", { name: "global", description: "global", role: "dev-peer", authority: "advisory", style: "concise", notes: "", source: "global", path: "" }],
+			["project", { name: "project", description: "project", role: "dev-peer", notes: "", source: "project", path: "" }],
 		]);
 		await defaultPreset(global, "---\npreset: global\n---\n");
-		await defaultPreset(project, "---\npreset: project\n---\n");
-		expect(discoverDefaultPreset(global, project, presets, true)).toBe("project");
+		await defaultPreset(project, "---\npreset: project\nstyle: concise\n---\n");
+		expect(discoverDefaultFacets(global, project, presets, components, true)).toEqual({ role: "dev-peer", style: "concise" });
+		await defaultPreset(project, "---\npreset: global\nauthority: none\n---\n");
+		expect(discoverDefaultFacets(global, project, presets, components, true)).toEqual({ role: "dev-peer", style: "concise" });
 		await defaultPreset(project, "---\npreset: missing\n---\n");
-		expect(discoverDefaultPreset(global, project, presets, true)).toBe("global");
-		expect(discoverDefaultPreset(global, project, presets, false)).toBe("global");
+		expect(discoverDefaultFacets(global, project, presets, components, true)).toEqual({ role: "dev-peer", authority: "advisory", style: "concise" });
+		expect(discoverDefaultFacets(global, project, presets, components, false)).toEqual({ role: "dev-peer", authority: "advisory", style: "concise" });
 		await defaultPreset(global, "---\npreset: missing\n---\n");
-		expect(discoverDefaultPreset(global, project, presets, true)).toBeUndefined();
+		expect(discoverDefaultFacets(global, project, presets, components, true)).toBeUndefined();
+	});
+
+	it("accepts partial presets and direct defaults", async () => {
+		const global = await root();
+		const project = await root();
+		await facet(global, "roles", "dev-peer");
+		await facet(global, "style", "concise");
+		await mkdir(join(global, "presets"), { recursive: true });
+		await writeFile(join(global, "presets", "partial.md"), "---\nname: partial\ndescription: partial\nrole: dev-peer\nauthority: none\n---\n");
+		const components = discoverFacets(global).components;
+		const presets = discoverFacetPresets(join(global, "presets"), join(project, "presets"), components, true).presets;
+		expect(presets.get("partial")).toMatchObject({ role: "dev-peer" });
+		await defaultPreset(project, "---\nstyle: concise\n---\n");
+		expect(discoverDefaultFacets(global, project, presets, components, true)).toEqual({ style: "concise" });
 	});
 
 	it("composes selected facets in compact axis order", async () => {

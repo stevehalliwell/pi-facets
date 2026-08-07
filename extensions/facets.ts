@@ -24,12 +24,9 @@ export interface FacetComponent {
 
 export type PresetSource = FacetSource;
 
-export interface FacetPreset {
+export interface FacetPreset extends FacetState {
 	name: string;
 	description: string;
-	role: string;
-	authority: string;
-	style: string;
 	skill?: string;
 	notes: string;
 	source: PresetSource;
@@ -197,6 +194,7 @@ export function discoverFacets(globalRoot: string, projectRoot?: string, project
 }
 
 const PRESET_FIELDS = new Set(["name", "description", "role", "authority", "style", "skill"]);
+const DEFAULT_FIELDS = new Set(["preset", ...AXES]);
 
 function isSkillName(value: string): boolean {
 	return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) && value.length <= 64;
@@ -256,19 +254,7 @@ function readPresetSource(
 				throw new Error("frontmatter `skill` must be a valid Pi skill name");
 			}
 
-			const refs = {} as Record<Axis, string>;
-			for (const axis of AXES) {
-				const value = parsed.frontmatter[axis];
-				if (typeof value !== "string" || !value.trim()) {
-					throw new Error(`frontmatter \`${axis}\` must be non-empty`);
-				}
-				if (!components.has(componentKey(axis, value))) {
-					throw new Error(
-						`unknown ${axis} component "${value}" (available: ${availableComponentNames(components, axis)})`,
-					);
-				}
-				refs[axis] = value;
-			}
+			const refs = readFacetState(parsed.frontmatter, components);
 
 			if (claimed.has(name)) {
 				presets.delete(name);
@@ -279,9 +265,7 @@ function readPresetSource(
 			presets.set(name, {
 				name,
 				description: description.trim(),
-				role: refs.role,
-				authority: refs.authority,
-				style: refs.style,
+				...refs,
 				skill,
 				notes: parsed.body.trim(),
 				source,
@@ -327,26 +311,52 @@ export function discoverFacetPresets(
 	};
 }
 
-function readDefaultPreset(root: string, presets: Map<string, FacetPreset>): string | undefined {
+function readFacetState(frontmatter: Record<string, unknown>, components: Map<string, FacetComponent>): FacetState {
+	const state: FacetState = {};
+	for (const axis of AXES) {
+		const value = frontmatter[axis];
+		if (value === undefined || value === "none") continue;
+		if (typeof value !== "string" || !value.trim()) throw new Error(`frontmatter \`${axis}\` must be a facet name or \`none\``);
+		if (!components.has(componentKey(axis, value))) {
+			throw new Error(`unknown ${axis} component "${value}" (available: ${availableComponentNames(components, axis)})`);
+		}
+		state[axis] = value;
+	}
+	return state;
+}
+
+function readDefaultFacets(root: string, presets: Map<string, FacetPreset>, components: Map<string, FacetComponent>): FacetState | undefined {
 	const path = join(root, "default.md");
 	if (!existsSync(path)) return undefined;
 	try {
 		const parsed = parseFrontmatter<Record<string, unknown>>(readFileSync(path, "utf8"));
-		if (Object.keys(parsed.frontmatter).length !== 1 || typeof parsed.frontmatter.preset !== "string") return undefined;
-		const preset = parsed.frontmatter.preset.trim();
-		return presets.has(preset) ? preset : undefined;
+		if (!Object.keys(parsed.frontmatter).length || Object.keys(parsed.frontmatter).some((field) => !DEFAULT_FIELDS.has(field))) return undefined;
+		const presetName = parsed.frontmatter.preset;
+		if (presetName !== undefined && (typeof presetName !== "string" || !presetName.trim())) return undefined;
+		const preset = presetName === undefined ? undefined : presets.get(presetName.trim());
+		if (presetName !== undefined && !preset) return undefined;
+		const overrides = readFacetState(parsed.frontmatter, components);
+		const state: FacetState = {};
+		for (const axis of AXES) {
+			if (preset?.[axis]) state[axis] = preset[axis];
+			if (parsed.frontmatter[axis] === undefined) continue;
+			if (overrides[axis]) state[axis] = overrides[axis];
+			else delete state[axis];
+		}
+		return state;
 	} catch {
 		return undefined;
 	}
 }
 
-export function discoverDefaultPreset(
+export function discoverDefaultFacets(
 	globalRoot: string,
 	projectRoot: string,
 	presets: Map<string, FacetPreset>,
+	components: Map<string, FacetComponent>,
 	projectTrusted: boolean,
-): string | undefined {
-	return (projectTrusted ? readDefaultPreset(projectRoot, presets) : undefined) ?? readDefaultPreset(globalRoot, presets);
+): FacetState | undefined {
+	return (projectTrusted ? readDefaultFacets(projectRoot, presets, components) : undefined) ?? readDefaultFacets(globalRoot, presets, components);
 }
 
 export function sortedPresets(presets: Map<string, FacetPreset>): FacetPreset[] {
@@ -600,9 +610,7 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 		const restored = restoreState(ctx);
 		if (restored) return restored;
 		const projectRoot = join(ctx.cwd, CONFIG_DIR_NAME, "facets");
-		const presetName = discoverDefaultPreset(globalRoot, projectRoot, presets, ctx.isProjectTrusted());
-		const preset = presetName ? presets.get(presetName) : undefined;
-		return preset ? { role: preset.role, authority: preset.authority, style: preset.style } : {};
+		return discoverDefaultFacets(globalRoot, projectRoot, presets, discovery.components, ctx.isProjectTrusted()) ?? {};
 	}
 
 	function reportMissing(ctx: ExtensionContext): void {
@@ -760,7 +768,10 @@ export function registerFacetExtension(pi: ExtensionAPI, globalRoot = join(getAg
 			return;
 		}
 		const before = { ...state };
-		const after = { role: preset.role, authority: preset.authority, style: preset.style };
+		const after: FacetState = {};
+		for (const axis of AXES) {
+			if (preset[axis]) after[axis] = preset[axis];
+		}
 		state = after;
 		scheduleActivation(before, after);
 		recordChange("apply-preset", before, after, { preset: { name: preset.name, source: preset.source } });

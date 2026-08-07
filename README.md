@@ -61,7 +61,7 @@ description: Prioritises customer value and business outcomes.
 
 Use optional sibling `product-owner.activation.md` for one-time Markdown context. It injects once when that facet becomes active or is restored, not on every agent turn. Put broad facet-specific goals, rules, or planning/execution context there when they would be noisy per turn; keep compact ongoing stance in the facet body and repeatable procedure in a skill. For example, Ponytail-style planning and execution guidance can live in an activation file while its persistent facet body stays short.
 
-A preset combines one role, authority, and style. It can point to a skill:
+A preset combines role, authority, and style. Each axis is optional: omit it or use `none` when the preset should not set that axis. It can point to a skill:
 
 ```markdown
 ---
@@ -72,6 +72,22 @@ style: concise
 skill: implementation
 ---
 ```
+
+### Default facets
+
+Set a starting composition in `~/.pi/agent/facets/default.md` or `.pi/facets/default.md`. A project default takes precedence when the project is trusted; an invalid or missing project default falls back to the global default. Explicit facet choices and clears in the session always override defaults.
+
+Use a preset, direct axes, or a preset with axis overrides. Omitted axes mean none; `none` explicitly removes an axis supplied by the preset.
+
+```markdown
+---
+preset: implementation-partner
+style: exploratory
+authority: none
+---
+```
+
+This starts from `implementation-partner`, changes its style, and removes its authority. Invalid facet names or fields are ignored and follow the fallback behavior above.
 
 See [facet grid](docs/facet-grid.md) for shipped examples. See [resource boundaries](docs/resource-boundaries.md) when authoring facets, presets, skills, prompts, or references.
 
