@@ -5,18 +5,17 @@ import { homedir } from "node:os";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const RESOURCE_DIRECTORIES = ["roles", "authority", "style", "presets"];
-const sourceRoot = join(dirname(fileURLToPath(import.meta.url)), "..", ".pi", "facets");
+const RESOURCE_DIRECTORIES = ["facets", "prompts", "skills"];
+const sourceRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "examples", "pi-resources");
 
 function usage() {
-	return `Usage: pi-facets install --scope project|global [--force]
+	return `Usage: pi-facets install [--force]
 
-Copy bundled facets and presets into Pi global or current-project scope.
+Copy bundled facets, prompts, and skills into global Pi scope.
 
 Options:
-  --scope <project|global>  Destination scope (required)
-  --force                   Replace conflicting bundled files
-  --help                    Show this help`;
+  --force  Replace conflicting bundled files
+  --help    Show this help`;
 }
 
 function fail(message) {
@@ -26,26 +25,16 @@ function fail(message) {
 }
 
 function parseArgs(args) {
-	let scope;
 	let force = false;
-	for (let index = 0; index < args.length; index += 1) {
-		const argument = args[index];
+	for (const argument of args) {
 		if (argument === "--help") return { help: true };
 		if (argument === "--force") {
 			force = true;
 			continue;
 		}
-		if (argument === "--scope") {
-			scope = args[index + 1];
-			index += 1;
-			continue;
-		}
 		throw new Error(`Unknown argument \`${argument}\`.`);
 	}
-	if (scope !== "project" && scope !== "global") {
-		throw new Error("`--scope` must be `project` or `global`.");
-	}
-	return { scope, force };
+	return { force };
 }
 
 async function filesIn(directory) {
@@ -69,10 +58,8 @@ async function exists(path) {
 	}
 }
 
-async function install({ scope, force }) {
-	const targetRoot = scope === "project"
-		? join(process.cwd(), ".pi", "facets")
-		: join(homedir(), ".pi", "agent", "facets");
+async function install({ force }) {
+	const targetRoot = join(homedir(), ".pi", "agent");
 	const sources = (await Promise.all(RESOURCE_DIRECTORIES.map((directory) => filesIn(join(sourceRoot, directory))))).flat();
 	const conflicts = [];
 	for (const source of sources) {
@@ -90,7 +77,7 @@ async function install({ scope, force }) {
 		await mkdir(dirname(target), { recursive: true });
 		await cp(source, target, { force: true });
 	}
-	console.log(`Installed ${sources.length} facet resources in ${targetRoot}`);
+	console.log(`Installed ${sources.length} Pi resources in ${targetRoot}`);
 }
 
 try {

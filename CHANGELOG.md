@@ -7,6 +7,11 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Changed
+
+- Bundled facets, prompts, and skills now live under `examples/pi-resources/`.
+- `pi-facets install [--force]` now installs all bundled resources into personal Pi scope; `--scope` is no longer supported.
+
 ## [0.4.0]
 
 ### Added

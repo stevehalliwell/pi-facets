@@ -5,6 +5,7 @@ Give pi repeatable collaboration stances and task workflows without turning ever
 - **Facets** shape persistent role, decision authority, and response style.
 - **Presets** combine facets for common work.
 - **Skills** provide temporary, focused workflows.
+- **Prompts** provide short request frames.
 
 ## Use it
 
@@ -14,21 +15,17 @@ Install pi-facets from GitHub:
 pi install git:github.com/stevehalliwell/pi-facets
 ```
 
-This installs it in personal Pi scope. Add `-l` to install it for current project instead.
+Then install the bundled resources into personal Pi scope.
 
-### Install bundled facets
+### Install bundled resources
 
-After installing pi-facets, copy its supplied roles, authority, style facets, activation siblings, and presets into desired Pi scope:
+Copy the supplied facets, prompts, and skills into personal Pi scope:
 
 ```sh
-# Current project: <cwd>/.pi/facets
-pi-facets install --scope project
-
-# Personal Pi scope: ~/.pi/agent/facets
-pi-facets install --scope global
+pi-facets install
 ```
 
-Existing bundled paths are reported and left unchanged. Pass `--force` to replace those paths; unrelated destination files remain untouched. Skills and extension stay package-provided.
+This copies the contents of [`examples/pi-resources/`](examples/pi-resources/) into `~/.pi/agent/{facets,prompts,skills}`. Existing bundled paths are reported and left unchanged. Pass `--force` to replace those paths; unrelated destination files remain untouched. The installer is global-only.
 
 Open facet selection:
 
@@ -105,7 +102,7 @@ Pi loads TypeScript extensions through jiti. No build step.
 ## Project layout
 
 - `extensions/` — Pi extension code.
-- `.pi/facets/` — project facets and presets.
-- `.pi/skills/` — task workflows.
-- `.pi/prompts/` — short request frames.
+- `examples/pi-resources/facets/` — installable facets and presets.
+- `examples/pi-resources/skills/` — installable task workflows.
+- `examples/pi-resources/prompts/` — installable short request frames.
 - `docs/` — authoring and example references.

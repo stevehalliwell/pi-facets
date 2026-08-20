@@ -75,7 +75,7 @@ describe("facet discovery", () => {
 	});
 
 	it("loads bundled activation files without diagnostics", () => {
-		const discovery = discoverFacets(resolve(".pi", "facets"));
+		const discovery = discoverFacets(resolve("examples", "pi-resources", "facets"));
 		expect(discovery.diagnostics).toEqual([]);
 		expect(discovery.components.get("role:dev-peer")?.activation).toContain("Full mode: enforce ladder.");
 		expect(discovery.components.get("style:concise")?.activation).toContain("Respond terse like smart caveman.");

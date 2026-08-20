@@ -5,7 +5,7 @@ import { parseFrontmatter } from "@earendil-works/pi-coding-agent";
 
 type PackageManifest = {
   bin: { "pi-facets": string };
-  pi: { extensions: string[]; skills: string[] };
+  pi: { extensions: string[]; skills?: string[]; prompts?: string[] };
 };
 
 type PiSettings = { packages: string[] };
@@ -20,7 +20,7 @@ describe("local Pi package setup", () => {
 
     expect(manifest.bin).toEqual({ "pi-facets": "./scripts/install.mjs" });
     expect(manifest.pi.extensions).toEqual(["./extensions"]);
-    expect(manifest.pi.skills).toEqual(["./.pi/skills"]);
+    expect(manifest.pi).not.toHaveProperty("skills");
     expect(manifest.pi).not.toHaveProperty("prompts");
   });
 
@@ -32,70 +32,70 @@ describe("local Pi package setup", () => {
 
   it("ships agreed facet, preset, prompt, and grid resources", async () => {
     const resources = [
-      ".pi/skills/backlog-capture/SKILL.md",
-      ".pi/skills/backlog-refinement/SKILL.md",
-      ".pi/skills/brainstorming/SKILL.md",
-      ".pi/skills/competitor-analysis/SKILL.md",
-      ".pi/skills/editorial-review/SKILL.md",
-      ".pi/skills/facet-alignment/SKILL.md",
-      ".pi/skills/facet-craft/SKILL.md",
-      ".pi/skills/six-thinking-hats/SKILL.md",
-      ".pi/skills/references/okf-artifacts.md",
-      ".pi/skills/implementation/SKILL.md",
-      ".pi/skills/iteration/SKILL.md",
-      ".pi/skills/note-taking/SKILL.md",
-      ".pi/skills/web-implementation/SKILL.md",
-      ".pi/skills/threejs-performance/SKILL.md",
-      ".pi/skills/release-readiness/SKILL.md",
-      ".pi/skills/technical-review/SKILL.md",
-      ".pi/skills/messaging-strategy/SKILL.md",
-      ".pi/skills/website-art-direction/SKILL.md",
-      ".pi/facets/roles/marketing-strategist.md",
-      ".pi/facets/roles/researcher.md",
-      ".pi/facets/roles/inquiry-guide.md",
-      ".pi/facets/roles/note-taker.md",
-      ".pi/facets/roles/delivery-lead.md",
-      ".pi/facets/roles/web-platform-specialist.md",
-      ".pi/facets/roles/release-steward.md",
-      ".pi/facets/roles/dev-peer.activation.md",
-      ".pi/facets/style/concise.activation.md",
-      ".pi/facets/style/exploratory.md",
-      ".pi/facets/style/explanatory.md",
-      ".pi/facets/style/structured.md",
-      ".pi/facets/style/inquisitive.md",
-      ".pi/facets/style/iterative.md",
-      ".pi/facets/presets/technical-review.md",
-      ".pi/facets/presets/implementation-partner.md",
-      ".pi/facets/presets/tweaking.md",
-      ".pi/facets/presets/web-implementation.md",
-      ".pi/facets/presets/backlog-capture.md",
-      ".pi/facets/presets/backlog-refinement.md",
-      ".pi/facets/presets/brainstorming.md",
-      ".pi/facets/presets/note-taker.md",
-      ".pi/facets/presets/messaging-strategy.md",
-      ".pi/facets/presets/research-exploration.md",
-      ".pi/facets/presets/release-readiness.md",
+      "examples/pi-resources/skills/backlog-capture/SKILL.md",
+      "examples/pi-resources/skills/backlog-refinement/SKILL.md",
+      "examples/pi-resources/skills/brainstorming/SKILL.md",
+      "examples/pi-resources/skills/competitor-analysis/SKILL.md",
+      "examples/pi-resources/skills/editorial-review/SKILL.md",
+      "examples/pi-resources/skills/facet-alignment/SKILL.md",
+      "examples/pi-resources/skills/facet-craft/SKILL.md",
+      "examples/pi-resources/skills/six-thinking-hats/SKILL.md",
+      "examples/pi-resources/skills/references/okf-artifacts.md",
+      "examples/pi-resources/skills/implementation/SKILL.md",
+      "examples/pi-resources/skills/iteration/SKILL.md",
+      "examples/pi-resources/skills/note-taking/SKILL.md",
+      "examples/pi-resources/skills/web-implementation/SKILL.md",
+      "examples/pi-resources/skills/threejs-performance/SKILL.md",
+      "examples/pi-resources/skills/release-readiness/SKILL.md",
+      "examples/pi-resources/skills/technical-review/SKILL.md",
+      "examples/pi-resources/skills/messaging-strategy/SKILL.md",
+      "examples/pi-resources/skills/website-art-direction/SKILL.md",
+      "examples/pi-resources/facets/roles/marketing-strategist.md",
+      "examples/pi-resources/facets/roles/researcher.md",
+      "examples/pi-resources/facets/roles/inquiry-guide.md",
+      "examples/pi-resources/facets/roles/note-taker.md",
+      "examples/pi-resources/facets/roles/delivery-lead.md",
+      "examples/pi-resources/facets/roles/web-platform-specialist.md",
+      "examples/pi-resources/facets/roles/release-steward.md",
+      "examples/pi-resources/facets/roles/dev-peer.activation.md",
+      "examples/pi-resources/facets/style/concise.activation.md",
+      "examples/pi-resources/facets/style/exploratory.md",
+      "examples/pi-resources/facets/style/explanatory.md",
+      "examples/pi-resources/facets/style/structured.md",
+      "examples/pi-resources/facets/style/inquisitive.md",
+      "examples/pi-resources/facets/style/iterative.md",
+      "examples/pi-resources/facets/presets/technical-review.md",
+      "examples/pi-resources/facets/presets/implementation-partner.md",
+      "examples/pi-resources/facets/presets/tweaking.md",
+      "examples/pi-resources/facets/presets/web-implementation.md",
+      "examples/pi-resources/facets/presets/backlog-capture.md",
+      "examples/pi-resources/facets/presets/backlog-refinement.md",
+      "examples/pi-resources/facets/presets/brainstorming.md",
+      "examples/pi-resources/facets/presets/note-taker.md",
+      "examples/pi-resources/facets/presets/messaging-strategy.md",
+      "examples/pi-resources/facets/presets/research-exploration.md",
+      "examples/pi-resources/facets/presets/release-readiness.md",
       "docs/facet-grid.md",
     ];
 
     for (const resource of resources) {
       await expect(access(resolve(resource))).resolves.toBeUndefined();
     }
-    await expect(access(resolve(".pi/facets/presets/implementation-review.md"))).rejects.toThrow();
+    await expect(access(resolve("examples/pi-resources/facets/presets/implementation-review.md"))).rejects.toThrow();
   });
 
   it("defines OKF capture reference and research workflow links", async () => {
-    const reference = await readFile(resolve(".pi/skills/references/okf-artifacts.md"), "utf8");
+    const reference = await readFile(resolve("examples/pi-resources/skills/references/okf-artifacts.md"), "utf8");
     expect(reference).toContain("type: Reference");
     expect(reference).toContain("type: Research Synthesis");
     for (const skill of ["competitor-analysis", "technical-review"]) {
-      await expect(readFile(resolve(".pi/skills", skill, "SKILL.md"), "utf8")).resolves.toContain("../references/okf-artifacts.md");
+      await expect(readFile(resolve("examples/pi-resources/skills", skill, "SKILL.md"), "utf8")).resolves.toContain("../references/okf-artifacts.md");
     }
   });
 
   it("defines implementation-partner composition", async () => {
     const parsed = parseFrontmatter<Record<string, unknown>>(
-      await readFile(resolve(".pi/facets/presets/implementation-partner.md"), "utf8"),
+      await readFile(resolve("examples/pi-resources/facets/presets/implementation-partner.md"), "utf8"),
     );
 
     expect(parsed.frontmatter).toMatchObject({
@@ -108,7 +108,7 @@ describe("local Pi package setup", () => {
 
   it("defines brainstorming composition and associated skill", async () => {
     const parsed = parseFrontmatter<Record<string, unknown>>(
-      await readFile(resolve(".pi/facets/presets/brainstorming.md"), "utf8"),
+      await readFile(resolve("examples/pi-resources/facets/presets/brainstorming.md"), "utf8"),
     );
 
     expect(parsed.frontmatter).toMatchObject({
@@ -122,7 +122,7 @@ describe("local Pi package setup", () => {
 
   it("defines note-taker composition and associated skill", async () => {
     const parsed = parseFrontmatter<Record<string, unknown>>(
-      await readFile(resolve(".pi/facets/presets/note-taker.md"), "utf8"),
+      await readFile(resolve("examples/pi-resources/facets/presets/note-taker.md"), "utf8"),
     );
 
     expect(parsed.frontmatter).toMatchObject({
@@ -136,7 +136,7 @@ describe("local Pi package setup", () => {
 
   it("defines tweaking composition and associated skill", async () => {
     const parsed = parseFrontmatter<Record<string, unknown>>(
-      await readFile(resolve(".pi/facets/presets/tweaking.md"), "utf8"),
+      await readFile(resolve("examples/pi-resources/facets/presets/tweaking.md"), "utf8"),
     );
 
     expect(parsed.frontmatter).toMatchObject({
@@ -166,7 +166,7 @@ describe("local Pi package setup", () => {
 
     for (const [preset, skill] of Object.entries(pairs)) {
       const parsed = parseFrontmatter<Record<string, unknown>>(
-        await readFile(resolve(".pi/facets/presets", `${preset}.md`), "utf8"),
+        await readFile(resolve("examples/pi-resources/facets/presets", `${preset}.md`), "utf8"),
       );
       expect(parsed.frontmatter.skill).toBe(skill);
       expect(parsed.body.trim()).toBeTruthy();
@@ -175,7 +175,7 @@ describe("local Pi package setup", () => {
   });
 
   it("defines messaging-strategy intent branches", async () => {
-    const skill = await readFile(resolve(".pi/skills/messaging-strategy/SKILL.md"), "utf8");
+    const skill = await readFile(resolve("examples/pi-resources/skills/messaging-strategy/SKILL.md"), "utf8");
     expect(skill).toContain("Review branch");
     expect(skill).toContain("Copy-direction branch");
     expect(skill).toContain("ask whether user wants diagnosis or copy direction");
@@ -184,20 +184,20 @@ describe("local Pi package setup", () => {
   });
 
   it("defines web implementation delivery workflow", async () => {
-    const skill = await readFile(resolve(".pi/skills/web-implementation/SKILL.md"), "utf8");
+    const skill = await readFile(resolve("examples/pi-resources/skills/web-implementation/SKILL.md"), "utf8");
     expect(skill).toContain("Run only after explicit delivery language");
     expect(skill).toContain("Target 100 in every applicable category");
     expect(skill).toContain("OKF research artifacts");
   });
 
   it("defines release-readiness workflow and composition", async () => {
-    const skill = await readFile(resolve(".pi/skills/release-readiness/SKILL.md"), "utf8");
+    const skill = await readFile(resolve("examples/pi-resources/skills/release-readiness/SKILL.md"), "utf8");
     expect(skill).toContain("latest reachable Git tag");
     expect(skill).toContain("released version heading in CHANGELOG");
     expect(skill).toContain("commit only after explicit request");
 
     const parsed = parseFrontmatter<Record<string, unknown>>(
-      await readFile(resolve(".pi/facets/presets/release-readiness.md"), "utf8"),
+      await readFile(resolve("examples/pi-resources/facets/presets/release-readiness.md"), "utf8"),
     );
     expect(parsed.frontmatter).toMatchObject({
       name: "release-readiness",
@@ -209,7 +209,7 @@ describe("local Pi package setup", () => {
 
   it("defines web-implementation composition", async () => {
     const parsed = parseFrontmatter<Record<string, unknown>>(
-      await readFile(resolve(".pi/facets/presets/web-implementation.md"), "utf8"),
+      await readFile(resolve("examples/pi-resources/facets/presets/web-implementation.md"), "utf8"),
     );
 
     expect(parsed.frontmatter).toMatchObject({
@@ -222,7 +222,7 @@ describe("local Pi package setup", () => {
 
   it("defines backlog-capture composition", async () => {
     const parsed = parseFrontmatter<Record<string, unknown>>(
-      await readFile(resolve(".pi/facets/presets/backlog-capture.md"), "utf8"),
+      await readFile(resolve("examples/pi-resources/facets/presets/backlog-capture.md"), "utf8"),
     );
 
     expect(parsed.frontmatter).toMatchObject({
@@ -236,7 +236,7 @@ describe("local Pi package setup", () => {
 
   it("defines backlog-refinement composition", async () => {
     const parsed = parseFrontmatter<Record<string, unknown>>(
-      await readFile(resolve(".pi/facets/presets/backlog-refinement.md"), "utf8"),
+      await readFile(resolve("examples/pi-resources/facets/presets/backlog-refinement.md"), "utf8"),
     );
 
     expect(parsed.frontmatter).toMatchObject({
@@ -248,7 +248,7 @@ describe("local Pi package setup", () => {
   });
 
   it("defines continuous backlog-refinement guidance", async () => {
-    const skill = await readFile(resolve(".pi/skills/backlog-refinement/SKILL.md"), "utf8");
+    const skill = await readFile(resolve("examples/pi-resources/skills/backlog-refinement/SKILL.md"), "utf8");
 
     expect(skill).toContain("`status: needs-refinement`");
     expect(skill).toContain("oldest legacy `status: todo` and `scope: draft` item");
@@ -261,7 +261,7 @@ describe("local Pi package setup", () => {
   it("defines argument-aware prompt templates", async () => {
     for (const name of ["explore-options", "decision-brief"]) {
       const parsed = parseFrontmatter<Record<string, unknown>>(
-        await readFile(resolve(".pi", "prompts", `${name}.md`), "utf8"),
+        await readFile(resolve("examples", "pi-resources", "prompts", `${name}.md`), "utf8"),
       );
       expect(parsed.frontmatter.description).toEqual(expect.any(String));
       expect(parsed.frontmatter["argument-hint"]).toBe("<topic>");
