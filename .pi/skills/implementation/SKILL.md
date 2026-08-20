@@ -9,7 +9,7 @@ Deliver one agreed, reviewable slice with smallest credible validation.
 
 ## Workflow
 
-1. Anchor work. Read selected task record, acceptance, current slice, and affected code paths. Confirm task scope is `agreed`; preserve stated behavior and decisions. Done when target behavior and slice boundary are known.
+1. Anchor work. Read selected task record, `tasks/.schema.md`, acceptance, current slice, and affected code paths. Confirm task is `status: todo`; when schema declares `scope`, also confirm `scope: agreed`. Preserve stated behavior and decisions. Done when target behavior and slice boundary are known.
 2. Establish slice. If task has no reviewable slices, write proposed slices to task plan, state first slice, and wait for user approval before editing implementation files. If slices exist, select one. Done when one bounded slice is authorized.
 3. Trace before edit. Inspect callers, interfaces, data flow, tests, and local conventions needed to avoid a wrong change. Done when changed path and preserved behavior are known.
 4. Implement slice. Reuse existing mechanisms; make smallest complete change. Pause for decisions affecting behavior, scope, security, data, public API, or compatibility. Done when slice behavior is implemented without unrelated refactoring.

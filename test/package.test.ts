@@ -250,12 +250,12 @@ describe("local Pi package setup", () => {
   it("defines continuous backlog-refinement guidance", async () => {
     const skill = await readFile(resolve(".pi/skills/backlog-refinement/SKILL.md"), "utf8");
 
-    expect(skill).toContain("`status: todo` and `scope: draft`");
-    expect(skill).toContain("select the oldest by creation date");
-    expect(skill).toContain("update only that item to `scope: agreed` and retain `status: todo`");
+    expect(skill).toContain("`status: needs-refinement`");
+    expect(skill).toContain("oldest legacy `status: todo` and `scope: draft` item");
+    expect(skill).toContain("update only that item to `status: todo`");
     expect(skill).toContain("return to step 1 and select the next oldest eligible item");
     expect(skill).toContain("Use /facets to choose a different facet or workflow.");
-    expect(skill).toContain("never implement it or set it `doing`");
+    expect(skill).toContain("Never implement it or set it `doing`");
   });
 
   it("defines argument-aware prompt templates", async () => {
