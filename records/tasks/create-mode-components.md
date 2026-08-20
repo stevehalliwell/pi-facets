@@ -5,7 +5,7 @@ created_at: 2026-07-30T01:25:04.757Z
 desc: ""
 tags: []
 status: done
-scope: agreed
+priority: medium
 depends_on: []
 ---
 
@@ -75,5 +75,7 @@ Create first-milestone Markdown mode components consumed by the `/mode` extensio
 - Likely next slice/task: refine project-local mode discovery or initial skills.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - New components should require no extension-code changes.

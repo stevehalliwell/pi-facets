@@ -8,7 +8,7 @@ tags:
   - presets
   - messaging
 status: done
-scope: agreed
+priority: medium
 depends_on: null
 ---
 
@@ -72,5 +72,7 @@ depends_on: null
 - Likely next slice/task: select another agreed task.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - The public project command changes from `/skill:website-messaging` to `/skill:messaging-strategy`.

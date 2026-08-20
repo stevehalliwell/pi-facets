@@ -8,7 +8,7 @@ tags:
   - presets
   - tweaking
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Desired outcome
@@ -71,6 +71,8 @@ scope: agreed
 - Next: refine `records/tasks/review-implementation-partner-after-tweaking.md` before changing `implementation-partner`.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Captured from maintainer request during preset/workflow audit.
 - Follow-up after this task reaches review: `records/tasks/review-implementation-partner-after-tweaking.md`.

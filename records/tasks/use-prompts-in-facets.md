@@ -5,7 +5,7 @@ created_at: 2026-07-30T23:12:34.134Z
 desc: ""
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -67,6 +67,8 @@ Define how Pi prompt templates fit pi-facets without turning them into persisten
 - Likely next slice/task: `tasks/expand-default-modes-and-test-presets`.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Pi feature is prompt templates invoked as `/name`; there is no built-in `/prompts` command.
 - No prompt implementation belongs in this task.

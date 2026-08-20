@@ -8,7 +8,7 @@ tags:
   - presets
   - notes
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Desired outcome
@@ -72,5 +72,7 @@ scope: agreed
 - Next slice: select another agreed task.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Captured from maintainer request during preset/workflow audit.

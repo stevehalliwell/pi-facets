@@ -8,7 +8,7 @@ tags:
   - design
   - presets
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -90,5 +90,7 @@ scope: agreed
 - Next task: run website art-direction discovery.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Do not treat subjective taste as evidence or prematurely choose a direction.

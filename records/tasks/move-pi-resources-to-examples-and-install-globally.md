@@ -7,7 +7,7 @@ desc: Move bundled Pi facets, prompts, and skills into an example directory;
   setup and usage guidance.
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -84,6 +84,8 @@ scope: agreed
 - Likely next slice/task: none.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - This intentionally breaks `--scope project`; README must make the global-only change clear.
 - Relocation can break package discovery, tests, and path assumptions.

@@ -5,7 +5,7 @@ created_at: 2026-08-04T00:00:00.000Z
 desc: "Add brief draft-only backlog capture preset and workflow."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -67,5 +67,7 @@ scope: agreed
 - `.pi/settings.json` remains user-modified and out of scope.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Attendant CLI unavailable from agent tool root; Markdown record remains source of truth.

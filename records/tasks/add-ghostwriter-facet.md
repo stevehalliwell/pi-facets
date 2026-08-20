@@ -8,7 +8,7 @@ tags:
   - ghostwriting
   - presets
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -94,6 +94,8 @@ scope: agreed
 - Approved: 2026-08-02. Task complete.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Avoid broadening first version into marketing copy or autonomous research.
 - Coordinate naming and boundaries with editorial-review task.

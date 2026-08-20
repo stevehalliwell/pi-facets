@@ -5,7 +5,7 @@ created_at: 2026-08-01T06:34:57.280Z
 desc: "Add intent-specific branches to website messaging workflow."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -75,5 +75,7 @@ scope: agreed
 - User approved intent branches on 2026-08-02; task complete.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Keep task workflow-specific; role/preset changes belong elsewhere.

@@ -5,7 +5,7 @@ created_at: 2026-08-04T00:13:31.068Z
 desc: "Move StoryBrand workshop and content-alignment skills to global Pi scope because they are unrelated to pi-facets."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -56,3 +56,7 @@ scope: agreed
 - Output path is requested before writing; no file for chat-only output.
 - Public refs remain URLs; local material is used only when user supplies it with provenance and claim boundaries.
 - `npm run check` and focused tests pass.
+
+## Notes
+
+- Former task scope: `agreed`.

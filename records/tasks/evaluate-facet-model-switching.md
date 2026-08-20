@@ -5,7 +5,7 @@ created_at: 2026-08-01T06:31:29.405Z
 desc: "Review whether facet selections should influence Pi model choice."
 tags: []
 status: done
-scope: draft
+priority: medium
 ---
 
 ## Scope
@@ -62,5 +62,7 @@ scope: draft
 - Likely next slice/task: none.
 
 ## Notes
+
+- Former task scope: `draft`.
 
 - Draft review task; separate from Pi-level model configuration.

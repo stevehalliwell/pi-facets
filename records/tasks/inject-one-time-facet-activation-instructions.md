@@ -5,7 +5,7 @@ created_at: 2026-08-03T06:32:09.513Z
 desc: "Let facets declare activation-only instructions injected when first selected, not on every agent turn."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -72,3 +72,7 @@ scope: agreed
 
 - Completed: sibling activation discovery, lifecycle prompt injection, and focused tests.
 - User approved; task complete.
+
+## Notes
+
+- Former task scope: `agreed`.

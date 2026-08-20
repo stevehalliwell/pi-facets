@@ -8,7 +8,7 @@ tags:
   - editorial
   - presets
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -85,6 +85,8 @@ scope: agreed
 - Approved: 2026-08-02. Task complete.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Future task: define `ghostwriter` role/preset.
 - Avoid merging editorial craft judgment with marketing strategy.

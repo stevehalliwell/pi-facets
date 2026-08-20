@@ -6,7 +6,7 @@ desc: Align project task templates, schema, and task-aware skills with updated
   global Pi Attendant templates.
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -73,5 +73,7 @@ scope: agreed
 - Likely next slice/task: none.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Existing projects can declare different task states; each skill must read the schema before using status-dependent logic.

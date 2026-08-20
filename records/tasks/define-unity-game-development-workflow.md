@@ -5,7 +5,7 @@ created_at: 2026-08-01T06:31:29.382Z
 desc: "Discover and define Pi workflow for Unity and game-development work."
 tags: []
 status: done
-scope: draft
+priority: medium
 ---
 
 ## Scope
@@ -62,5 +62,7 @@ scope: draft
 - Likely next slice/task: none.
 
 ## Notes
+
+- Former task scope: `draft`.
 
 - This replaces uncaptured exploration with an explicit review item.

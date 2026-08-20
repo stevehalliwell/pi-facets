@@ -5,7 +5,7 @@ created_at: 2026-07-30T11:01:55.117Z
 desc: ""
 tags: []
 status: done
-scope: agreed
+priority: medium
 depends_on: []
 ---
 
@@ -67,5 +67,7 @@ Decide stable public slash command keyword for pi-facets facet controls.
 - Likely next slice/task: `tasks/rename-mode-command-to-facets`.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - `/mode` is not currently a built-in Pi command, but broad names can collide with extension commands. `/facets` is more distinctive.

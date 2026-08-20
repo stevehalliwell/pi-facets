@@ -9,7 +9,7 @@ tags:
   - implementation
   - iteration
 status: done
-scope: agreed
+priority: medium
 depends_on:
   - add-tweaking-preset
 ---
@@ -85,5 +85,7 @@ depends_on:
 - Next slice: none; no follow-up task is needed.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Captured by maintainer request after `add-tweaking-preset` reaches review.

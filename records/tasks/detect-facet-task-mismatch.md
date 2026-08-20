@@ -5,7 +5,7 @@ created_at: 2026-07-30T01:43:45.446Z
 desc: "Surface clear request/facet misalignment before substantive work."
 tags: []
 status: done
-scope: agreed
+priority: medium
 depends_on:
   - tasks/implement-mode-extension
   - tasks/create-initial-skills
@@ -85,5 +85,7 @@ depends_on:
 - Next candidate: `configure-default-starting-facet-preset`.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Prompt injection technically occurs each agent start; mismatch behavior must not.

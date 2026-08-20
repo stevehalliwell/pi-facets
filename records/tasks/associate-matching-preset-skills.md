@@ -5,7 +5,7 @@ created_at: 2026-08-03T04:54:32.280Z
 desc: ""
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -86,5 +86,7 @@ scope: agreed
 - Likely next task: assess facet compaction, removal, renaming, and merging.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - `preset-skill-confirmation` governs launch behavior.

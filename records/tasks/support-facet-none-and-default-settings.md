@@ -5,7 +5,7 @@ created_at: 2026-08-07T18:43:56.601Z
 desc: "Support two currently unsupported facet configuration cases: an explicit 'none' value in preset facet elements, and facet-element settings in default.md rather than only a preset."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -78,5 +78,7 @@ scope: agreed
 - Likely next slice/task: none.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Default parser/result types must distinguish invalid configuration from a valid empty composition so fallback behavior remains correct.

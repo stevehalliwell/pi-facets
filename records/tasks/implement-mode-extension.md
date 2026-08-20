@@ -5,7 +5,7 @@ created_at: 2026-07-30T01:25:02.583Z
 desc: ""
 tags: []
 status: done
-scope: agreed
+priority: medium
 depends_on: []
 ---
 
@@ -108,5 +108,7 @@ Provide thin stateful `/mode` extension that composes selected role, authority, 
 - Deferred follow-ups: project-local modes, presets, transcript event history, mismatch detection, and documentation.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Keep mode files single-axis; do not duplicate skill workflows or project facts.

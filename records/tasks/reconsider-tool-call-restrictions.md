@@ -5,7 +5,7 @@ created_at: 2026-08-01T06:31:29.414Z
 desc: "Review whether Facets should ever restrict or gate Pi tool calls."
 tags: []
 status: done
-scope: draft
+priority: medium
 ---
 
 ## Scope
@@ -62,5 +62,7 @@ scope: draft
 - Likely next slice/task: none.
 
 ## Notes
+
+- Former task scope: `draft`.
 
 - Draft review task; does not authorize tool restrictions.

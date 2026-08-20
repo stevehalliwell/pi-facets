@@ -5,7 +5,7 @@ created_at: 2026-07-30T09:07:16.846Z
 desc: ""
 tags: []
 status: done
-scope: agreed
+priority: medium
 depends_on: []
 ---
 
@@ -92,5 +92,7 @@ Ship representative package examples across role, authority, style, presets, and
 - No remaining slice.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Keep prompt templates short and non-duplicative; skills remain workflow source of truth.

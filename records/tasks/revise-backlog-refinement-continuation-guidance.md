@@ -8,7 +8,7 @@ tags:
   - backlog
   - refinement
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Desired outcome
@@ -70,5 +70,7 @@ scope: agreed
 - Next slice: refine a draft task before any further implementation.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Captured at maintainer request after `add-tweaking-preset`.

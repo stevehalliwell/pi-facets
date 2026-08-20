@@ -5,7 +5,7 @@ created_at: 2026-07-30T01:43:30.461Z
 desc: ""
 tags: []
 status: done
-scope: agreed
+priority: medium
 depends_on:
   - tasks/implement-mode-extension
 ---
@@ -87,5 +87,7 @@ Allow projects to define mode components local to their repository while retaini
 - Next: refine next pivotal draft task.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Keep global/project source boundaries explicit in `/mode show` or equivalent query output.

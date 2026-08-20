@@ -5,7 +5,7 @@ created_at: 2026-08-03T20:53:27.306Z
 desc: "Document facet activation instruction files, their intended use, and relevant skill guidance."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -68,3 +68,7 @@ scope: agreed
 
 - Completed: authoring docs and `facet-craft` guidance.
 - User approved; task complete.
+
+## Notes
+
+- Former task scope: `agreed`.

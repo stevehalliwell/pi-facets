@@ -8,7 +8,7 @@ tags:
   - skills
   - cleanup
 status: done
-scope: agreed
+priority: medium
 depends_on: null
 ---
 
@@ -69,5 +69,7 @@ depends_on: null
 - Likely next slice/task: select another agreed preset task or refine the draft `ghostwriter` investigation.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - The standalone `inquiry-guide` role remains intentionally: this task removes only the preset and skill.

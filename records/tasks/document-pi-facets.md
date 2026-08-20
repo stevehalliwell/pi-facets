@@ -5,7 +5,7 @@ created_at: 2026-07-30T01:26:16.328Z
 desc: ""
 tags: []
 status: done
-scope: agreed
+priority: medium
 depends_on:
   - tasks/implement-mode-extension
   - tasks/create-mode-components
@@ -89,5 +89,7 @@ Document first-milestone usage and extension points so a new role or skill can b
 - Next: refine next actionable task when needed.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Avoid duplicating mode/skill content in README.

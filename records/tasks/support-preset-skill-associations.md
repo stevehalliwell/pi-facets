@@ -9,7 +9,7 @@ tags:
   - skills
   - extension
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -87,5 +87,7 @@ scope: agreed
 - Approved 2026-08-03. Next dependent task: `add-five-whys-inquisitive-stance-and-skill`.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Blocks paired Five Whys preset integration.

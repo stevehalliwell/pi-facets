@@ -9,7 +9,7 @@ tags:
   - audit
   - resource-boundaries
 status: done
-scope: agreed
+priority: medium
 depends_on: null
 ---
 
@@ -97,6 +97,8 @@ depends_on: null
 - Deferred follow-up: assess facet compaction, removal, renaming, and merging after preset-skill association work.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Source audit found hard violations in eight facet components and advisory workflow-adjacent wording in two role components.
 - Full audit is a post-change check, not permission to modify findings outside this task.

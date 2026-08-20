@@ -5,7 +5,7 @@ created_at: 2026-08-04T00:34:40.800Z
 desc: "Move generic style-learning, generation, and verification skills to global Pi scope because they are unrelated to pi-facets."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -60,3 +60,7 @@ scope: agreed
 - Default verifier never edits target; every finding is grounded in target text.
 - Apply mode changes only exact anti-pattern matches and shows changes.
 - `npm run check` and tests pass.
+
+## Notes
+
+- Former task scope: `agreed`.

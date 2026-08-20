@@ -5,7 +5,7 @@ created_at: 2026-08-01T06:31:29.423Z
 desc: "Review whether Pi should ever automatically switch persistent facets."
 tags: []
 status: done
-scope: draft
+priority: medium
 ---
 
 ## Scope
@@ -62,5 +62,7 @@ scope: draft
 - Likely next slice/task: none.
 
 ## Notes
+
+- Former task scope: `draft`.
 
 - Draft review task; does not supersede no-silent-switch guardrail.

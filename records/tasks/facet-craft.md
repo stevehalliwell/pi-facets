@@ -10,7 +10,7 @@ tags:
   - presets
   - architecture
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -177,5 +177,7 @@ scope: agreed
 - Approved 2026-08-03. Follow-up audit-skill task is separately tracked.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Preset-to-skill/prompt association is a material product/extension behavior decision; discuss before implementing.

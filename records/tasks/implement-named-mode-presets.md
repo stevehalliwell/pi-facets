@@ -5,7 +5,7 @@ created_at: 2026-07-30T01:37:42.118Z
 desc: ""
 tags: []
 status: done
-scope: agreed
+priority: medium
 depends_on:
   - tasks/implement-mode-extension
   - tasks/create-mode-components
@@ -99,6 +99,8 @@ Allow users to select named shorthand compositions of mode components at global 
 - Next: select and refine next deferred task.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Keep preset layer thin; component files remain behavioral source of truth.
 - JSON config rejected in favor of shareable Markdown records.

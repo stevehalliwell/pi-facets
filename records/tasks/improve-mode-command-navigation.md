@@ -5,7 +5,7 @@ created_at: 2026-07-30T08:52:41.697Z
 desc: ""
 tags: []
 status: done
-scope: agreed
+priority: medium
 depends_on: []
 ---
 
@@ -79,5 +79,7 @@ depends_on: []
 - Likely next slice/task: user review in interactive Pi TUI.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Keep removed command names out of public usage text.

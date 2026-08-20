@@ -5,7 +5,7 @@ created_at: 2026-08-01T06:25:10.212Z
 desc: "Add standards-aware web implementation and pre-delivery quality workflow."
 tags: []
 status: done
-scope: agreed
+priority: medium
 depends_on:
   - tasks/add-okf-research-artifact-capture
 ---
@@ -93,5 +93,7 @@ depends_on:
 - Next candidate: `add-threejs-performance-workflow`.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - 100 Lighthouse is explicit delivery target, not permission for indiscriminate audit runs.

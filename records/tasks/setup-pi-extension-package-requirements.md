@@ -5,7 +5,7 @@ created_at: 2026-07-30T01:28:01.036Z
 desc: "Set up Pi package metadata, local package loading, and development checks for pi-facets."
 tags: []
 status: done
-scope: agreed
+priority: medium
 depends_on: []
 ---
 
@@ -90,5 +90,7 @@ Establish package and runtime requirements needed to develop, test, and load the
 - Next slice/task: implement mode components, then mode extension.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - This task should unblock extension implementation and mode-extension tests.

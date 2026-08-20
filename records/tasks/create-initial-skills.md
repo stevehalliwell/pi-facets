@@ -5,7 +5,7 @@ created_at: 2026-07-30T01:25:06.597Z
 desc: ""
 tags: []
 status: done
-scope: agreed
+priority: medium
 depends_on: []
 ---
 
@@ -86,5 +86,7 @@ Add four independently invokable stub skills covering the initial workflow categ
 - Next: refine next pivotal draft task.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Keep skill descriptions short and discriminative.

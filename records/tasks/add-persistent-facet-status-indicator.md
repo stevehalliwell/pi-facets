@@ -5,7 +5,7 @@ created_at: 2026-08-01T06:25:10.166Z
 desc: "Show compact persistent active-facet state in Pi UI."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -84,5 +84,7 @@ scope: agreed
 - Lifecycle test covers restore, explicit clear, and shutdown status updates.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Footer status is orientation aid, not interactive control.

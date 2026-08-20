@@ -5,7 +5,7 @@ created_at: 2026-07-30T01:25:08.663Z
 desc: ""
 tags: []
 status: done
-scope: agreed
+priority: medium
 depends_on:
   - tasks/implement-mode-extension
   - tasks/create-mode-components
@@ -91,5 +91,7 @@ Complete focused automated coverage for first-milestone mode-extension behavior 
 - Next slice: continue with next pending project task.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Do not duplicate full Pi interactive runtime setup for behavior already isolated by the extension API contract.

@@ -5,7 +5,7 @@ created_at: 2026-07-31T19:12:26.222Z
 desc: "Configure project-scoped default starting facet preset with global fallback for new Pi sessions."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -88,5 +88,7 @@ scope: agreed
 - Next candidate: `add-persistent-facet-status-indicator`.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Transient defaults deliberately allow config changes to affect sessions with no explicit facet history.

@@ -5,7 +5,7 @@ created_at: 2026-07-31T03:02:05.215Z
 desc: ""
 tags: []
 status: done
-scope: agreed
+priority: medium
 depends_on: []
 ---
 
@@ -92,5 +92,7 @@ Make `/facets` canonical pi-facets slash command for selecting and inspecting ro
 - Likely next slice/task: none.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Hard event-ID rename intentionally invalidates restoration of old `pi-facets.mode-*` entries.

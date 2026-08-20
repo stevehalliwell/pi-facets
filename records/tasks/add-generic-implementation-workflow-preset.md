@@ -5,7 +5,7 @@ created_at: 2026-08-01T06:34:57.246Z
 desc: "Add senior-dev-peer implementation workflow and matching preset."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -89,5 +89,7 @@ scope: agreed
 - Next candidate: `align-backlog-refinement-preset-authority`.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - This task addresses recurring scope/validation friction across domains.

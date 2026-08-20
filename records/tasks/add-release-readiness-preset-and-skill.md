@@ -5,7 +5,7 @@ created_at: 2026-08-02T11:30:02.233Z
 desc: "Add release-readiness preset and skill to derive user-facing and developer-facing documentation updates from Git history, draft CHANGELOG entries, then present edits for user confirmation."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -73,5 +73,7 @@ scope: agreed
 - Likely next slice/task: commit only on explicit user request.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Current repository has no Git tag and only an `Unreleased` CHANGELOG section; manual scenario correctly stops for release target rather than inventing one.

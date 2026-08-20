@@ -5,7 +5,7 @@ created_at: 2026-08-01T06:31:29.367Z
 desc: "Review whether action breadth needs persistent initiative facet axis."
 tags: []
 status: done
-scope: draft
+priority: medium
 ---
 
 ## Scope
@@ -64,5 +64,7 @@ scope: draft
 - Likely next slice/task: reopen only on `initiative-axis-evidence` or `cross-domain-action-scope-friction`.
 
 ## Notes
+
+- Former task scope: `draft`.
 
 - Draft review task; does not reopen accepted decision by itself.

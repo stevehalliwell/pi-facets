@@ -5,7 +5,7 @@ created_at: 2026-08-01T06:34:57.263Z
 desc: "Align backlog-refinement preset authority with discussion-only workflow."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -72,5 +72,7 @@ scope: agreed
 - Next candidate: `detect-facet-task-mismatch`.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Small configuration task; do not broaden into generic workflow redesign.

@@ -8,7 +8,7 @@ tags:
   - skills
   - workflow
 status: done
-scope: agreed
+priority: medium
 depends_on: null
 ---
 
@@ -76,5 +76,7 @@ depends_on: null
 - Likely next slice/task: implement `remove-project-ghostwriter-resources`.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Removal would affect preset, skill, role, style, docs, and tests; do not begin cleanup without agreement.

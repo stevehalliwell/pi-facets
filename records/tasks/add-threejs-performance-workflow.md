@@ -5,7 +5,7 @@ created_at: 2026-08-01T06:25:10.193Z
 desc: "Add performance-aware Three.js visual iteration workflow."
 tags: []
 status: done
-scope: agreed
+priority: medium
 depends_on:
   - tasks/add-okf-research-artifact-capture
 ---
@@ -80,5 +80,7 @@ depends_on:
 - User approved Three.js performance workflow on 2026-08-02; task complete.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Performance-aware workflow remains distinct from persistent facet pending initiative/role evidence.

@@ -5,7 +5,7 @@ created_at: 2026-07-30T01:44:01.930Z
 desc: ""
 tags: []
 status: done
-scope: agreed
+priority: medium
 depends_on:
   - tasks/implement-mode-extension
   - tasks/implement-named-mode-presets
@@ -96,5 +96,7 @@ Record mode changes in the Pi transcript so resumed sessions and slash-tree navi
 - Next: select and refine next deferred task.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Keep payload compact and inspectable; do not duplicate full mode files in every event.

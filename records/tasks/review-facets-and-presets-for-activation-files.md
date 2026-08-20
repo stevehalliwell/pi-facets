@@ -5,7 +5,7 @@ created_at: 2026-08-04T00:06:00.358Z
 desc: "Review every existing facet and preset for need for optional one-time activation Markdown; identify needed additions or alterations. Concise/Caveman and implementation/Ponytail known candidates."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -76,3 +76,7 @@ scope: agreed
 - Each injects once only when its matching facet becomes active or restored.
 - Persistent facet bodies continue injecting per turn.
 - `npm run check` and focused tests pass.
+
+## Notes
+
+- Former task scope: `agreed`.

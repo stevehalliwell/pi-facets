@@ -8,7 +8,7 @@ tags:
   - design
   - skills
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -86,5 +86,7 @@ scope: agreed
 - Approved 2026-08-03.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - A prompt is not in first scope; add only if repeated invocation framing creates friction.

@@ -5,7 +5,7 @@ created_at: 2026-08-01T06:31:29.394Z
 desc: "Review whether active skills need persistent UI status."
 tags: []
 status: done
-scope: draft
+priority: medium
 ---
 
 ## Scope
@@ -62,5 +62,7 @@ scope: draft
 - Likely next slice/task: none.
 
 ## Notes
+
+- Former task scope: `draft`.
 
 - Draft review task; avoid creating competing persistent state without demonstrated value.

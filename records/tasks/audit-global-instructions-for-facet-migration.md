@@ -8,7 +8,7 @@ tags:
   - global-config
   - audit
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -122,5 +122,7 @@ scope: agreed
 - Follow-up implementation needs separate scoped task.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Avoid turning global operational discipline into always-on behavioral facets.

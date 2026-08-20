@@ -9,7 +9,7 @@ tags:
   - five-whys
   - inquiry
 status: done
-scope: agreed
+priority: medium
 depends_on:
   - support-preset-skill-associations
 ---
@@ -93,5 +93,7 @@ depends_on:
 - Approved 2026-08-03.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Five Whys allows branching, evidence limits, and fewer or more than five steps.

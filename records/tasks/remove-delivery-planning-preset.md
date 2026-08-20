@@ -7,7 +7,7 @@ tags:
   - presets
   - cleanup
 status: done
-scope: agreed
+priority: medium
 depends_on: null
 ---
 
@@ -65,5 +65,7 @@ depends_on: null
 - Likely next slice/task: `remove-project-five-whys-preset` after global skill availability is verified.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - The standalone `delivery-lead` role remains intentionally: this task removes only the preset.

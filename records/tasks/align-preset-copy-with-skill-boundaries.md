@@ -9,7 +9,7 @@ tags:
   - skills
   - editorial
 status: done
-scope: agreed
+priority: medium
 depends_on: null
 ---
 
@@ -66,5 +66,7 @@ depends_on: null
 - Likely next slice/task: select another agreed task; messaging strategy remains separately tracked.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - This is a documentation/preset-copy gap, not evidence for a new skill.

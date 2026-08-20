@@ -5,7 +5,7 @@ created_at: 2026-07-31T21:40:08.282Z
 desc: "Make injected active-facet prompt context more compact and consistently ordered Markdown."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -100,5 +100,7 @@ scope: agreed
 - Next candidate: `add-generic-implementation-workflow-preset`.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Warnings inform user; they never alter active state or external component instructions.

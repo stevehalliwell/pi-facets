@@ -5,7 +5,7 @@ created_at: 2026-08-01T06:25:10.202Z
 desc: "Persist research and standards verification as OKF-compatible Markdown artifacts."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -88,5 +88,7 @@ scope: agreed
 - Next candidate: `add-web-implementation-delivery-workflow`.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Missing root asks user; supplied root enables automatic compliant saving.

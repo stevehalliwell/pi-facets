@@ -9,7 +9,7 @@ tags:
   - skills
   - workflow
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -105,6 +105,8 @@ scope: agreed
 - Next: select an agreed removal task; draft investigations require refinement first.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Related completed work: `records/tasks/associate-matching-preset-skills.md` and `records/tasks/align-facet-components-with-resource-boundaries.md`.
 - Maintainer proposed new preset candidates remain separately tracked: `records/tasks/add-note-taker-preset.md`, `records/tasks/add-brainstorming-preset.md`, and `records/tasks/add-tweaking-preset.md`.

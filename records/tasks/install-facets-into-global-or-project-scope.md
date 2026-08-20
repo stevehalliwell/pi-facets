@@ -5,7 +5,7 @@ created_at: 2026-08-04T00:07:24.649Z
 desc: "Provide post-install mechanism to copy bundled facets from this repository into either global Pi scope or project-local Pi scope."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -76,3 +76,7 @@ scope: agreed
 - Existing files remain unchanged without `--force`; command lists conflicts and exits nonzero.
 - `--force` replaces only conflicting bundled paths.
 - `npm run check` and tests pass.
+
+## Notes
+
+- Former task scope: `agreed`.

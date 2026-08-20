@@ -5,7 +5,7 @@ created_at: 2026-07-30T03:41:40.557Z
 desc: ""
 tags: []
 status: done
-scope: draft
+priority: medium
 ---
 
 ## Scope
@@ -72,5 +72,7 @@ Define whether pi-facets should distinguish communication addressed to the user 
 - Revisit only when `communication-target-pain` or `artifact-style-conflict` occurs.
 
 ## Notes
+
+- Former task scope: `draft`.
 
 - Avoid conflating how the agent talks to the user with style constraints for text generated on the user's behalf.

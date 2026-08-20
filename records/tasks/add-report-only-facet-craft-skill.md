@@ -9,7 +9,7 @@ tags:
   - audit
   - authoring
 status: done
-scope: agreed
+priority: medium
 depends_on:
   - define-resource-boundaries-before-facet-craft
 ---
@@ -84,5 +84,7 @@ depends_on:
 - Approved 2026-08-03.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Depends on `define-resource-boundaries-before-facet-craft`; do not start until contract task reaches review.

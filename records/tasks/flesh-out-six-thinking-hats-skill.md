@@ -9,7 +9,7 @@ tags:
   - brainstorming
   - decision-making
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -86,5 +86,7 @@ scope: agreed
 - Approved 2026-08-03.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Future work; do not implement from this capture alone.

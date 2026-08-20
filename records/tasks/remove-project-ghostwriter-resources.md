@@ -8,7 +8,7 @@ tags:
   - skills
   - cleanup
 status: done
-scope: agreed
+priority: medium
 depends_on:
   - investigate-ghostwriter-preset-removal
 ---
@@ -71,5 +71,7 @@ depends_on:
 - Likely next slice/task: select another agreed task.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Removal is reversible through version control but intentionally does not retain a global copy.

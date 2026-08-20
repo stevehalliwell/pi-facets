@@ -8,7 +8,7 @@ tags:
   - navigation
   - usability
 status: done
-scope: draft
+priority: medium
 ---
 
 ## Scope
@@ -65,5 +65,7 @@ scope: draft
 - Revisit only if Pi adds a wrap configuration to `ctx.ui.select()`.
 
 ## Notes
+
+- Former task scope: `draft`.
 
 - No matching tracked task found. Related completed navigation work: `records/tasks/improve-mode-command-navigation.md`.

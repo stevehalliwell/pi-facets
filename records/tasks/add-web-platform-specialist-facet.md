@@ -5,7 +5,7 @@ created_at: 2026-08-01T06:25:10.183Z
 desc: "Add web-platform specialist role and optional preset for standards-aware web work."
 tags: []
 status: done
-scope: agreed
+priority: medium
 ---
 
 ## Scope
@@ -76,5 +76,7 @@ scope: agreed
 - Next candidate: `add-web-implementation-delivery-workflow`.
 
 ## Notes
+
+- Former task scope: `agreed`.
 
 - Delivery/audit behavior belongs in `add-web-implementation-delivery-workflow`.
